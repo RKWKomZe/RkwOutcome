@@ -1,0 +1,40 @@
+plugin.tx_rkwoutcome {
+
+	view {
+        # cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template layouts (FE)
+        layoutRootPath = EXT:rkw_outcome/Resources/Private/Layouts/
+
+		# cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template root (FE)
+		templateRootPath = EXT:rkw_outcome/Resources/Private/Templates/
+
+		# cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template partials (FE)
+		partialRootPath = EXT:rkw_outcome/Resources/Private/Partials/
+		
+	}
+	persistence {
+		# cat=plugin.tx_rkwoutcome//a; type=string; label=Default storage PID
+		storagePid = 4161
+	}
+
+	settings {
+
+	}
+}
+
+module.tx_rkwoutcome {
+
+	settings < plugin.tx_rkwoutcome.settings
+	persistence < plugin.tx_rkwoutcome.persistence
+	view < plugin.tx_rkwoutcome.view
+
+	view {
+		# cat=module.tx_rkwoutcome/file; type=string; label=Path to template root (BE)
+		templateRootPath = EXT:rkw_outcome/Resources/Private/Templates/Backend/
+
+		# cat=module.tx_rkwoutcome/file; type=string; label=Path to template partials (BE)
+		partialRootPath = EXT:rkw_outcome/Resources/Private/Partials/Backend/
+
+		# cat=module.tx_rkwoutcome/file; type=string; label=Path to template layouts (BE)
+		layoutRootPath = EXT:rkw_outcome/Resources/Private/Layouts/Backend/
+	}
+}

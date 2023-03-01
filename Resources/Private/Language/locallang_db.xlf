@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" datatype="plaintext" original="messages" date="2015-04-09T13:46:25Z" product-name="rkw_newsletter">
+		<header/>
+		<body>
+
+
+            <!-- ##################################################### -->
+            <!-- tx_rkwoutcome_domain_model_survey              -->
+            <!-- ##################################################### -->
+			<trans-unit id="tx_rkwoutcome_domain_model_survey">
+				<source>RKW Outcome: Questionnaire</source>
+			</trans-unit>
+            <trans-unit id="tx_rkwoutcome_domain_model_survey.product">
+                <source>Product</source>
+            </trans-unit>
+            <trans-unit id="tx_rkwoutcome_domain_model_survey.event">
+                <source>Event</source>
+            </trans-unit>
+            <trans-unit id="tx_rkwoutcome_domain_model_survey.survey">
+                <source>Survey</source>
+            </trans-unit>
+
+            <!-- ##################################################### -->
+            <!-- fe_user                                               -->
+            <!-- ##################################################### -->
+
+
+            <!-- ##################################################### -->
+            <!-- Flexforms                                             -->
+            <!-- ##################################################### -->
+
+
+
+		</body>
+	</file>
+</xliff>

@@ -1,0 +1,63 @@
+#typo3-docbody form {
+    margin-bottom: 0;
+}
+
+.tx-rkwnewsletter-description {
+    font-size: 1.2em;
+    font-weight:bold;
+}
+
+
+table.tx-rkwnewsletter-list {
+	border-collapse: collapse;
+	width: 80%;
+	border: 0;
+    margin-bottom:2em;
+}
+
+table.tx-rkwnewsletter-list th,
+table.tx-rkwnewsletter-list td {
+	text-align: left;
+	padding: 8px;
+	border: 0;
+}
+table.tx-rkwnewsletter-list input {
+    width:350px;
+}
+
+table.tx-rkwnewsletter-list table.tx-rkwnewsletter-list__inner {
+    width:100%;
+}
+
+table.tx-rkwnewsletter-list table.tx-rkwnewsletter-list__inner td,
+table.tx-rkwnewsletter-list table.tx-rkwnewsletter-list__inner th {
+    padding-bottom:0;
+    padding-left:0;
+    padding-right:16px;
+}
+table.tx-rkwnewsletter-list table.tx-rkwnewsletter-list__inner td {
+    padding-top:0;
+}
+
+table.tx-rkwnewsletter-list tr:nth-child(even){
+    background-color: #f2f2f2
+}
+table.tx-rkwnewsletter-list table.tx-rkwnewsletter-list__inner tr {
+    background-color:transparent;
+}
+
+table.tx-rkwnewsletter-list th {
+	background-color: #e64415;
+	color: #fff;
+}
+
+table.tx-rkwnewsletter-list table.tx-rkwnewsletter-list__inner th {
+    background-color: transparent;
+    color:#000;
+}
+
+table.tx-rkwnewsletter-list a,
+table.tx-rkwnewsletter-list a:link,
+table.tx-rkwnewsletter-list a:visited {
+    color:#e64415;
+}

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<xliff version="1.0">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2014-08-01T14:10:48Z" product-name="rkw_energyfounder">
+		<header/>
+		<body>
+
+            <!-- ##################################################### -->
+            <!-- tx_rkwoutcome_domain_model_survey              -->
+            <!-- ##################################################### -->
+			<trans-unit id="tx_rkwoutcome_domain_model_survey">
+				<source>RKW Outcome: Questionnaire</source>
+				<target>RKW Outcome: Fragebogen</target>
+			</trans-unit>
+            <trans-unit id="tx_rkwoutcome_domain_model_survey.product">
+                <source>Product</source>
+                <target>Produkt</target>
+            </trans-unit>
+            <trans-unit id="tx_rkwoutcome_domain_model_survey.event">
+                <source>Event</source>
+                <target>Veranstaltung</target>
+            </trans-unit>
+            <trans-unit id="tx_rkwoutcome_domain_model_survey.survey">
+                <source>Survey</source>
+                <target>Umfrage</target>
+            </trans-unit>
+
+            <!-- ##################################################### -->
+            <!-- pages                                                 -->
+            <!-- ##################################################### -->
+
+
+
+            <!-- ##################################################### -->
+            <!-- tt_content                                            -->
+            <!-- ##################################################### -->
+
+
+
+            <!-- ##################################################### -->
+            <!-- fe_user                                               -->
+            <!-- ##################################################### -->
+
+
+
+            <!-- ##################################################### -->
+            <!-- Flexforms                                             -->
+            <!-- ##################################################### -->
+
+
+
+		</body>
+	</file>
+</xliff>

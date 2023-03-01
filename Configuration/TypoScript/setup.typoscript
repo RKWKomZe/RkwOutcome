@@ -1,0 +1,84 @@
+config.tx_extbase.persistence {
+
+    // make sure ref_index is updated
+#    updateReferenceIndex = 1
+
+    // enableAutomaticCacheClearing = 1
+    classes {
+
+#        RKW\RkwRegistration\Domain\Model\FrontendUser {
+#            subclasses {
+#                Tx_RkwOutcome_FrontendUser = RKW\RkwOutcome\Domain\Model\FrontendUser
+#            }
+#        }
+
+#        RKW\RkwOutcome\Domain\Model\FrontendUser {
+#            mapping {
+#                tableName = fe_users
+#            }
+#        }
+
+        RKW\RkwBasics\Domain\Model\TargetGroup {
+            mapping {
+                tableName = tx_rkwbasics_domain_model_target_group
+            }
+        }
+    }
+}
+
+#================================================================================
+# Configuration for Plugins & Modules
+#================================================================================
+
+plugin.tx_outcome {
+	view {
+        layoutRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Layouts/
+            1 = {$plugin.tx_outcome.view.layoutRootPath}
+        }
+		templateRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Templates/
+            1 = {$plugin.tx_outcome.view.templateRootPath}
+        }
+		partialRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Partials/
+            1 = {$plugin.tx_outcome.view.partialRootPath}
+        }
+	}
+	persistence {
+		storagePid = {$plugin.tx_outcome.persistence.storagePid}
+	}
+
+	settings {
+
+	}
+}
+
+# Module configuration
+module.tx_outcome {
+	persistence {
+		storagePid = {$module.tx_outcome.persistence.storagePid}
+	}
+    view {
+        layoutRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Layouts/Backend/
+            1 = {$module.tx_outcome.view.layoutRootPath}
+        }
+        templateRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Templates/Backend/
+            1 = {$module.tx_outcome.view.templateRootPath}
+        }
+        partialRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Partials/Backend/
+            1 = {$module.tx_outcome.view.partialRootPath}
+        }
+    }
+
+    settings < plugin.tx_outcome.settings
+}
+
+
+plugin.tx_outcome._CSS_DEFAULT_STYLE (
+
+)
+
