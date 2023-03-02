@@ -1,6 +1,6 @@
 <?php
-
 namespace RKW\RkwOutcome\Domain\Model;
+
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -14,10 +14,9 @@ namespace RKW\RkwOutcome\Domain\Model;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwShop\Domain\Model\Order;
 
 /**
- * Approval
+ * SurveyRequest
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
@@ -30,54 +29,91 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * frontendUser
      *
-     * @var \RKW\RkwShop\Domain\Model\FrontendUser
+     * @var \RKW\RkwShop\Domain\Model\FrontendUser|null
      */
     protected $frontendUser = null;
 
+
     /**
-     * order
+     * process
      *
-     * @var \RKW\RkwShop\Domain\Model\Order
+     * @var \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\Event|null
      */
-    protected $order = null;
+    protected $process = null;
+
+
+    /**
+     * processType
+     *
+     * @var string
+     */
+     protected $processType;
+
 
     /**
      * targetGroup
      *
-     * @var \RKW\RkwBasics\Domain\Model\TargetGroup
+     * @var \RKW\RkwBasics\Domain\Model\TargetGroup|null
      */
-    protected $targetGroup;
+    protected $targetGroup = null;
+
 
     /**
-     * Returns the order
+     * Returns the process
      *
-     * @return \RKW\RkwShop\Domain\Model\Order|null
+     * @return \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\Event|null $process
      */
-    public function getOrder()
+    public function getProcess()
     {
-        return $this->order;
+        return $this->process;
     }
 
+
     /**
-     * Sets the order
+     * Sets the process
      *
-     * @param \RKW\RkwShop\Domain\Model\Order
+     * @param \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\Event $process
      * @return void
      */
-    public function setOrder(Order $order): void
+    public function setProcess($process): void
     {
-        $this->order = $order;
+        $this->process = $process;
     }
+
+
+    /**
+     * Returns the process type
+     *
+     * @return string
+     */
+    public function getProcessType(): string
+    {
+        return $this->processType;
+    }
+
+
+    /**
+     * Sets the processType
+     *
+     * @param string $processType
+     * @return void
+     */
+    public function setProcessType(string $processType): void
+    {
+        $this->processType = $processType;
+    }
+
 
     /**
      * Returns the frontendUser
      *
-     * @return \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser
+     * @return \RKW\RkwShop\Domain\Model\FrontendUser
      */
-    public function getFrontendUser()
+    public function getFrontendUser(): \RKW\RkwShop\Domain\Model\FrontendUser
     {
         return $this->frontendUser;
     }
+
 
     /**
      * Sets the frontendUser
@@ -85,20 +121,22 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser
      * @return void
      */
-    public function setFrontendUser(\RKW\RkwShop\Domain\Model\FrontendUser $frontendUser)
+    public function setFrontendUser(\RKW\RkwShop\Domain\Model\FrontendUser $frontendUser): void
     {
         $this->frontendUser = $frontendUser;
     }
+
 
     /**
      * Returns the targetGroup
      *
      * @return \RKW\RkwBasics\Domain\Model\TargetGroup
      */
-    public function getTargetGroup()
+    public function getTargetGroup(): \RKW\RkwBasics\Domain\Model\TargetGroup
     {
         return $this->targetGroup;
     }
+
 
     /**
      * Sets the targetGroup
@@ -106,7 +144,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup
      * @return void
      */
-    public function setTargetGroup(\RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup)
+    public function setTargetGroup(\RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup): void
     {
         $this->targetGroup = $targetGroup;
     }

@@ -1,18 +1,6 @@
 <?php
-
 namespace RKW\RkwOutcome\Manager;
 
-use RKW\RkwNewsletter\Domain\Model\Approval;
-use RKW\RkwNewsletter\Domain\Model\Issue;
-use RKW\RkwNewsletter\Domain\Model\Pages;
-use RKW\RkwNewsletter\Domain\Model\Topic;
-use RKW\RkwNewsletter\Status\ApprovalStatus;
-use TYPO3\CMS\Core\Log\Logger;
-use TYPO3\CMS\Core\Log\LogLevel;
-use TYPO3\CMS\Core\Log\LogManager;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use RKW\RkwOutcome\Domain\Model\SurveyRequest;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -25,6 +13,12 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
  *
  * The TYPO3 project - inspiring people to share!
  */
+
+use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use TYPO3\CMS\Core\Log\Logger;
+use TYPO3\CMS\Core\Log\LogLevel;
+use TYPO3\CMS\Core\Log\LogManager;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * SurveyRequestManager
@@ -55,9 +49,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * Intermediate function for creating survey requests - used by SignalSlot
      *
      * @param \RKW\RkwShop\Domain\Model\BackendUser|array $backendUser
-     * @param \RKW\RkwShop\Domain\Model\Order  $order
+     * @param \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\Event $process
      * @param array $backendUserForProductMap
-     * @return SurveyRequest
+     * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest
      * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
@@ -68,18 +62,20 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     public function createSurveyRequest
     (
 //        $backendUser,
-        \RKW\RkwShop\Domain\Model\Order $order
+        $process
 //        $backendUserForProductMap
-    )
+    ): SurveyRequest
     {
         //  @todo: use a custom Signal in OrderManager->saveOrder to provide FE-User instead of BE-User
         //
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
-        $surveyRequest->setOrder($order);
-        $surveyRequest->setFrontendUser($order->getFrontendUser());
-        $surveyRequest->setTargetGroup($order->getTargetGroup());
+        $surveyRequest->setProcess($process);
+        //  @todo: Kann evtl. das Setzen des processType per Mutator erfolgen, so dass es hier nicht explizit gesetzt werden muss?
+        $surveyRequest->setProcessType(get_class($process));
+        $surveyRequest->setFrontendUser($process->getFrontendUser());
+        $surveyRequest->setTargetGroup($process->getTargetGroup());
 
         $this->surveyRequestRepository->add($surveyRequest);
         $this->persistenceManager->persistAll();
@@ -88,8 +84,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             LogLevel::DEBUG,
             sprintf(
 //                'Created surveyRequest for order with id=%s of by frontenduser with id=%s.',
-                'Created surveyRequest for order with id=%s of by frontenduser with id=',
-                $order->getUid()
+                'Created surveyRequest for process with id=%s of type=%s by frontenduser with id=',
+                $process->getUid(),
+                get_class($process)
 //                $issue->getUid()
             )
         );
@@ -104,7 +101,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      *
      * @return \TYPO3\CMS\Core\Log\Logger
      */
-    protected function getLogger()
+    protected function getLogger(): Logger
     {
         if (!$this->logger instanceof Logger) {
             $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);

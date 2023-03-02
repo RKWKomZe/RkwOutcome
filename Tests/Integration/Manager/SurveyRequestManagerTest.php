@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\Tests\Integration\Manager;
 
 /*
@@ -15,15 +14,16 @@ namespace RKW\RkwOutcome\Tests\Integration\Manager;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Nimut\TestingFramework\TestCase\FunctionalTestCase;
+
+use RKW\RkwBasics\Domain\Repository\TargetGroupRepository;
+use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
+use RKW\RkwOutcome\Manager\SurveyRequestManager;
+use RKW\RkwShop\Domain\Repository\FrontendUserRepository;
+use RKW\RkwShop\Domain\Repository\OrderRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
-use RKW\RkwOutcome\Domain\Model\SurveyRequest;
-use RKW\RkwOutcome\Manager\SurveyRequestManager;
-use RKW\RkwShop\Domain\Repository\OrderRepository;
-use Nimut\TestingFramework\TestCase\FunctionalTestCase;
-use RKW\RkwShop\Domain\Repository\FrontendUserRepository;
-use RKW\RkwBasics\Domain\Repository\TargetGroupRepository;
-use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 
 /**
  * SurveyRequestManagerTest
@@ -41,6 +41,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     const FIXTURE_PATH = __DIR__ . '/SurveyRequestManagerTest/Fixtures';
 
+
     /**
      * @var string[]
      */
@@ -52,40 +53,48 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         'typo3conf/ext/rkw_survey',
     ];
 
+
     /**
      * @var string[]
      */
     protected $coreExtensionsToLoad = [ ];
 
+
     /**
      * @var \RKW\RkwOutcome\Manager\SurveyRequestManager
      */
-    private $subject;
+    private $subject = null;
+
 
     /**
      * @var \TYPO3\CMS\Extbase\Object\ObjectManager
      */
-    private $objectManager;
+    private $objectManager = null;
+
 
     /**
      * @var \RKW\RkwShop\Domain\Repository\FrontendUserRepository
      */
-    private $frontendUserRepository;
+    private $frontendUserRepository = null;
+
 
     /**
      * @var \RKW\RkwShop\Domain\Repository\OrderRepository
      */
-    private $orderRepository;
+    private $orderRepository = null;
+
 
     /**
      * @var \RKW\RkwBasics\Domain\Repository\TargetGroupRepository
      */
-    private $targetGroupRepository;
+    private $targetGroupRepository = null;
+
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      */
-    private $surveyRequestRepository;
+    private $surveyRequestRepository = null;
+
 
     /**
      * Setup
@@ -100,16 +109,16 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->setUpFrontendRootPage(
             1,
             [
-                'EXT:rkw_basics/Configuration/TypoScript/setup.typoscript',
-                'EXT:rkw_outcome/Configuration/TypoScript/setup.typoscript',
-                'EXT:rkw_registration/Configuration/TypoScript/setup.typoscript',
-                'EXT:rkw_shop/Configuration/TypoScript/setup.typoscript',
-                'EXT:rkw_survey/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_basics/Configuration/TypoScript/constants.typoscript',
+                'EXT:rkw_basics/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_outcome/Configuration/TypoScript/constants.typoscript',
+                'EXT:rkw_outcome/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_registration/Configuration/TypoScript/constants.typoscript',
+                'EXT:rkw_registration/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_shop/Configuration/TypoScript/constants.typoscript',
+                'EXT:rkw_shop/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_survey/Configuration/TypoScript/constants.typoscript',
+                'EXT:rkw_survey/Configuration/TypoScript/setup.typoscript',
                 self::FIXTURE_PATH . '/Frontend/Configuration/Rootpage.typoscript',
             ]
         );
@@ -120,12 +129,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->orderRepository = $this->objectManager->get(OrderRepository::class);
         $this->targetGroupRepository = $this->objectManager->get(TargetGroupRepository::class);
         $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
-
         $this->subject = $this->objectManager->get(SurveyRequestManager::class);
 
     }
 
-    //=============================================
 
     /**
      * @test
@@ -158,13 +165,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
         $targetGroup = $this->targetGroupRepository->findByUid(1);
 
-        //  @todo: Kann ich das Triggern eines SignalSlots testen?
         //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($order);
 
         self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
-        self::assertEquals($order, $surveyRequest->getOrder());
+        self::assertEquals($order, $surveyRequest->getProcess());
+        self::assertEquals(get_class($order), $surveyRequest->getProcessType());
         self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
         self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
 
@@ -178,14 +185,12 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     }
 
-    //=============================================
-
     /**
      * TearDown
      */
-    protected function tearDown()
+    protected function tearDown(): void
     {
-        //parent::tearDown();
+        parent::tearDown();
     }
 
 }
