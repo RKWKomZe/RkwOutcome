@@ -74,7 +74,13 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         $surveyRequest->setProcess($process);
         //  @todo: Kann evtl. das Setzen des processType per Mutator erfolgen, so dass es hier nicht explizit gesetzt werden muss?
         $surveyRequest->setProcessType(get_class($process));
-        $surveyRequest->setFrontendUser($process->getFrontendUser());
+
+        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
+            $surveyRequest->setFrontendUser($process->getFeUser());
+        } else {
+            $surveyRequest->setFrontendUser($process->getFrontendUser());
+        }
+
         $surveyRequest->setTargetGroup($process->getTargetGroup());
 
         $this->surveyRequestRepository->add($surveyRequest);

@@ -29,7 +29,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * frontendUser
      *
-     * @var \RKW\RkwShop\Domain\Model\FrontendUser|null
+     * @var \RKW\RkwShop\Domain\Model\FrontendUser|\RKW\RkwEvents\Domain\Model\FrontendUser|null
      */
     protected $frontendUser = null;
 
@@ -107,9 +107,9 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the frontendUser
      *
-     * @return \RKW\RkwShop\Domain\Model\FrontendUser
+     * @return \RKW\RkwShop\Domain\Model\FrontendUser|\RKW\RkwEvents\Domain\Model\FrontendUser
      */
-    public function getFrontendUser(): \RKW\RkwShop\Domain\Model\FrontendUser
+    public function getFrontendUser()
     {
         return $this->frontendUser;
     }
@@ -118,10 +118,10 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Sets the frontendUser
      *
-     * @param \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser
+     * @param \RKW\RkwShop\Domain\Model\FrontendUser|\RKW\RkwEvents\Domain\Model\FrontendUser $frontendUser
      * @return void
      */
-    public function setFrontendUser(\RKW\RkwShop\Domain\Model\FrontendUser $frontendUser): void
+    public function setFrontendUser($frontendUser): void
     {
         $this->frontendUser = $frontendUser;
     }

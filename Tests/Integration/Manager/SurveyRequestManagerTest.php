@@ -15,13 +15,10 @@ namespace RKW\RkwOutcome\Tests\Integration\Manager;
  */
 
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
-
 use RKW\RkwBasics\Domain\Repository\TargetGroupRepository;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Manager\SurveyRequestManager;
-use RKW\RkwShop\Domain\Repository\FrontendUserRepository;
-use RKW\RkwShop\Domain\Repository\OrderRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 
@@ -47,10 +44,12 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     protected $testExtensionsToLoad = [
         'typo3conf/ext/rkw_basics',
+        'typo3conf/ext/rkw_events',
         'typo3conf/ext/rkw_outcome',
         'typo3conf/ext/rkw_registration',
         'typo3conf/ext/rkw_shop',
         'typo3conf/ext/rkw_survey',
+        'typo3conf/ext/static_info_tables',
     ];
 
 
@@ -73,15 +72,15 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwShop\Domain\Repository\FrontendUserRepository
+     * @var \RKW\RkwShop\Domain\Repository\FrontendUserRepository|\RKW\RkwEvents\Domain\Repository\FrontendUserRepository
      */
     private $frontendUserRepository = null;
 
 
     /**
-     * @var \RKW\RkwShop\Domain\Repository\OrderRepository
+     * @var \RKW\RkwShop\Domain\Repository\OrderRepository|\RKW\RkwEvents\Domain\Repository\EventReservationRepository
      */
-    private $orderRepository = null;
+    private $processRepository = null;
 
 
     /**
@@ -125,8 +124,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $this->frontendUserRepository = $this->objectManager->get(FrontendUserRepository::class);
-        $this->orderRepository = $this->objectManager->get(OrderRepository::class);
         $this->targetGroupRepository = $this->objectManager->get(TargetGroupRepository::class);
         $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
         $this->subject = $this->objectManager->get(SurveyRequestManager::class);
@@ -138,7 +135,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestCreatesSurveyRequest()
+    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnOrder()
     {
 
         /**
@@ -156,8 +153,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          */
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
-        /** @var \RKW\RkwShop\Domain\Model\Order $order */
-        $order = $this->orderRepository->findByUid(1);
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\FrontendUserRepository::class);
+        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $process */
+        $process = $this->processRepository->findByUid(1);
 
         /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
@@ -167,12 +169,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($order);
+        $surveyRequest = $this->subject->createSurveyRequest($process);
 
         self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
-        self::assertEquals($order, $surveyRequest->getProcess());
-        self::assertEquals(get_class($order), $surveyRequest->getProcessType());
+        self::assertEquals($process, $surveyRequest->getProcess());
+        self::assertEquals(get_class($process), $surveyRequest->getProcessType());
         self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
         self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
@@ -184,6 +187,65 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertEquals($surveyRequest, $surveyRequestDb);
 
     }
+
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnEventReservation()
+    {
+
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given an orderItem-object that is persisted and belongs to that order-object
+         * Given a product-object is persisted and is contained within that orderItem-object
+         * When the method is called
+         * Then an instance of \RKW\RkwOutcome\Model\SurveyRequest is returned
+         * Then the order-property of this instance is set to the order-object
+         * Then the frontendUser-property of this instance is set to the frontendUser-object
+         * Then the targetGroup-property of this instance is set to targetGroup-property of the order-object
+         * Then the surveyRequest-object is persisted
+         */
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check20.xml');
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwEvents\Domain\Repository\FrontendUserRepository::class);
+        $this->processRepository = $this->objectManager->get(\RKW\RkwEvents\Domain\Repository\EventReservationRepository::class);
+
+        /** @var \RKW\RkwEvents\Domain\Model\EventReservation $process */
+        $process = $this->processRepository->findByUid(1);
+
+        /** @var \RKW\RkwEvents\Domain\Model\FrontendUser $frontendUser */
+        $frontendUser = $this->frontendUserRepository->findByUid(1);
+
+        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
+        $targetGroup = $this->targetGroupRepository->findByUid(1);
+
+        //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = $this->subject->createSurveyRequest($process);
+
+        self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
+        self::assertEquals($process, $surveyRequest->getProcess());
+        self::assertEquals(get_class($process), $surveyRequest->getProcessType());
+        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
+        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(1, $surveyRequestsDb);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestDb = $surveyRequestsDb->getFirst();
+        self::assertEquals($surveyRequest, $surveyRequestDb);
+
+    }
+
 
     /**
      * TearDown
