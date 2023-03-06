@@ -37,6 +37,14 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      */
     protected $surveyRequestRepository;
 
+
+    /**
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRepository
+     * @inject
+     */
+    protected $surveyRepository;
+
+
     /**
      * PersistenceManager
      *
@@ -45,13 +53,13 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      */
     protected $persistenceManager;
 
+
     /**
      * Intermediate function for creating survey requests - used by SignalSlot
      *
-     * @param \RKW\RkwShop\Domain\Model\BackendUser|array $backendUser
-     * @param \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\Event $process
-     * @param array $backendUserForProductMap
-     * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest
+     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
@@ -61,43 +69,79 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      */
     public function createSurveyRequest
     (
-//        $backendUser,
+        \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser,
         $process
 //        $backendUserForProductMap
-    ): SurveyRequest
+    ): ?SurveyRequest
     {
         //  @todo: use a custom Signal in OrderManager->saveOrder to provide FE-User instead of BE-User
-        //
+        //  @todo: Alternativ: Wie kann ich $frontendUser und $backendUserForProductMap ignorieren?
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
-        $surveyRequest->setProcess($process);
-        //  @todo: Kann evtl. das Setzen des processType per Mutator erfolgen, so dass es hier nicht explizit gesetzt werden muss?
-        $surveyRequest->setProcessType(get_class($process));
+        //  @todo: Check, if associated survey exists in tx_rkwoutcome_domain_model_survey.
 
+        $surveyableObjects = [];
+
+        //  if ProcessType is order, check contained products
+        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+
+
+            /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
+            foreach ($process->getOrderItem() as $orderItem) {
+
+                if ($this->surveyRepository->findByProductUid($orderItem->getProduct())) {
+                    $surveyableObjects[] = $orderItem->getProduct();
+                }
+            }
+
+        }
+        //  if ProcessType is order, check contained products
         if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
-            $surveyRequest->setFrontendUser($process->getFeUser());
-        } else {
-            $surveyRequest->setFrontendUser($process->getFrontendUser());
+
+            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
+            $event = $process->getEvent();
+
+            if ($this->surveyRepository->findByEventUid($event)) {
+                $surveyableObjects[] = $event;
+            }
+
         }
 
-        $surveyRequest->setTargetGroup($process->getTargetGroup());
+        if (count($surveyableObjects) > 0) {
 
-        $this->surveyRequestRepository->add($surveyRequest);
-        $this->persistenceManager->persistAll();
+            /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+            $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
+            $surveyRequest->setProcess($process);
+            //  @todo: Kann evtl. das Setzen des processType per Mutator erfolgen, so dass es hier nicht explizit gesetzt werden muss?
+            $surveyRequest->setProcessType(get_class($process));
+            $surveyRequest->setFrontendUser($frontendUser); //  @todo: Entweder direkt oder per $process->getFrontendUser()
 
-        $this->getLogger()->log(
-            LogLevel::DEBUG,
-            sprintf(
+            //  @todo: TargetGroups über die sys_categories steuern
+            $surveyRequest->setTargetGroup($process->getTargetGroup());
+
+            $this->surveyRequestRepository->add($surveyRequest);
+            $this->persistenceManager->persistAll();
+
+            $this->getLogger()->log(
+                LogLevel::DEBUG,
+                sprintf(
 //                'Created surveyRequest for order with id=%s of by frontenduser with id=%s.',
-                'Created surveyRequest for process with id=%s of type=%s by frontenduser with id=',
-                $process->getUid(),
-                get_class($process)
+                    'Created surveyRequest for process with id=%s of type=%s by frontenduser with id=',
+                    $process->getUid(),
+                    get_class($process)
 //                $issue->getUid()
-            )
-        );
+                )
+            );
 
-        return $surveyRequest;
+            //  @todo: Einfach nur die Uid des SurveyRequest übergeben statt des gesamten Objekts, falls es im Frontend nochmals scheitern sollte.
+
+//        return [];  //  @todo: Fehlermeldung "The slot method return value is of an not allowed type", aber für das Testen brauche ich eigentlich das Objekt.
+            //   @todo: Mögliche Lösung: eine Funktion ohne Rückgabe als Slot, die aber intern die createRequest aufruft, auf die dann auch getestet werden kann.
+            return $surveyRequest;
+
+        }
+
+        return null;
+
 
     }
 

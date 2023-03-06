@@ -2,7 +2,7 @@
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest',
-        'label' => 'order',
+        'label' => 'process',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',
@@ -17,14 +17,14 @@ return [
         ],
         // do only make requestUpdate, if token-list should be shown on check
         // 'requestUpdate' => 'access_restricted',
-        'searchFields' => 'order, event, survey',
+        'searchFields' => 'process, process_type, survey',
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyrequest.gif'
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, order, event, survey',
+        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, process, process_type, survey',
     ],
     'types' => [
-        '1' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, order, event, survey, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
+        '1' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, process, process_type, survey, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
     ],
     'columns' => [
 
@@ -138,31 +138,23 @@ return [
             ],
         ],
 
-        'order' => [
+        'process' => [
             'exclude' => 0,
             'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest.order',
             'config' => [
-                'type' => 'select',
-                'renderType' => 'selectSingle',
-                'foreign_table' => 'tx_rkwshop_domain_model_order',
-                'foreign_table_where' => ' AND ((\'###PAGE_TSCONFIG_IDLIST###\' <> \'0\' AND FIND_IN_SET(tx_rkwshop_domain_model_order.pid,\'###PAGE_TSCONFIG_IDLIST###\')) OR (\'###PAGE_TSCONFIG_IDLIST###\' = \'0\')) AND tx_rkwshop_domain_model_order.hidden = 0 AND tx_rkwshop_domain_model_order.deleted = 0',
-                'size' => 1,
-                'minitems' => 0,
-                'maxitems' => 1,
+                'type' => 'input',
+                'size' => 30,
+                'eval' => 'trim, required'
             ],
         ],
 
-        'event' => [
+        'process_type' => [
             'exclude' => 0,
-            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest.event',
+            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest.order',
             'config' => [
-                'type' => 'select',
-                'renderType' => 'selectSingle',
-                'foreign_table' => 'tx_rkwevents_domain_model_event',
-                'foreign_table_where' => ' AND ((\'###PAGE_TSCONFIG_IDLIST###\' <> \'0\' AND FIND_IN_SET(tx_rkwevents_domain_model_event.pid,\'###PAGE_TSCONFIG_IDLIST###\')) OR (\'###PAGE_TSCONFIG_IDLIST###\' = \'0\')) AND tx_rkwevents_domain_model_event.hidden = 0 AND tx_rkwevents_domain_model_event.deleted = 0',
-                'size' => 1,
-                'minitems' => 0,
-                'maxitems' => 1,
+                'type' => 'input',
+                'size' => 30,
+                'eval' => 'trim, required'
             ],
         ],
 

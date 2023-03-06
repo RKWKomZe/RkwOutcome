@@ -16,9 +16,11 @@ namespace RKW\RkwOutcome\Tests\Integration\Manager;
 
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwBasics\Domain\Repository\TargetGroupRepository;
+use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Manager\SurveyRequestManager;
+use RKW\RkwShop\Domain\Model\Order;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 
@@ -144,6 +146,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given an order-object that is persisted
          * Given an orderItem-object that is persisted and belongs to that order-object
          * Given a product-object is persisted and is contained within that orderItem-object
+         * Given a survey is associated with product-object
          * When the method is called
          * Then an instance of \RKW\RkwOutcome\Model\SurveyRequest is returned
          * Then the order-property of this instance is set to the order-object
@@ -169,13 +172,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($process);
+        $surveyRequest = $this->subject->createSurveyRequest($frontendUser, $process);
 
         self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
         self::assertEquals($process, $surveyRequest->getProcess());
         self::assertEquals(get_class($process), $surveyRequest->getProcessType());
         self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
         self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
@@ -185,6 +188,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
         self::assertEquals($surveyRequest, $surveyRequestDb);
+        self::assertInstanceOf(Order::class, $surveyRequestDb->getProcess());
 
     }
 
@@ -199,12 +203,12 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /**
          * Scenario:
          *
-         * Given an order-object that is persisted
-         * Given an orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and is contained within that orderItem-object
+         * Given an event-object that is persisted
+         * Given an eventReservation-object that is persisted and belongs to that event-object
+         * Given a survey is associated with event-object
          * When the method is called
          * Then an instance of \RKW\RkwOutcome\Model\SurveyRequest is returned
-         * Then the order-property of this instance is set to the order-object
+         * Then the process-property of this instance is set to the eventReservation-object
          * Then the frontendUser-property of this instance is set to the frontendUser-object
          * Then the targetGroup-property of this instance is set to targetGroup-property of the order-object
          * Then the surveyRequest-object is persisted
@@ -227,13 +231,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($process);
+        $surveyRequest = $this->subject->createSurveyRequest($frontendUser, $process);
 
         self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
         self::assertEquals($process, $surveyRequest->getProcess());
         self::assertEquals(get_class($process), $surveyRequest->getProcessType());
         self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
-        self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
         self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
@@ -243,9 +247,59 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
         self::assertEquals($surveyRequest, $surveyRequestDb);
+        self::assertInstanceOf(EventReservation::class, $surveyRequestDb->getProcess());
 
     }
 
+
+    //  @todo: Check, if existing survey is connected to same target group
+    //  @todo: Check, if connected survey is due (in between starttime <> endtime)
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestTriggeredByAnOrderDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedProduct()
+    {
+
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given an orderItem-object that is persisted and belongs to that order-object
+         * Given a product-object is persisted and is contained within that orderItem-object
+         * Given no survey is associated with product-object
+         * When the method is called
+         * Then null is returned
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check30.xml');
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\FrontendUserRepository::class);
+        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $process */
+        $process = $this->processRepository->findByUid(1);
+
+        /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
+        $frontendUser = $this->frontendUserRepository->findByUid(1);
+
+        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
+        $targetGroup = $this->targetGroupRepository->findByUid(1);
+
+        //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = $this->subject->createSurveyRequest($frontendUser, $process);
+
+        self::assertNull($surveyRequest);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+
+    }
 
     /**
      * TearDown

@@ -16,38 +16,31 @@ namespace RKW\RkwOutcome\Domain\Model;
 
 
 /**
- * SurveyRequest
+ * Survey
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
+class Survey extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 {
 
-    /**
-     * frontendUser
-     *
-     * @var \RKW\RkwRegistration\Domain\Model\FrontendUser|null
-     */
-    protected $frontendUser = null;
-
 
     /**
-     * process
+     * product
      *
-     * @var \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
+     * @var \RKW\RkwShop\Domain\Model\Product|null
      */
-    protected $process = null;
+    protected $product = null;
 
 
     /**
-     * processType
+     * survey
      *
-     * @var string
+     * @var \RKW\RkwSurvey\Domain\Model\Survey|null
      */
-     protected $processType;
+    protected $survey = null;
 
 
     /**
@@ -59,71 +52,48 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the process
+     * Returns the product
      *
-     * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null $process
+     * @return \RKW\RkwShop\Domain\Model\Product|null $product
      */
-    public function getProcess()
+    public function getProduct()
     {
-        return $this->process;
+        return $this->product;
     }
 
 
     /**
-     * Sets the process
+     * Sets the product
      *
-     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @param \RKW\RkwShop\Domain\Model\Product $product
      * @return void
      */
-    public function setProcess($process): void
+    public function setProducts($product): void
     {
-        $this->process = $process;
+        $this->product = $product;
     }
 
 
     /**
-     * Returns the process type
+     * Returns the survey
      *
-     * @return string
+     * @return \RKW\RkwSurvey\Domain\Model\Survey|null $survey
      */
-    public function getProcessType(): string
+    public function getSurvey()
     {
-        return $this->processType;
+        return $this->survey;
     }
 
 
     /**
-     * Sets the processType
+     * Sets the survey
      *
-     * @param string $processType
+     * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
      * @return void
      */
-    public function setProcessType(string $processType): void
+    public function setSurvey($survey): void
     {
-        $this->processType = $processType;
-    }
-
-
-    /**
-     * Returns the frontendUser
-     *
-     * @return \RKW\RkwRegistration\Domain\Model\FrontendUser
-     */
-    public function getFrontendUser()
-    {
-        return $this->frontendUser;
-    }
-
-
-    /**
-     * Sets the frontendUser
-     *
-     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
-     * @return void
-     */
-    public function setFrontendUser(\RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser): void
-    {
-        $this->frontendUser = $frontendUser;
+        $this->survey = $survey;
     }
 
 

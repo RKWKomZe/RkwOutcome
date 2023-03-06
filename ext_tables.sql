@@ -9,8 +9,8 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyrequest (
 	frontend_user int(11) unsigned DEFAULT '0',
 	target_group int(11) unsigned DEFAULT '0',
 
-	order int(11) unsigned DEFAULT '0',
-	event int(11) unsigned DEFAULT '0',
+	process int(11) unsigned DEFAULT '0',
+	process_type varchar(255) DEFAULT '' NOT NULL,
 	survey int(11) unsigned DEFAULT '0',
 
 	tstamp int(11) unsigned DEFAULT '0' NOT NULL,
