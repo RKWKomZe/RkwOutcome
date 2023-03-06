@@ -84,11 +84,14 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         //  if ProcessType is order, check contained products
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
 
-
             /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
             foreach ($process->getOrderItem() as $orderItem) {
 
-                if ($this->surveyRepository->findByProductUid($orderItem->getProduct())) {
+                /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+                if (
+                    ($survey = $this->surveyRepository->findByProductUid($orderItem->getProduct()))
+                    && $survey->getTargetGroup() === $process->getTargetGroup()
+                ) {
                     $surveyableObjects[] = $orderItem->getProduct();
                 }
             }

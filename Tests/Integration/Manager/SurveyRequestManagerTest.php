@@ -146,7 +146,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given an order-object that is persisted
          * Given an orderItem-object that is persisted and belongs to that order-object
          * Given a product-object is persisted and is contained within that orderItem-object
-         * Given a survey is associated with product-object
+         * Given a surveyConfiguration is associated with product-object
+         * Given the surveyConfiguration-property targetGroup is set to the order-property targetGroup
          * When the method is called
          * Then an instance of \RKW\RkwOutcome\Model\SurveyRequest is returned
          * Then the order-property of this instance is set to the order-object
@@ -206,6 +207,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given an event-object that is persisted
          * Given an eventReservation-object that is persisted and belongs to that event-object
          * Given a survey is associated with event-object
+         * Given the surveyConfiguration-property targetGroup is set to the eventReservation-property targetGroup
          * When the method is called
          * Then an instance of \RKW\RkwOutcome\Model\SurveyRequest is returned
          * Then the process-property of this instance is set to the eventReservation-object
@@ -300,6 +302,55 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertCount(0, $surveyRequestsDb);
 
     }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestTriggeredByAnOrderDoesNotCreateSurveyRequestIfAssociatedSurveyDoesNotUseSameTargetgroupAsOrder()
+    {
+
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given the targetGroup-property of this instance is set to uid 1
+         * Given an orderItem-object that is persisted and belongs to that order-object
+         * Given a product-object is persisted and is contained within that orderItem-object
+         * Given a survey is associated with product-object
+         * Given the targetGroup-property of this associated is set to uid 2
+         * When the method is called
+         * Then null is returned
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check40.xml');
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\FrontendUserRepository::class);
+        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $process */
+        $process = $this->processRepository->findByUid(1);
+
+        /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
+        $frontendUser = $this->frontendUserRepository->findByUid(1);
+
+        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
+        $targetGroup = $this->targetGroupRepository->findByUid(1);
+
+        //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = $this->subject->createSurveyRequest($frontendUser, $process);
+
+        self::assertNull($surveyRequest);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+
+    }
+
 
     /**
      * TearDown
