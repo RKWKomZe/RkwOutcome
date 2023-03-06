@@ -77,39 +77,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         //  @todo: use a custom Signal in OrderManager->saveOrder to provide FE-User instead of BE-User
         //  @todo: Alternativ: Wie kann ich $frontendUser und $backendUserForProductMap ignorieren?
 
-        //  @todo: Check, if associated survey exists in tx_rkwoutcome_domain_model_surveyconfiguration.
-
-        $surveyableObjects = [];
-
-        //  if ProcessType is order, check contained products
-        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-
-            /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
-            foreach ($process->getOrderItem() as $orderItem) {
-
-                /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
-                if (
-                    ($survey = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
-                    && $survey->getTargetGroup() === $process->getTargetGroup()
-                ) {
-                    $surveyableObjects[] = $orderItem->getProduct();
-                }
-            }
-
-        }
-        //  if ProcessType is order, check contained products
-        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
-
-            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
-            $event = $process->getEvent();
-
-            if ($this->surveyConfigurationRepository->findByEventUid($event)) {
-                $surveyableObjects[] = $event;
-            }
-
-        }
-
-        if (count($surveyableObjects) > 0) {
+        if ($this->isSurveyable($process)) {
 
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
             $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
@@ -161,6 +129,49 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         }
 
         return $this->logger;
+    }
+
+
+    /**
+     * Checks, if process is associated with a valid survey
+     *
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @return bool
+     */
+    protected function isSurveyable(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): bool
+    {
+        $surveyableObjects = [];
+
+        //  if ProcessType is order, check contained products
+        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+
+            /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
+            foreach ($process->getOrderItem() as $orderItem) {
+
+                /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+                if (
+                    ($survey = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
+                    && $survey->getTargetGroup() === $process->getTargetGroup()
+                ) {
+                    $surveyableObjects[] = $orderItem->getProduct();
+                }
+            }
+
+        }
+        //  if ProcessType is order, check contained products
+        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
+
+            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
+            $event = $process->getEvent();
+
+            /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+            if ($this->surveyConfigurationRepository->findByEventUid($event->getUid())) {
+                $surveyableObjects[] = $event;
+            }
+
+        }
+
+        return count($surveyableObjects) > 0;
     }
 
 }
