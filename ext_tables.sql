@@ -32,9 +32,9 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyrequest (
 );
 
 #
-# Table structure for table 'tx_rkwoutcome_domain_model_survey'
+# Table structure for table 'tx_rkwoutcome_domain_model_surveyconfiguration'
 #
-CREATE TABLE tx_rkwoutcome_domain_model_survey (
+CREATE TABLE tx_rkwoutcome_domain_model_surveyconfiguration (
 
 	uid int(11) NOT NULL auto_increment,
 	pid int(11) DEFAULT '0' NOT NULL,

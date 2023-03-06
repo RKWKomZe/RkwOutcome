@@ -1,7 +1,7 @@
 <?php
 return [
     'ctrl' => [
-        'title'	=> 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_survey',
+        'title'	=> 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration',
         'label' => 'product',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
@@ -18,7 +18,7 @@ return [
         // do only make requestUpdate, if token-list should be shown on check
         // 'requestUpdate' => 'access_restricted',
         'searchFields' => 'product, event, survey',
-        'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_survey.gif'
+        'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyconfiguration.gif'
     ],
     'interface' => [
         'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group',
@@ -55,8 +55,8 @@ return [
                 'items' => [
                     ['', 0],
                 ],
-                'foreign_table' => 'tx_rkwoutcome_domain_model_survey',
-                'foreign_table_where' => 'AND tx_rkwoutcome_domain_model_survey.pid=###CURRENT_PID### AND tx_rkwoutcome_domain_model_survey.sys_language_uid IN (-1,0)',
+                'foreign_table' => 'tx_rkwoutcome_domain_model_surveyconfiguration',
+                'foreign_table_where' => 'AND tx_rkwoutcome_domain_model_surveyconfiguration.pid=###CURRENT_PID### AND tx_rkwoutcome_domain_model_surveyconfiguration.sys_language_uid IN (-1,0)',
             ],
         ],
         'l10n_diffsource' => [
@@ -112,7 +112,7 @@ return [
 
         'product' => [
             'exclude' => 0,
-            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_survey.product',
+            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.product',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
@@ -126,7 +126,7 @@ return [
 
         'event' => [
             'exclude' => 0,
-            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_survey.event',
+            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.event',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
@@ -140,7 +140,7 @@ return [
 
         'survey' => [
             'exclude' => 0,
-            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_survey.survey',
+            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.survey',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',

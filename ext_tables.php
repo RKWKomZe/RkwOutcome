@@ -13,7 +13,7 @@ call_user_func(
         // Add tables
         //=================================================================
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::allowTableOnStandardPages(
-            'tx_rkwoutcome_domain_model_survey'
+            'tx_rkwoutcome_domain_model_surveyconfiguration'
         );
 
 

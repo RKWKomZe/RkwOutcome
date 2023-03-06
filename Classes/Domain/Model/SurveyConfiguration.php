@@ -16,14 +16,14 @@ namespace RKW\RkwOutcome\Domain\Model;
 
 
 /**
- * Survey
+ * SurveyConfiguration
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class Survey extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
+class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 {
 
 

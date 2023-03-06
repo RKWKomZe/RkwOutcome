@@ -6,18 +6,18 @@
 
 
             <!-- ##################################################### -->
-            <!-- tx_rkwoutcome_domain_model_survey              -->
+            <!-- tx_rkwoutcome_domain_model_surveyconfiguration              -->
             <!-- ##################################################### -->
-			<trans-unit id="tx_rkwoutcome_domain_model_survey">
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration">
 				<source>RKW Outcome: Questionnaire</source>
 			</trans-unit>
-            <trans-unit id="tx_rkwoutcome_domain_model_survey.product">
+            <trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.product">
                 <source>Product</source>
             </trans-unit>
-            <trans-unit id="tx_rkwoutcome_domain_model_survey.event">
+            <trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.event">
                 <source>Event</source>
             </trans-unit>
-            <trans-unit id="tx_rkwoutcome_domain_model_survey.survey">
+            <trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.survey">
                 <source>Survey</source>
             </trans-unit>
 

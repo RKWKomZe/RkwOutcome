@@ -18,14 +18,14 @@ use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
- * SurveyRepository
+ * SurveyConfigurationRepository
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
- * @package RKW_RkwNewsletter
+ * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
+class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
 
     /*

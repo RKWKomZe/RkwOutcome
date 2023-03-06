@@ -47,13 +47,13 @@
         <pid>1</pid>
         <name>Kunden</name>
     </tx_rkwbasics_domain_model_target_group>
-    <tx_rkwoutcome_domain_model_survey>
+    <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
         <product>1</product>
         <survey>1</survey>
         <target_group>2</target_group>
-    </tx_rkwoutcome_domain_model_survey>
+    </tx_rkwoutcome_domain_model_surveyconfiguration>
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>

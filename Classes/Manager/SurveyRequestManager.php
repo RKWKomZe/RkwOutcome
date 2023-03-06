@@ -39,10 +39,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
 
     /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRepository
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
      * @inject
      */
-    protected $surveyRepository;
+    protected $surveyConfigurationRepository;
 
 
     /**
@@ -77,7 +77,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         //  @todo: use a custom Signal in OrderManager->saveOrder to provide FE-User instead of BE-User
         //  @todo: Alternativ: Wie kann ich $frontendUser und $backendUserForProductMap ignorieren?
 
-        //  @todo: Check, if associated survey exists in tx_rkwoutcome_domain_model_survey.
+        //  @todo: Check, if associated survey exists in tx_rkwoutcome_domain_model_surveyconfiguration.
 
         $surveyableObjects = [];
 
@@ -89,7 +89,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
                 /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
                 if (
-                    ($survey = $this->surveyRepository->findByProductUid($orderItem->getProduct()))
+                    ($survey = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
                     && $survey->getTargetGroup() === $process->getTargetGroup()
                 ) {
                     $surveyableObjects[] = $orderItem->getProduct();
@@ -103,7 +103,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
             $event = $process->getEvent();
 
-            if ($this->surveyRepository->findByEventUid($event)) {
+            if ($this->surveyConfigurationRepository->findByEventUid($event)) {
                 $surveyableObjects[] = $event;
             }
 
