@@ -11,18 +11,13 @@ config.tx_extbase.persistence {
 #                Tx_RkwOutcome_FrontendUser = RKW\RkwOutcome\Domain\Model\FrontendUser
 #            }
 #        }
-
+#
 #        RKW\RkwOutcome\Domain\Model\FrontendUser {
 #            mapping {
 #                tableName = fe_users
 #            }
 #        }
 
-        RKW\RkwBasics\Domain\Model\TargetGroup {
-            mapping {
-                tableName = tx_rkwbasics_domain_model_target_group
-            }
-        }
     }
 }
 

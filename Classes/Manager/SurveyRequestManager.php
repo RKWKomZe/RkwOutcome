@@ -58,7 +58,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * Intermediate function for creating survey requests - used by SignalSlot
      *
      * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
-     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @param \RKW\RkwShop\Domain\Model\Order $process
      * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
@@ -82,7 +82,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
             $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
             $surveyRequest->setProcess($process);
-            //  @todo: Kann evtl. das Setzen des processType per Mutator erfolgen, so dass es hier nicht explizit gesetzt werden muss?
             $surveyRequest->setProcessType(get_class($process));
             $surveyRequest->setFrontendUser($frontendUser); //  @todo: Entweder direkt oder per $process->getFrontendUser()
 
@@ -116,19 +115,36 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     }
 
-
     /**
-     * Returns logger instance
+     * Send notifications to request a survey from frontend user
      *
-     * @return \TYPO3\CMS\Core\Log\Logger
-     */
-    protected function getLogger(): Logger
+     * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+    */
+    public function sendNotification(\RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest)
     {
-        if (!$this->logger instanceof Logger) {
-            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        }
 
-        return $this->logger;
+        //  @todo select product or event
+        $process = $surveyRequest->getProcess();
+        $process->getOrderItem()->rewind();
+
+        $surveyRequest->setProcessSubject($process->getOrderItem()->current()->getProduct());
+        $surveyRequest->setNotifiedTstamp(time());
+
+        $this->surveyRequestRepository->update($surveyRequest);
+        $this->persistenceManager->persistAll();
+
+//        $this->getLogger()->log(
+//            LogLevel::INFO,
+//            sprintf(
+//                'Increased stage for approval id=%s in approval-stage %s.',
+//                $approval->getUid(),
+//                $stage
+//            )
+//        );
+
+
+
+
     }
 
 
@@ -172,6 +188,21 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         }
 
         return count($surveyableObjects) > 0;
+    }
+
+
+    /**
+     * Returns logger instance
+     *
+     * @return \TYPO3\CMS\Core\Log\Logger
+     */
+    protected function getLogger(): Logger
+    {
+        if (!$this->logger instanceof Logger) {
+            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
+        }
+
+        return $this->logger;
     }
 
 }

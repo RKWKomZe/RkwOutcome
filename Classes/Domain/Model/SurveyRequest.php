@@ -38,6 +38,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * process
      *
      * @var \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
+     *
      */
     protected $process = null;
 
@@ -56,6 +57,23 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @var \RKW\RkwBasics\Domain\Model\TargetGroup|null
      */
     protected $targetGroup = null;
+
+
+    /**
+     * notifiedTstamp
+     *
+     * @var int
+     */
+    protected $notifiedTstamp = 0;
+
+
+    /**
+     * processSubject
+     *
+     * @var \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
+     *
+     */
+    protected $processSubject = null;
 
 
     /**
@@ -148,5 +166,51 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     {
         $this->targetGroup = $targetGroup;
     }
+
+
+    /**
+     * Returns the notifiedTstamp
+     *
+     * @return int
+     */
+    public function getNotifiedTstamp(): int
+    {
+        return $this->notifiedTstamp;
+    }
+
+    /**
+     * Sets the notifiedTstamp
+     *
+     * @param int $notifiedTstamp
+     * @return void
+     */
+    public function setNotifiedTstamp(int $notifiedTstamp): void
+    {
+        $this->notifiedTstamp = $notifiedTstamp;
+    }
+
+
+    /**
+     * Returns the processSubject
+     *
+     * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null $processSubject
+     */
+    public function getProcessSubject()
+    {
+        return $this->processSubject;
+    }
+
+
+    /**
+     * Sets the processSubject
+     *
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $processSubject
+     * @return void
+     */
+    public function setProcessSubject($processSubject): void
+    {
+        $this->processSubject = $processSubject;
+    }
+
 
 }

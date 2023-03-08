@@ -18,11 +18,14 @@ use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwBasics\Domain\Repository\TargetGroupRepository;
 use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Manager\SurveyRequestManager;
-use RKW\RkwShop\Domain\Model\Order;
+use RKW\RkwShop\Domain\Repository\OrderRepository;
+use RKW\RkwShop\Domain\Repository\ProductRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 /**
  * SurveyRequestManagerTest
@@ -80,9 +83,21 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
+     * @var \RKW\RkwShop\Domain\Repository\OrderRepository
+     */
+    private $orderRepository = null;
+
+
+    /**
      * @var \RKW\RkwShop\Domain\Repository\OrderRepository|\RKW\RkwEvents\Domain\Repository\EventReservationRepository
      */
     private $processRepository = null;
+
+
+    /**
+     * @var \RKW\RkwShop\Domain\Repository\ProductRepository
+     */
+    private $productRepository = null;
 
 
     /**
@@ -95,6 +110,20 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      */
     private $surveyRequestRepository = null;
+
+
+    /**
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
+     */
+    private $surveyConfigurationRepository = null;
+
+
+    /**
+     * PersistenceManager
+     *
+     * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
+     */
+    protected $persistenceManager;
 
 
     /**
@@ -126,8 +155,12 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
+        $this->orderRepository = $this->objectManager->get(OrderRepository::class);
         $this->targetGroupRepository = $this->objectManager->get(TargetGroupRepository::class);
         $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
+        $this->surveyConfigurationRepository = $this->objectManager->get(SurveyConfigurationRepository::class);
+        $this->productRepository = $this->objectManager->get(ProductRepository::class);
         $this->subject = $this->objectManager->get(SurveyRequestManager::class);
 
     }
@@ -171,7 +204,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
         $targetGroup = $this->targetGroupRepository->findByUid(1);
 
-        //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($frontendUser, $process);
 
@@ -189,7 +221,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
         self::assertEquals($surveyRequest, $surveyRequestDb);
-        self::assertInstanceOf(Order::class, $surveyRequestDb->getProcess());
+        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
 
     }
 
@@ -288,18 +320,22 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
-        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
-        $targetGroup = $this->targetGroupRepository->findByUid(1);
-
-        //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($frontendUser, $process);
-
         self::assertNull($surveyRequest);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(0, $surveyRequestsDb);
+
+    }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestTriggeredByAnEventDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedEvent()
+    {
 
     }
 
@@ -318,7 +354,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given an orderItem-object that is persisted and belongs to that order-object
          * Given a product-object is persisted and is contained within that orderItem-object
          * Given a survey is associated with product-object
-         * Given the targetGroup-property of this associated is set to uid 2
+         * Given the targetGroup-property of this associated survey is set to uid 2
          * When the method is called
          * Then null is returned
          */
@@ -336,18 +372,115 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
-        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
-        $targetGroup = $this->targetGroupRepository->findByUid(1);
-
-        //  @todo: Darf ein per SignalSlot angesprochene Methode überhaupt etwas zurückliefern?
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($frontendUser, $process);
-
         self::assertNull($surveyRequest);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(0, $surveyRequestsDb);
+
+    }
+
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestTriggeredByAnEventDoesNotCreateSurveyRequestIfAssociatedSurveyDoesNotUseSameTargetgroupAsEventReservation()
+    {
+
+
+    }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function sendingSurveyRequestNotificationSetsNotifiedTstampOnIndividualSurveyRequest()
+    {
+
+        // @todo: Theoretisch könnten die Felder shipped_tstamp und target_group auch in der
+        // für die Tabelle tx_rkwshop_domain_model_order in der rkw_outcome angelegt werden?
+
+        /**
+         * Scenario:
+         *
+         * Given the surveyWaitingTime is set to 172800 (2 days)
+         * Given a persisted order-object
+         * Given a persisted surveyRequest-object
+         * Given the surveyRequest-property process is set to that order
+         * Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * When the method is called
+         * Then a notification email is sent to frontendUser
+         * Then the surveyRequest-property notifiedTstamp is set to > 0
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check50.xml');
+
+        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
+        $processDb = $this->orderRepository->findByUid(1);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
+        $surveyRequest->setProcess($processDb);
+        $surveyRequest->setProcessType(get_class($processDb));
+        $surveyRequest->setFrontendUser($processDb->getFrontendUser()); //  @todo: Entweder direkt oder per $process->getFrontendUser()
+        $surveyRequest->setTargetGroup($processDb->getTargetGroup());
+        $this->surveyRequestRepository->add($surveyRequest);
+        $this->persistenceManager->persistAll();
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
+        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
+        self::assertEquals($processDb, $surveyRequestDb->getProcess());
+        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
+        //  end workaround
+
+        $this->subject->sendNotification($surveyRequestDb);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
+        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
+        self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
+
+        $processDb->getOrderItem()->rewind();
+        self::assertEquals($processDb->getOrderItem()->current()->getProduct(), $surveyRequestDb->getProcessSubject());
+
+    }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function findNotifiableSurveyRequests()
+    {
+
+        /**
+         * Scenario:
+         *
+         * Given the surveyWaitingTime is set to 172800 (2 days)
+         * Given a persisted order-object
+         * Given a persisted surveyRequest-object
+         * Given the surveyRequest-property process is set to that order
+         * Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * When the method is called
+         * Then a notification email is sent to frontendUser
+         * Then the surveyRequest-property notifiedTstamp is set to > 0
+         */
+
+    }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function findFinalNotifiableSurveyRequest()
+    {
+        /*
+        mehrere SurveyRequests sind fällig
+        Identifizieren der auszusendenden SurveyRequest anhand der insgesamt verknüpften Produkte bzw. Events
+        Markierung der ausgesendeten SurveyRequest
+        Markierung der weiteren berücksichtigten, aber unversendeten SurveyRequests, um sie nicht erneut zur Auswahl zu stellen
+        */
 
     }
 

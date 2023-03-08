@@ -138,16 +138,6 @@ return [
             ],
         ],
 
-        'process' => [
-            'exclude' => 0,
-            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest.order',
-            'config' => [
-                'type' => 'input',
-                'size' => 30,
-                'eval' => 'trim, required'
-            ],
-        ],
-
         'process_type' => [
             'exclude' => 0,
             'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest.order',

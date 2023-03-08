@@ -1,3 +1,5 @@
+-- noinspection SqlNoDataSourceInspectionForFile
+
 #
 # Table structure for table 'tx_rkwoutcome_domain_model_surveyrequest'
 #
@@ -11,6 +13,8 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyrequest (
 
 	process int(11) unsigned DEFAULT '0',
 	process_type varchar(255) DEFAULT '' NOT NULL,
+	process_subject int(11) unsigned DEFAULT '0',
+
 	survey int(11) unsigned DEFAULT '0',
 
 	tstamp int(11) unsigned DEFAULT '0' NOT NULL,

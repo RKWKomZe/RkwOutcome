@@ -46,6 +46,8 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
     public function findByProductUid($uid)
     {
         $query = $this->createQuery();
+        //  @todo: Check, if these settings are okay?
+        $query->getQuerySettings()->setIgnoreEnableFields(true);
         $query->getQuerySettings()->setIncludeDeleted(true);
 
         $query->matching(
