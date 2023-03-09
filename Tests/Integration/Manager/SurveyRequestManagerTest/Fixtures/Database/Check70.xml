@@ -12,21 +12,32 @@
         <zip>10969</zip>
         <city>Hamburg</city>
     </fe_users>
-    <tx_rkwevents_domain_model_event>
+    <tx_rkwshop_domain_model_order>
         <uid>1</uid>
         <pid>1</pid>
-        <title>Shoptalk</title>
-        <start>1000</start>
-        <end>2000</end>
-    </tx_rkwevents_domain_model_event>
-    <tx_rkwevents_domain_model_eventreservation>
-        <uid>1</uid>
-        <pid>1</pid>
-        <fe_user>1</fe_user>
-        <event>1</event>
+        <frontend_user>1</frontend_user>
+        <order_item>1</order_item>
         <email>test@dummy.de</email>
+        <remark>Toller Hinweis!!!</remark>
         <target_group>1</target_group>
-    </tx_rkwevents_domain_model_eventreservation>
+        <shipped_tstamp>0</shipped_tstamp>
+    </tx_rkwshop_domain_model_order>
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>1</uid>
+        <pid>1</pid>
+        <amount>4</amount>
+        <product>1</product>
+        <ext_order>1</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <tx_rkwshop_domain_model_product>
+        <uid>1</uid>
+        <pid>1</pid>
+        <title>Leitfaden deluxe</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
     <tx_rkwbasics_domain_model_target_group>
         <uid>1</uid>
         <pid>1</pid>
@@ -35,7 +46,7 @@
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
-        <event>1</event>
+        <product>1</product>
         <survey>1</survey>
         <target_group>1</target_group>
     </tx_rkwoutcome_domain_model_surveyconfiguration>

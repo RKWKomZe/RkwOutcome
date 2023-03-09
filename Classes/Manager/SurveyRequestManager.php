@@ -150,16 +150,18 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
          /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
          $surveyRequests = $this->surveyRequestRepository->findAllPendingSurveyRequests();
 
+         $notifiedSurveyRequests = [];
+
          /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
          foreach ($surveyRequests as $surveyRequest) {
-             if ($this->isSurveyable($surveyRequest->getProcess())) {
+             if ($this->isNotifiable($surveyRequest->getProcess())) {
                  if ($this->sendNotification($surveyRequest)) {
                      $this->markAsNotified($surveyRequest);
+
+                     $notifiedSurveyRequests[] = $surveyRequest;
                  }
              }
          }
-
-         $notifiedSurveyRequests = $surveyRequests->toArray();
 
         return $notifiedSurveyRequests;
 
@@ -201,6 +203,68 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     }
 
+
+    /**
+     * Checks, if process is associated with a valid survey
+     *
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @return bool
+     */
+    protected function isNotifiable(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): bool
+    {
+
+        $notifiableObjects = [];
+
+        //  check contained products
+        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+
+            $shippedTstamp = $process->getShippedTstamp();
+
+            if (
+                $shippedTstamp > 0
+                && $shippedTstamp < time() // @todo: Plus SurveyWaitingTime, ...
+            ) {
+                /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
+                foreach ($process->getOrderItem() as $orderItem) {
+                    /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+                    if (
+                        ($survey = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
+                        && $survey->getTargetGroup() === $process->getTargetGroup()
+                    ) {
+                        $notifiableObjects[] = $orderItem->getProduct();
+                    }
+                }
+            }
+
+        }
+        //  check contained products
+        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
+
+            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
+            $event = $process->getEvent();
+            $endTstamp = $event->getEnd();
+
+            if (
+                $endTstamp > 0
+                && $endTstamp < time() // @todo: Plus SurveyWaitingTime, ...
+            ) {
+
+                /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+                if (
+                    ($survey = $this->surveyConfigurationRepository->findByEventUid($event->getUid()))
+                    && $survey->getTargetGroup() === $process->getTargetGroup()
+                ) {
+                    $notifiableObjects[] = $event;
+                }
+
+            }
+
+        }
+
+        return count($notifiableObjects) > 0;
+
+
+    }
 
     /**
      * Checks, if process is associated with a valid survey
