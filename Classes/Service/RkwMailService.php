@@ -15,6 +15,13 @@ namespace RKW\RkwOutcome\Service;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwMailer\Service\MailService;
+use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
+use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use RKW\RkwRegistration\Domain\Model\FrontendUser;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+
 /**
  * RkwOutcome
  *
@@ -25,6 +32,60 @@ namespace RKW\RkwOutcome\Service;
  */
 class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 {
+
+    /**
+     * Send mail to frontend user to submit survey request
+     *
+     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $recipient
+     * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+     * @return void
+     * @throws \Exception
+     * @throws \RKW\RkwMailer\Exception
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
+     * @throws \TYPO3Fluid\Fluid\View\Exception\InvalidTemplateResourceException
+     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
+     */
+    public function sendMailSurveyRequestToUser(
+        FrontendUser $recipient,
+        SurveyRequest $surveyRequest,
+    ): void {
+
+        // get settings
+        $settings = $this->getSettings(ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK);
+        if ($settings['view']['templateRootPaths']) {
+
+            /** @var \RKW\RkwMailer\Service\MailService $mailService */
+            $mailService = GeneralUtility::makeInstance(MailService::class);
+
+            if ($recipient->getEmail()) {
+
+                // send new user an email with token
+                $mailService->setTo($recipient, [
+                    'marker'  => array(
+                        'surveyRequest'    => $surveyRequest,
+                        'frontendUser' => $recipient,
+                    ),
+                    'subject' => FrontendLocalizationUtility::translate(
+                        'rkwMailService.subject.userSurveyRequestNotification',
+                        'rkw_outcome',
+                        null,
+                        'de'
+                    ),
+                ]);
+
+            }
+
+            $mailService->getQueueMail()->addTemplatePaths($settings['view']['templateRootPaths']);
+            $mailService->getQueueMail()->addPartialPaths($settings['view']['partialRootPaths']);
+
+            $mailService->getQueueMail()->setPlaintextTemplate('Email/UserSurveyRequest');
+            $mailService->getQueueMail()->setHtmlTemplate('Email/UserSurveyRequest');
+
+            $mailService->send();
+        }
+    }
+
 
     /**
      * Returns TYPO3 settings

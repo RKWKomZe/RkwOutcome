@@ -32,6 +32,23 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 {
 
     /**
+     * Signal name for use in ext_localconf.php
+     *
+     * @const string
+     */
+    const SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST = 'sendMailSurveyRequestToUser';
+
+
+    /**
+     * Signal Slot Dispatcher
+     *
+     * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
+     * @inject
+     */
+    protected $signalSlotDispatcher;
+
+
+    /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      * @inject
      */
@@ -58,7 +75,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * Intermediate function for creating survey requests - used by SignalSlot
      *
      * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
-     * @param \RKW\RkwShop\Domain\Model\Order $process
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
      * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
@@ -86,6 +103,8 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             $surveyRequest->setFrontendUser($frontendUser); //  @todo: Entweder direkt oder per $process->getFrontendUser()
 
             //  @todo: TargetGroups über die sys_categories steuern
+            //  @todo: targetGroup must be mandatory in order form, otherwise this next condition crashes:
+            //  Argument 1 passed to RKW\RkwOutcome\Domain\Model\SurveyRequest::setTargetGroup() must be an instance of RKW\RkwBasics\Domain\Model\TargetGroup, null given
             $surveyRequest->setTargetGroup($process->getTargetGroup());
 
             $this->surveyRequestRepository->add($surveyRequest);
@@ -115,35 +134,70 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     }
 
+
     /**
-     * Send notifications to request a survey from frontend user
+     * Processes all pending survey requests
+     *
+     * @return array
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
+     * @throws \TYPO3\CMS\Extbase\SignalSlot\Exception\InvalidSlotException
+     * @throws \TYPO3\CMS\Extbase\SignalSlot\Exception\InvalidSlotReturnException
+     */
+     public function processPendingSurveyRequests():array {
+
+         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+         $surveyRequests = $this->surveyRequestRepository->findAllPendingSurveyRequests();
+
+         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+         foreach ($surveyRequests as $surveyRequest) {
+             if ($this->isSurveyable($surveyRequest->getProcess())) {
+                 if ($this->sendNotification($surveyRequest)) {
+                     $this->markAsNotified($surveyRequest);
+                 }
+             }
+         }
+
+         $notifiedSurveyRequests = $surveyRequests->toArray();
+
+        return $notifiedSurveyRequests;
+
+    }
+
+
+    /**
+     * Send notification to request a survey from frontend user
      *
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
     */
     public function sendNotification(\RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest)
     {
 
-        //  @todo select product or event
-        $process = $surveyRequest->getProcess();
-        $process->getOrderItem()->rewind();
+        if ($recipient = $surveyRequest->getFrontendUser()) {
 
-        $surveyRequest->setProcessSubject($process->getOrderItem()->current()->getProduct());
-        $surveyRequest->setNotifiedTstamp(time());
+            // Signal for e.g. E-Mails
+            $this->signalSlotDispatcher->dispatch(
+                __CLASS__,
+                self::SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST,
+                [$recipient, $surveyRequest]
+            );
 
-        $this->surveyRequestRepository->update($surveyRequest);
-        $this->persistenceManager->persistAll();
+            $this->getLogger()->log(
+                LogLevel::INFO,
+                sprintf(
+                    'Send request for survey request %s to frontend user with id %s (email %s).',
+                    $surveyRequest->getUid(),
+                    $recipient->getUid(),
+                    $recipient->getEmail()
+                )
+            );
 
-//        $this->getLogger()->log(
-//            LogLevel::INFO,
-//            sprintf(
-//                'Increased stage for approval id=%s in approval-stage %s.',
-//                $approval->getUid(),
-//                $stage
-//            )
-//        );
+            return true;
 
+        }
 
-
+        return false;
 
     }
 
@@ -158,12 +212,11 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     {
         $surveyableObjects = [];
 
-        //  if ProcessType is order, check contained products
+        //  check contained products
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
 
             /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
             foreach ($process->getOrderItem() as $orderItem) {
-
                 /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
                 if (
                     ($survey = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
@@ -174,20 +227,50 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             }
 
         }
-        //  if ProcessType is order, check contained products
+        //  check contained products
         if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
 
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
             $event = $process->getEvent();
 
             /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
-            if ($this->surveyConfigurationRepository->findByEventUid($event->getUid())) {
+            if (
+                ($survey = $this->surveyConfigurationRepository->findByEventUid($event->getUid()))
+                && $survey->getTargetGroup() === $process->getTargetGroup()
+            ) {
                 $surveyableObjects[] = $event;
             }
 
         }
 
         return count($surveyableObjects) > 0;
+    }
+
+
+    /**
+     * @param SurveyRequest $surveyRequest
+     * @return void
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
+     */
+    protected function markAsNotified(SurveyRequest $surveyRequest): void
+    {
+
+        //  @todo select product or event
+        $process = $surveyRequest->getProcess();
+
+        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+            $process->getOrderItem()->rewind();
+            $surveyRequest->setProcessSubject($process->getOrderItem()->current()->getProduct());
+        } else {
+            $surveyRequest->setProcessSubject($process->getEvent());
+        }
+
+        $surveyRequest->setNotifiedTstamp(time());
+
+        $this->surveyRequestRepository->update($surveyRequest);
+        $this->persistenceManager->persistAll();
+
     }
 
 
@@ -204,5 +287,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
         return $this->logger;
     }
+
 
 }

@@ -36,5 +36,28 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
         $this->defaultQuerySettings->setRespectStoragePage(false);
     }
+
+
+    /**
+     * findAllPendingSurveyRequests
+     *
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @comment implicitly tested @todo actually explicitly tested
+     */
+    public function findAllPendingSurveyRequests(
+    ): QueryResultInterface
+    {
+        $query = $this->createQuery();
+        $constraints = [];
+
+        $constraints[] =
+            $query->equals('notifiedTstamp', 0)
+        ;
+
+        return $query->execute();
+    }
+
+
     
 }

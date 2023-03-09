@@ -28,12 +28,11 @@ call_user_func(
          * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher
          */
         $signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class);
-
         $signalSlotDispatcher->connect(
-            \RKW\RkwShop\Orders\OrderManager::class,
-            \RKW\RkwShop\Orders\OrderManager::SIGNAL_AFTER_ORDER_CREATED_USER,
             \RKW\RkwOutcome\Manager\SurveyRequestManager::class,
-            'createSurveyRequest'
+            \RKW\RkwOutcome\Manager\SurveyRequestManager::SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST . 'RkwOutcome',
+            \RKW\RkwOutcome\Service\RkwMailService::class,
+            'sendMailSurveyRequestToUser'
         );
 
         //=================================================================

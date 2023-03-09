@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataset>
+    <fe_users>
+        <uid>1</uid>
+        <pid>0</pid>
+        <username>spd@test.de</username>
+        <email>lauterbach@spd.de</email>
+        <first_name />
+        <last_name />
+        <company />
+        <address />
+        <zip>10969</zip>
+        <city>Hamburg</city>
+    </fe_users>
+    <tx_rkwevents_domain_model_event>
+        <uid>1</uid>
+        <pid>1</pid>
+        <title>Shoptalk</title>
+    </tx_rkwevents_domain_model_event>
+    <tx_rkwevents_domain_model_eventreservation>
+        <uid>1</uid>
+        <pid>1</pid>
+        <fe_user>1</fe_user>
+        <event>1</event>
+        <email>test@dummy.de</email>
+        <target_group>1</target_group>
+    </tx_rkwevents_domain_model_eventreservation>
+    <tx_rkwbasics_domain_model_target_group>
+        <uid>1</uid>
+        <pid>1</pid>
+        <name>Unternehmen</name>
+    </tx_rkwbasics_domain_model_target_group>
+    <tx_rkwoutcome_domain_model_surveyconfiguration>
+        <uid>1</uid>
+        <pid>1</pid>
+        <event>1</event>
+        <survey>1</survey>
+        <target_group>1</target_group>
+    </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <tx_rkwsurvey_domain_model_survey>
+        <uid>1</uid>
+        <pid>1</pid>
+        <name>Meine Umfrage</name>
+    </tx_rkwsurvey_domain_model_survey>
+</dataset>

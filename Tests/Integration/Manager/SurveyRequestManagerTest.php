@@ -17,6 +17,8 @@ namespace RKW\RkwOutcome\Tests\Integration\Manager;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwBasics\Domain\Repository\TargetGroupRepository;
 use RKW\RkwEvents\Domain\Model\EventReservation;
+use RKW\RkwEvents\Domain\Repository\EventRepository;
+use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
@@ -80,6 +82,12 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @var \RKW\RkwShop\Domain\Repository\FrontendUserRepository|\RKW\RkwEvents\Domain\Repository\FrontendUserRepository
      */
     private $frontendUserRepository = null;
+
+
+    /**
+     * @var \RKW\RkwEvents\Domain\Repository\EventReservationRepository
+     */
+    private $eventReservationRepository = null;
 
 
     /**
@@ -157,6 +165,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
         $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
         $this->orderRepository = $this->objectManager->get(OrderRepository::class);
+        $this->eventReservationRepository = $this->objectManager->get(EventReservationRepository::class);
         $this->targetGroupRepository = $this->objectManager->get(TargetGroupRepository::class);
         $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
         $this->surveyConfigurationRepository = $this->objectManager->get(SurveyConfigurationRepository::class);
@@ -393,50 +402,57 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     }
 
+
     /**
      * @test
      * @throws \Exception
      */
-    public function sendingSurveyRequestNotificationSetsNotifiedTstampOnIndividualSurveyRequest()
+    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfSurveyRequestContainsAnOrder()
     {
 
         // @todo: Theoretisch könnten die Felder shipped_tstamp und target_group auch in der
         // für die Tabelle tx_rkwshop_domain_model_order in der rkw_outcome angelegt werden?
 
+        //  CommandController->processPendingSurveyRequestsCommand
+            //  findAllPendingSurveyRequests
+                //  @todo finde alle SurveyRequests im passenden Zeitraum
+                //  @todo filtere alle Formate mit zugeordneter Umfrage
+                //  @todo filtere auf passende Zielgruppe
+                //  @todo checke den shippedTstamp
+                //  @todo gruppiere nach Format
+                //  @todo ggfs. zufällige Auswahl aus der Gruppierung nach Format
+                //  foreach found PendingSurveyRequest
+                    //  processSurveyRequest($surveyRequest)->returns true/false
+                        //  sendNotification()->returns true/false
+                        //  setNotifiedTstamp(time())
+                        //  setProcessSubject(product, event)
+                //  endforeach
+
         /**
          * Scenario:
          *
-         * Given the surveyWaitingTime is set to 172800 (2 days)
+         * @todo Given the surveyWaitingTime is set to 172800 (2 days)
+         * Given a persisted product
+         * Given a persisted surveyConfiguration-object
+         * Given the surveyConfiguration-property is set to that product-object
          * Given a persisted order-object
+         * Given the product-property ot the contained orderItem-object ist set to the same product-object
          * Given a persisted surveyRequest-object
+         * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that order
-         * Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
          * When the method is called
-         * Then a notification email is sent to frontendUser
          * Then the surveyRequest-property notifiedTstamp is set to > 0
+         * Then the surveyRequest-property processSubject is set to that product-object
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check50.xml');
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
-        $processDb = $this->orderRepository->findByUid(1);
+        $processDb = $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
-        $surveyRequest->setProcess($processDb);
-        $surveyRequest->setProcessType(get_class($processDb));
-        $surveyRequest->setFrontendUser($processDb->getFrontendUser()); //  @todo: Entweder direkt oder per $process->getFrontendUser()
-        $surveyRequest->setTargetGroup($processDb->getTargetGroup());
-        $this->surveyRequestRepository->add($surveyRequest);
-        $this->persistenceManager->persistAll();
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
-        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
-        self::assertEquals($processDb, $surveyRequestDb->getProcess());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
-        //  end workaround
-
-        $this->subject->sendNotification($surveyRequestDb);
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests();
+        self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
@@ -447,40 +463,62 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     }
 
+
     /**
      * @test
      * @throws \Exception
      */
-    public function findNotifiableSurveyRequests()
+    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfSurveyRequestContainsAnEvent()
     {
+
+        // @todo: Theoretisch könnten die Felder shipped_tstamp und target_group auch in der
+        // für die Tabelle tx_rkwshop_domain_model_order in der rkw_outcome angelegt werden?
+
+        //  CommandController->processPendingSurveyRequestsCommand
+        //  findAllPendingSurveyRequests
+        //  @todo finde alle SurveyRequests im passenden Zeitraum
+        //  @todo filtere alle Formate mit zugeordneter Umfrage
+        //  @todo filtere auf passende Zielgruppe
+        //  @todo checke den shippedTstamp
+        //  @todo gruppiere nach Format
+        //  @todo ggfs. zufällige Auswahl aus der Gruppierung nach Format
+        //  foreach found PendingSurveyRequest
+        //  processSurveyRequest($surveyRequest)->returns true/false
+        //  sendNotification()->returns true/false
+        //  setNotifiedTstamp(time())
+        //  setProcessSubject(product, event)
+        //  endforeach
 
         /**
          * Scenario:
          *
-         * Given the surveyWaitingTime is set to 172800 (2 days)
-         * Given a persisted order-object
+         * @todo Given the surveyWaitingTime is set to 172800 (2 days)
+         * Given a persisted event
+         * Given a persisted surveyConfiguration-object
+         * Given the surveyConfiguration-property is set to that event-object
+         * Given a persisted eventReservation-object
+         * Given the event-property of that eventReservation-object is set to the that event-object
          * Given a persisted surveyRequest-object
-         * Given the surveyRequest-property process is set to that order
-         * Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * @todo: Check targetGroup
+         * Given the surveyRequest-property process is set to that eventReservation-object
+         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
          * When the method is called
-         * Then a notification email is sent to frontendUser
          * Then the surveyRequest-property notifiedTstamp is set to > 0
+         * Then the surveyRequest-property processSubject is set to that eventReservation-object
          */
 
-    }
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check60.xml');
 
-    /**
-     * @test
-     * @throws \Exception
-     */
-    public function findFinalNotifiableSurveyRequest()
-    {
-        /*
-        mehrere SurveyRequests sind fällig
-        Identifizieren der auszusendenden SurveyRequest anhand der insgesamt verknüpften Produkte bzw. Events
-        Markierung der ausgesendeten SurveyRequest
-        Markierung der weiteren berücksichtigten, aber unversendeten SurveyRequests, um sie nicht erneut zur Auswahl zu stellen
-        */
+        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
+        $processDb = $this->setUpSurveyRequest('\RKW\RkwEvents\Domain\Model\EventReservation');
+
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests();
+        self::assertCount(1, $notifiedSurveyRequests);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
+        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
+        self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
+        self::assertEquals($processDb->getEvent(), $surveyRequestDb->getProcessSubject());
 
     }
 
@@ -491,6 +529,61 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
+    }
+
+    /**
+     *
+     * @param string $model
+     *
+     * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     */
+    protected function setUpSurveyRequest(string $model): \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
+    {
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
+
+        if ($model === '\RKW\RkwShop\Domain\Model\Order') {
+            $process = $this->orderRepository->findByUid(1);
+            $frontendUser = $process->getFrontendUser();
+        }
+
+        if ($model === '\RKW\RkwEvents\Domain\Model\EventReservation') {
+            $process = $this->eventReservationRepository->findByUid(1);
+            $frontendUser = $process->getFeUser();
+        }
+
+        $surveyRequest->setProcess($process);
+        $surveyRequest->setProcessType(get_class($process));
+        $surveyRequest->setFrontendUser($frontendUser);
+        $surveyRequest->setTargetGroup($process->getTargetGroup());
+        $this->surveyRequestRepository->add($surveyRequest);
+        $this->persistenceManager->persistAll();
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
+        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
+        self::assertEquals($process, $surveyRequestDb->getProcess());
+        self::assertInstanceOf($model, $surveyRequestDb->getProcess());
+
+
+//        $processDb = $this->orderRepository->findByUid(1);
+//
+//        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+//        $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
+//        $surveyRequest->setProcess($processDb);
+//        $surveyRequest->setProcessType(get_class($processDb));
+//        $surveyRequest->setFrontendUser($processDb->getFrontendUser()); //  @todo: Entweder direkt oder per $process->getFrontendUser()
+//        $surveyRequest->setTargetGroup($processDb->getTargetGroup());
+//        $this->surveyRequestRepository->add($surveyRequest);
+//        $this->persistenceManager->persistAll();
+//
+//        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
+//        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
+//        self::assertEquals($processDb, $surveyRequestDb->getProcess());
+//        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
+
+
+        return $process;
     }
 
 }
