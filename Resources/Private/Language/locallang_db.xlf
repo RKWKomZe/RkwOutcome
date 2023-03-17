@@ -11,6 +11,15 @@
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration">
 				<source>RKW Outcome: Questionnaire</source>
 			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.processType">
+                <source>Process-Type</source>
+            </trans-unit>
+            <trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.processType.product">
+                <source>Product</source>
+            </trans-unit>
+            <trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.processType.event">
+                <source>Event</source>
+            </trans-unit>
             <trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.product">
                 <source>Product</source>
             </trans-unit>

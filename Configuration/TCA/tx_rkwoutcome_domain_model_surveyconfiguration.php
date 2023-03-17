@@ -2,7 +2,8 @@
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration',
-        'label' => 'product',
+        'label' => 'event',
+        'label_userFunc' => \RKW\RkwOutcome\Utilities\TCA::class . '->surveyConfigurationTitle',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',
@@ -24,7 +25,7 @@ return [
         'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group',
     ],
     'types' => [
-        '1' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
+        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
     ],
     'columns' => [
 
@@ -110,6 +111,20 @@ return [
             ],
         ],
 
+        'process_type' => [
+            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.processType',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'items' => [
+                    ['LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.processType.product', '\RKW\RkwShop\Domain\Model\Product'],
+                    ['LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.processType.event', '\RKW\RkwEvents\Domain\Model\Event'],
+                ],
+                'default' => '\RKW\RkwShop\Domain\Model\Product'
+            ],
+            'onChange' => 'reload',
+        ],
+
         'product' => [
             'exclude' => 0,
             'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.product',
@@ -122,6 +137,7 @@ return [
                 'minitems' => 0,
                 'maxitems' => 1,
             ],
+            'displayCond' => 'FIELD:process_type:=:\RKW\RkwShop\Domain\Model\Product',
         ],
 
         'event' => [
@@ -131,11 +147,12 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'foreign_table' => 'tx_rkwevents_domain_model_event',
-                'foreign_table_where' => ' AND ((\'###PAGE_TSCONFIG_IDLIST###\' <> \'0\' AND FIND_IN_SET(tx_rkwevents_domain_model_event.pid,\'###PAGE_TSCONFIG_IDLIST###\')) OR (\'###PAGE_TSCONFIG_IDLIST###\' = \'0\')) AND tx_rkwevents_domain_model_event.hidden = 0 AND tx_rkwevents_domain_model_event.deleted = 0 ORDER BY title',
+                'foreign_table_where' => ' AND ((\'###PAGE_TSCONFIG_IDLIST###\' <> \'0\' AND FIND_IN_SET(tx_rkwevents_domain_model_event.pid,\'###PAGE_TSCONFIG_IDLIST###\')) OR (\'###PAGE_TSCONFIG_IDLIST###\' = \'0\')) AND tx_rkwevents_domain_model_event.hidden = 0 AND tx_rkwevents_domain_model_event.deleted = 0 ORDER BY start DESC, title ASC',
                 'size' => 1,
                 'minitems' => 0,
                 'maxitems' => 1,
             ],
+            'displayCond' => 'FIELD:process_type:=:\RKW\RkwEvents\Domain\Model\Event',
         ],
 
         'survey' => [
