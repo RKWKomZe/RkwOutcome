@@ -1,14 +1,14 @@
 # Extension configuration
-plugin.tx_rkwnewsletter {
+plugin.tx_rkwoutcome {
 	view {
         layoutRootPaths {
-            0 = EXT:rkw_newsletter/Resources/Private/Layouts/
+            0 = EXT:rkw_outcome/Resources/Private/Layouts/
         }
 		templateRootPaths {
-            0 = EXT:rkw_newsletter/Resources/Private/Templates/
+            0 = EXT:rkw_outcome/Resources/Private/Templates/
         }
 		partialRootPaths {
-            0 = EXT:rkw_newsletter/Resources/Private/Partials/
+            0 = EXT:rkw_outcome/Resources/Private/Partials/
         }
 	}
 	persistence {
@@ -17,133 +17,38 @@ plugin.tx_rkwnewsletter {
 
 	settings {
 
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=remind BackendUser on stage 1 to approve pages of a new issue
-        reminderApprovalStage1 = 302400
 
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=remind BackendUser on stage 2 to approve pages of a new issue
-        reminderApprovalStage2 = 302400
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=remind BackendUser on stage 3 to approve pages of a new issue
-        reminderApprovalStage3 = 302400
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=automatic approval of stage 1 after a certain time
-        automaticApprovalStage1 = 604800
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=automatic approval of stage 2 after a certain time
-        automaticApprovalStage2 = 604800
-
-        # cat=plugin.tx_rkwnewsletter//a; type=boolean; label=Order topics randomly
-        randomTopicOrder = 1
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Pid of login mask
-        loginPid =
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Pid of terms
-        termsPid =
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Pid for subscriptions
-        subscriptionPid =
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=TypeNum for webview of newsletter
-        webViewPageNum = 1536732477
-
-        # cat=plugin.tx_rkwnewsletter//a; type=string; label=Required fields for subscription
-        requiredFieldsSubscription = txRkwregistrationGender, firstName, lastName
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Maximum teaser length
-        minTeaserLength = 500
-
-        # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Minimum teaser length
-        maxTeaserLength = 900
-
-        pages {
-            # permissions for pages elements
-            permissions {
-                # on create of a new issue
-                stage1 {
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=UserId permission
-                    userId = 1
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=GroupId permission
-                    groupId = 1
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of user (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    user = 1
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of group (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    group = 1
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of everybody (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    everybody = 1
-                }
-                # perms which come into effect on approve of stage 1
-                stage2 {
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=UserId permission
-                    userId = 2
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=GroupId permission
-                    groupId = 2
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of user (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    user = 2
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of group (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    group = 2
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of everybody (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    everybody = 2
-                }
-                # perms which come into effect on approve of stage 2
-                release {
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=UserId permission
-                    userId = 3
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=GroupId permission
-                    groupId = 3
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of user (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    user = 4
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of group (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    group = 4
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of everybody (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    everybody = 4
-                }
-                # perms which come into effect after final sending of the issue
-                sent {
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=UserId permission
-                    userId = 4
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=GroupId permission
-                    groupId = 4
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of user (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    user = 8 
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of group (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    group = 8
-                    # cat=plugin.tx_rkwnewsletter//a; type=integer; label=Perms of everybody (0, 1, 2, 4, 8, 16 - and every possible combination of it)
-                    everybody = 8
-                }
-            }
-        }
 	}
 }
 
 
 # Module configuration
-module.tx_rkwnewsletter {
+module.tx_rkwoutcome {
 
-	settings < plugin.tx_rkwnewsletter.settings
-	persistence < plugin.tx_rkwnewsletter.persistence
-	view < plugin.tx_rkwnewsletter.view
+	settings < plugin.tx_rkwoutcome.settings
+	persistence < plugin.tx_rkwoutcome.persistence
+	view < plugin.tx_rkwoutcome.view
 
 	view {
-		# cat=module.tx_rkwnewsletter/file; type=string; label=Path to template root (BE)
-		templateRootPath = EXT:rkw_newsletter/Resources/Private/Templates/Backend/
+		# cat=module.tx_rkwoutcome/file; type=string; label=Path to template root (BE)
+		templateRootPath = EXT:rkw_outcome/Resources/Private/Templates/Backend/
 
-		# cat=module.tx_rkwnewsletter/file; type=string; label=Path to template partials (BE)
-		partialRootPath = EXT:rkw_newsletter/Resources/Private/Partials/Backend/
+		# cat=module.tx_rkwoutcome/file; type=string; label=Path to template partials (BE)
+		partialRootPath = EXT:rkw_outcome/Resources/Private/Partials/Backend/
 
-		# cat=module.tx_rkwnewsletter/file; type=string; label=Path to template layouts (BE)
-		layoutRootPath = EXT:rkw_newsletter/Resources/Private/Layouts/Backend/
+		# cat=module.tx_rkwoutcome/file; type=string; label=Path to template layouts (BE)
+		layoutRootPath = EXT:rkw_outcome/Resources/Private/Layouts/Backend/
 
 
-        newsletter {
-            # cat=module.tx_rkwnewsletter/file; type=string; label=Path to template root for newsletter
-            templateRootPath = EXT:rkw_newsletter/Resources/Private/Templates/Newsletter
+        outcome {
+            # cat=module.tx_rkwoutcome/file; type=string; label=Path to template root for outcome
+            templateRootPath = EXT:rkw_outcome/Resources/Private/Templates/Newsletter
 
-            # cat=module.tx_rkwnewsletter/file; type=string; label=Path to template partials for newsletter
-            partialRootPath = EXT:rkw_newsletter/Resources/Private/Partials/Newsletter
+            # cat=module.tx_rkwoutcome/file; type=string; label=Path to template partials for outcome
+            partialRootPath = EXT:rkw_outcome/Resources/Private/Partials/Newsletter
 
-            # cat=module.tx_rkwnewsletter/file; type=string; label=Path to template layouts for newsletter
-            layoutRootPath = EXT:rkw_newsletter/Resources/Private/Layouts/Newsletter
+            # cat=module.tx_rkwoutcome/file; type=string; label=Path to template layouts for outcome
+            layoutRootPath = EXT:rkw_outcome/Resources/Private/Layouts/Newsletter
         }
 	}
 }

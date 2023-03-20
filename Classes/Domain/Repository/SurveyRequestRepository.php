@@ -52,8 +52,15 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $constraints = [];
 
         $constraints[] =
-            $query->equals('notifiedTstamp', 0)
+            $query->logicalAnd(
+                $query->equals('notifiedTstamp', 0)
+            )
         ;
+
+        // NOW: construct final query!
+        if ($constraints) {
+            $query->matching($query->logicalAnd($constraints));
+        }
 
         return $query->execute();
     }

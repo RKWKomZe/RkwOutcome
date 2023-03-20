@@ -8,10 +8,23 @@ call_user_func(
         //=================================================================
         // Configure Plugins
         //=================================================================
+        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
+            'RKW.' . $extKey,
+            'SurveyRequest',
+            array(
+                'SurveyRequest' => 'show',
+            ),
+
+            // non-cacheable actions
+            array(
+                'SurveyRequest' => 'show',
+            )
+        );
 
         //=================================================================
         // Register CommandController
         //=================================================================
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['extbase']['commandControllers'][] = 'RKW\RkwOutcome\Controller\SurveyRequestCommandController';
 
         //=================================================================
         // Register TCA evaluation to be available in 'eval' of TCA
@@ -28,9 +41,17 @@ call_user_func(
          * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher
          */
         $signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class);
+
+        $signalSlotDispatcher->connect(
+            \RKW\RkwShop\Orders\OrderManager::class,
+            \RKW\RkwShop\Orders\OrderManager::SIGNAL_AFTER_ORDER_CREATED_USER,
+            \RKW\RkwOutcome\Manager\SurveyRequestManager::class,
+            'createSurveyRequestSignalSlot'
+        );
+
         $signalSlotDispatcher->connect(
             \RKW\RkwOutcome\Manager\SurveyRequestManager::class,
-            \RKW\RkwOutcome\Manager\SurveyRequestManager::SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST . 'RkwOutcome',
+            \RKW\RkwOutcome\Manager\SurveyRequestManager::SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST,
             \RKW\RkwOutcome\Service\RkwMailService::class,
             'sendMailSurveyRequestToUser'
         );

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <xliff version="1.0">
-	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2015-04-07T16:19:42Z" product-name="rkw_newsletter">
+	<file source-language="en" target-language="de" datatype="plaintext" original="messages" date="2015-04-07T16:19:42Z" product-name="rkw_outcome">
 		<header/>
 		<body>
 
@@ -14,7 +14,9 @@
 			<!-- ##################### -->
 			<!-- Email- Subjects       -->
 			<!-- ##################### -->
-
+			<trans-unit id="rkwMailService.subject.userSurveyRequestNotification">
+				<source>Notification: Survey request</source>
+			</trans-unit>
 
 
 			<!-- ##################### -->
@@ -47,7 +49,10 @@
 			<!-- ##################### -->
 			<!-- E-Mail Templates -->
 			<!-- ##################### -->
-
+            <!-- Templates/Backend/Email/UserSurveyRequest.html -->
+			<trans-unit id="templates_email_userSurveyRequest.headline">
+				<source>Hello</source>
+			</trans-unit>
 
 
 			<!-- ##################### -->

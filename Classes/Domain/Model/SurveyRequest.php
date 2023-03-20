@@ -31,16 +31,16 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @var \RKW\RkwRegistration\Domain\Model\FrontendUser|null
      */
-    protected $frontendUser = null;
+    protected $frontendUser;
 
 
     /**
      * process
      *
-     * @var \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
+     * @var \RKW\RkwShop\Domain\Model\Order|null
      *
      */
-    protected $process = null;
+    protected $process;
 
 
     /**
@@ -56,7 +56,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @var \RKW\RkwBasics\Domain\Model\TargetGroup|null
      */
-    protected $targetGroup = null;
+    protected $targetGroup;
 
 
     /**
@@ -70,16 +70,23 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * processSubject
      *
-     * @var \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
+     * @var \RKW\RkwShop\Domain\Model\Product|null
      *
      */
-    protected $processSubject = null;
+    protected $processSubject;
 
+
+    /**
+     * Returns the survey
+     *
+     * @var \RKW\RkwSurvey\Domain\Model\Survey|null
+     */
+    protected $survey;
 
     /**
      * Returns the process
      *
-     * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null $process
+     * @return \RKW\RkwShop\Domain\Model\Order|null
      */
     public function getProcess()
     {
@@ -90,10 +97,10 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Sets the process
      *
-     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @param \RKW\RkwShop\Domain\Model\Order $process
      * @return void
      */
-    public function setProcess($process): void
+    public function setProcess(\RKW\RkwShop\Domain\Model\Order $process): void
     {
         $this->process = $process;
     }
@@ -193,7 +200,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the processSubject
      *
-     * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null $processSubject
+     * @return \RKW\RkwShop\Domain\Model\Product|null $processSubject
      */
     public function getProcessSubject()
     {
@@ -204,12 +211,34 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Sets the processSubject
      *
-     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $processSubject
+     * @param \RKW\RkwShop\Domain\Model\Product $processSubject
      * @return void
      */
-    public function setProcessSubject($processSubject): void
+    public function setProcessSubject(\RKW\RkwShop\Domain\Model\Product $processSubject): void
     {
         $this->processSubject = $processSubject;
+    }
+
+    /**
+     * Returns the surevy
+     *
+     * @return \RKW\RkwSurvey\Domain\Model\Survey
+     */
+    public function getSurvey(): \RKW\RkwSurvey\Domain\Model\Survey
+    {
+        return $this->survey;
+    }
+
+
+    /**
+     * Sets the survey
+     *
+     * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
+     * @return void
+     */
+    public function setSurvey(\RKW\RkwSurvey\Domain\Model\Survey $survey): void
+    {
+        $this->survey = $survey;
     }
 
 

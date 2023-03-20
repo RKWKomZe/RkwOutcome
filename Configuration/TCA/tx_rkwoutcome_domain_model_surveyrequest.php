@@ -138,6 +138,21 @@ return [
             ],
         ],
 
+        //  @todo: Das flexibel machen, so dass EventReservation, aber auch Order aufgerufen werden kann!
+        'process' => [
+            'exclude' => 0,
+            'label' => 'LLL:EXT:rkw_shop/Resources/Private/Language/locallang_db.xlf:tx_rkwshop_domain_model_orderitem.product',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'foreign_table' => 'tx_rkwshop_domain_model_order',
+                'foreign_table_where' => 'AND tx_rkwshop_domain_model_order.deleted = 0 ORDER BY name ASC',
+                'minitems' => 1,
+                'maxitems' => 1,
+                'readOnly' => true
+            ],
+        ],
+
         'process_type' => [
             'exclude' => 0,
             'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest.order',
@@ -145,6 +160,20 @@ return [
                 'type' => 'input',
                 'size' => 30,
                 'eval' => 'trim, required'
+            ],
+        ],
+
+        'process_subject' => [
+            'exclude' => 0,
+            'label' => 'LLL:EXT:rkw_shop/Resources/Private/Language/locallang_db.xlf:tx_rkwshop_domain_model_orderitem.product',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'foreign_table' => 'tx_rkwshop_domain_model_product',
+                'foreign_table_where' => 'AND tx_rkwshop_domain_model_product.deleted = 0 ORDER BY name ASC',
+                'minitems' => 1,
+                'maxitems' => 1,
+                'readOnly' => true
             ],
         ],
 
@@ -159,6 +188,16 @@ return [
                 'size' => 1,
                 'minitems' => 0,
                 'maxitems' => 1,
+            ],
+        ],
+
+        'notified_tstamp' => [
+            'exclude' => 0,
+            'label' => 'LLL:EXT:rkw_events/Resources/Private/Language/locallang_db.xlf:tx_rkwevents_domain_model_event.target_group',
+            'config' => [
+                'type' => 'input',
+                'size' => 30,
+                'readOnly' => true
             ],
         ],
     ],
