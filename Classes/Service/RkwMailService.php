@@ -17,9 +17,6 @@ namespace RKW\RkwOutcome\Service;
 
 use RKW\RkwMailer\Service\MailService;
 use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
-use TYPO3\CMS\Core\Log\Logger;
-use TYPO3\CMS\Core\Log\LogLevel;
-use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
@@ -34,10 +31,7 @@ use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 {
 
-    /**
-     * @var \TYPO3\CMS\Core\Log\Logger
-     */
-    protected $logger;
+    use LogTrait;
 
     /**
      * Send mail to frontend user to submit survey request
@@ -57,8 +51,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
         \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
     ): void {
 
-        $this->getLogger()->log(
-            LogLevel::INFO,
+        $this->logInfo(
             sprintf(
                 'Mailer: Sending survey request %s to frontend user with %s.',
                 $surveyRequest->getUid(),
@@ -69,8 +62,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
         // get settings
         $settings = $this->getSettings(ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK);
 
-        $this->getLogger()->log(
-            LogLevel::INFO,
+        $this->logInfo(
             sprintf(
                 'Mailer: Settings %s.',
                 json_encode($settings['view'])
@@ -79,8 +71,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($settings['view']['templateRootPaths']) {
 
-            $this->getLogger()->log(
-                LogLevel::INFO,
+            $this->logInfo(
                 sprintf(
                     'Mailer: Build mail for survey request %s to frontend user with %s.',
                     $surveyRequest->getUid(),
@@ -110,8 +101,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                     )
                 );
 
-                $this->getLogger()->log(
-                    LogLevel::INFO,
+                $this->logInfo(
                     sprintf(
                         'Mailer: Prepared mail for survey request %s to frontend user with %s.',
                         $surveyRequest->getUid(),
@@ -141,20 +131,6 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
     protected function getSettings(string $which = ConfigurationManagerInterface::CONFIGURATION_TYPE_SETTINGS): array
     {
         return \RKW\RkwBasics\Utility\GeneralUtility::getTyposcriptConfiguration('RkwOutcome', $which);
-    }
-
-    /**
-     * Returns logger instance
-     *
-     * @return \TYPO3\CMS\Core\Log\Logger
-     */
-    protected function getLogger(): Logger
-    {
-        if (!$this->logger instanceof Logger) {
-            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        }
-
-        return $this->logger;
     }
 
 }

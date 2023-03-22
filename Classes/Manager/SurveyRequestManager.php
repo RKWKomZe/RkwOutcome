@@ -15,9 +15,7 @@ namespace RKW\RkwOutcome\Manager;
  */
 
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
-use TYPO3\CMS\Core\Log\Logger;
-use TYPO3\CMS\Core\Log\LogLevel;
-use TYPO3\CMS\Core\Log\LogManager;
+use RKW\RkwOutcome\Service\LogTrait;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -30,6 +28,8 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 {
+
+    use LogTrait;
 
     /**
      * Signal name for use in ext_localconf.php
@@ -72,11 +72,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * @inject
      */
     protected $persistenceManager;
-
-    /**
-     * @var \TYPO3\CMS\Core\Log\Logger
-     */
-    protected $logger;
 
 
     /**
@@ -132,8 +127,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = (method_exists($process, 'getFrontendUser')) ? $process->getFrontendUser() : $process->getFeUser();
 
-        $this->getLogger()->log(
-            LogLevel::INFO,
+        $this->logInfo(
             sprintf(
                 'Created surveyRequest for process with uid=%s of by frontenduser with %s.',
                 $process->getUid(),
@@ -158,8 +152,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             $this->surveyRequestRepository->add($surveyRequest);
             $this->persistenceManager->persistAll();
 
-            $this->getLogger()->log(
-                LogLevel::DEBUG,
+            $this->logDebug(
                 sprintf(
 //                'Created surveyRequest for order with id=%s of by frontenduser with id=%s.',
                     'Created surveyRequest for process with id=%s of type=%s by frontenduser with id=',
@@ -194,8 +187,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
          /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
          $surveyRequests = $this->surveyRequestRepository->findAllPendingSurveyRequests();
 
-         $this->getLogger()->log(
-             LogLevel::INFO,
+         $this->logInfo(
              sprintf(
                  'Get on with %s survey requests.',
                  $surveyRequests->count()
@@ -207,8 +199,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
          /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
          foreach ($surveyRequests as $surveyRequest) {
 
-             $this->getLogger()->log(
-                 LogLevel::INFO,
+             $this->logInfo(
                  sprintf(
                      'Get on with survey request with uid %s.',
                      $surveyRequest->getUid()
@@ -218,8 +209,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
              if ($surveyRequest->getProcess()) {
                  if ($this->isNotifiable($surveyRequest->getProcess())) {
 
-                     $this->getLogger()->log(
-                         LogLevel::INFO,
+                     $this->logInfo(
                          sprintf(
                              'Survey request with uid %s is notifiable.',
                              $surveyRequest->getUid()
@@ -237,8 +227,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
              }
          }
 
-         $this->getLogger()->log(
-             LogLevel::INFO,
+         $this->logInfo(
              sprintf(
                  '%s pending request have been processed.',
                  count($notifiedSurveyRequests)
@@ -267,8 +256,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                 [$recipient, $surveyRequest]
             );
 
-            $this->getLogger()->log(
-                LogLevel::INFO,
+            $this->logInfo(
                 sprintf(
                     'Send request for survey request %s to frontend user with id %s (email %s).',
                     $surveyRequest->getUid(),
@@ -362,8 +350,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         //  check contained products
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
 
-            $this->getLogger()->log(
-                LogLevel::INFO,
+            $this->logInfo(
                 sprintf(
                     'Check surveyable for order uid %s.',
                     $process->getUid()
@@ -408,8 +395,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
         $isStringSurveyable = ($isSurveyable) ? 'true' : 'false';
 
-        $this->getLogger()->log(
-            LogLevel::INFO,
+        $this->logInfo(
             sprintf(
                 'Process with uid %s is surveyable %s.',
                 $process->getUid(),
@@ -445,8 +431,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         $this->surveyRequestRepository->update($surveyRequest);
         $this->persistenceManager->persistAll();
 
-        $this->getLogger()->log(
-            LogLevel::INFO,
+        $this->logInfo(
             sprintf(
                 'Survey request with uid %s has been marked as notified.',
                 $surveyRequest->getUid()
@@ -455,19 +440,5 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     }
 
-
-    /**
-     * Returns logger instance
-     *
-     * @return \TYPO3\CMS\Core\Log\Logger
-     */
-    protected function getLogger(): Logger
-    {
-        if (!$this->logger instanceof Logger) {
-            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        }
-
-        return $this->logger;
-    }
 
 }

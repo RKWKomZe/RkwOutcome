@@ -15,8 +15,7 @@ namespace RKW\RkwOutcome\Controller;
  */
 
 use RKW\RkwOutcome\Manager\SurveyRequestManager;
-use TYPO3\CMS\Core\Log\Logger;
-use TYPO3\CMS\Core\Log\LogManager;
+use RKW\RkwOutcome\Service\LogTrait;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
@@ -32,6 +31,8 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
 class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\CommandController
 {
 
+    use LogTrait;
+
     /**
      * surveyRequestsRepository
      *
@@ -39,12 +40,6 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
      * @inject
      */
     protected $surveyRequestRepository;
-
-
-    /**
-     * @var \TYPO3\CMS\Core\Log\Logger
-     */
-    protected $logger;
 
 
     /**
@@ -75,8 +70,7 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
 //
 //        } catch (\Exception $e) {
 //
-//            $this->getLogger()->log(
-//                LogLevel::ERROR,
+//            $this->logError(
 //                sprintf(
 //                    'An unexpected error occurred while trying to process survey requests: %s',
 //                    $e->getMessage()
@@ -85,22 +79,6 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
 //
 //        }
     }
-
-    /**
-     * Returns logger instance
-     *
-     * @return \TYPO3\CMS\Core\Log\Logger
-     */
-    protected function getLogger(): Logger
-    {
-
-        if (!$this->logger instanceof Logger) {
-            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        }
-
-        return $this->logger;
-    }
-
 
     /**
      * Returns TYPO3 settings
