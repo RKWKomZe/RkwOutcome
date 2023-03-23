@@ -22,6 +22,7 @@ use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Manager\SurveyRequestManager;
+use RKW\RkwShop\Domain\Model\Order;
 use RKW\RkwShop\Domain\Repository\OrderRepository;
 use RKW\RkwShop\Domain\Repository\ProductRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -430,7 +431,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
                 //  @todo finde alle SurveyRequests im passenden Zeitraum
                 //  @todo filtere alle Formate mit zugeordneter Umfrage
                 //  @todo filtere auf passende Zielgruppe
-                //  @todo checke den shippedTstamp
+                //  @todo checke den orderTstamp + SurveyWaitingTime
                 //  @todo gruppiere nach Format
                 //  @todo ggfs. zufällige Auswahl aus der Gruppierung nach Format
                 //  foreach found PendingSurveyRequest
@@ -452,7 +453,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyRequest-object
          * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that order
-         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * @todo Given the order-property crdate is set to now - surveyWaitingTime
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
          * Then the surveyRequest-property processSubject is set to that product-object
@@ -460,10 +461,22 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check50.xml');
 
+        //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests();
+        //  @todo: How to set waiting time aka tolerance in test?
+        //  @todo: Besser auf ein orderedTstamp bzw. shippedTstamp umsteigen, das bei Erstellen der Order automatisch analog zu crdate gesetzt wird,
+        //  bis dann per Soap vom AVS angeliefert. Damit wäre es dann auch möglich, im Testkontext ein passendes shippedTstamp zu setzen, so dass dieses nicht
+        //  durch das Fixture crdate unflexibel gesetzt wird
+
+
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
         self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
@@ -495,7 +508,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  @todo finde alle SurveyRequests im passenden Zeitraum
         //  @todo filtere alle Formate mit zugeordneter Umfrage
         //  @todo filtere auf passende Zielgruppe
-        //  @todo checke den shippedTstamp
+        //  @todo checke den crdate (später shippedTstamp)
         //  @todo gruppiere nach Format
         //  @todo ggfs. zufällige Auswahl aus der Gruppierung nach Format
         //  foreach found PendingSurveyRequest
@@ -517,7 +530,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyRequest-object
          * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that eventReservation-object
-         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * @todo Given the order-property crdate is set to now - surveyWaitingTime
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
          * Then the surveyRequest-property processSubject is set to that eventReservation-object
@@ -547,7 +560,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfOrderHasNotBeenShippedYet()
+    public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfOrderHasNotBeenShippedYet() //  @todo: Switch to order->crdate and check on notifiable (including waitingTime)
     {
 
         // @todo: Theoretisch könnten die Felder shipped_tstamp und target_group auch in der
@@ -558,7 +571,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  @todo finde alle SurveyRequests im passenden Zeitraum
         //  @todo filtere alle Formate mit zugeordneter Umfrage
         //  @todo filtere auf passende Zielgruppe
-        //  @todo checke den shippedTstamp
+        //  @todo checke den crdate, später shippedTstamp
         //  @todo gruppiere nach Format
         //  @todo ggfs. zufällige Auswahl aus der Gruppierung nach Format
         //  foreach found PendingSurveyRequest
@@ -580,7 +593,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyRequest-object
          * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that order
-         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * @todo Given the order-property crdate is set to now - surveyWaitingTime
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to 0
          * Then the surveyRequest-property processSubject is set to null
@@ -588,10 +601,16 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check70.xml');
 
+        //  dynamically set shippedTstamp to be greater than time() - $surveyWaitingTime
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests();
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (7 * 24 * 60 * 60));
         self::assertCount(0, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
@@ -639,7 +658,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyRequest-object
          * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that eventReservation-object
-         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * @todo Given the order-property crdate is set to now - surveyWaitingTime
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to 0
          * Then the surveyRequest-property processSubject is set to null

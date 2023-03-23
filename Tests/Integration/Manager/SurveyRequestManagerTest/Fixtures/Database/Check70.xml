@@ -20,7 +20,6 @@
         <email>test@dummy.de</email>
         <remark>Toller Hinweis!!!</remark>
         <target_group>1</target_group>
-        <shipped_tstamp>0</shipped_tstamp>
     </tx_rkwshop_domain_model_order>
     <tx_rkwshop_domain_model_orderitem>
         <uid>1</uid>

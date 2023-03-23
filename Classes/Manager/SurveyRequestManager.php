@@ -207,7 +207,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
              );
 
              if ($surveyRequest->getProcess()) {
-                 if ($this->isNotifiable($surveyRequest->getProcess())) {
+                 if ($this->isNotifiable($surveyRequest->getProcess(), $tolerance)) {
 
                      $this->logInfo(
                          sprintf(
@@ -278,9 +278,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * Checks, if process is associated with a valid survey
      *
      * @param \RKW\RkwShop\Domain\Model\Order $process
+     * @param int $tolerance
      * @return bool
      */
-    protected function isNotifiable(\RKW\RkwShop\Domain\Model\Order $process): bool
+    protected function isNotifiable(\RKW\RkwShop\Domain\Model\Order $process, int $tolerance = 0): bool
     {
 
         $notifiableObjects = [];
@@ -292,7 +293,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
             if (
                 $shippedTstamp > 0
-                && $shippedTstamp < time() // @todo: Plus SurveyWaitingTime, ...
+                && $shippedTstamp < time() - $tolerance // @todo: Plus SurveyWaitingTime, ...
             ) {
                 /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
                 foreach ($process->getOrderItem() as $orderItem) {
