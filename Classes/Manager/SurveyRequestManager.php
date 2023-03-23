@@ -295,17 +295,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                 $shippedTstamp > 0
                 && $shippedTstamp < time() - $tolerance // @todo: Plus SurveyWaitingTime, ...
             ) {
-                /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
-                foreach ($process->getOrderItem() as $orderItem) {
-                    /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-                    if (
-                        ($surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
-                        && $surveyConfiguration->getTargetGroup() === $process->getTargetGroup()
-                    ) {
-                        $notifiableObjects[] = $orderItem->getProduct();
-                    }
-                }
-
+                $notifiableObjects = $this->getNotifiableObjects($process, $notifiableObjects);
             }
 
         }
@@ -423,19 +413,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
 
-            //  check products associated with corresponding survey configuration and randomly select from them
-            $notifiableObjects = [];
-
-            /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
-            foreach ($process->getOrderItem() as $orderItem) {
-                /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-                if (
-                    ($surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
-                    && $surveyConfiguration->getTargetGroup() === $process->getTargetGroup()
-                ) {
-                    $notifiableObjects[] = $orderItem->getProduct();
-                }
-            }
+            $notifiableObjects = $this->getNotifiableObjects($process);
 
             $randomKey = array_rand($notifiableObjects);
             $processSubject = $notifiableObjects[$randomKey];
@@ -461,6 +439,28 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             )
         );
 
+    }
+
+    /**
+     * @param \RKW\RkwShop\Domain\Model\Order $process
+     * @param array                           $notifiableObjects
+     * @return array
+     */
+    protected function getNotifiableObjects(\RKW\RkwShop\Domain\Model\Order $process, array $notifiableObjects = []): array
+    {
+
+        /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
+        foreach ($process->getOrderItem() as $orderItem) {
+            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+            if (
+                ($surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
+                && $surveyConfiguration->getTargetGroup() === $process->getTargetGroup()
+            ) {
+                $notifiableObjects[] = $orderItem->getProduct();
+            }
+        }
+
+        return $notifiableObjects;
     }
 
 
