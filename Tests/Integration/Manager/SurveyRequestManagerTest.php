@@ -106,7 +106,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @var \RKW\RkwShop\Domain\Repository\ProductRepository
      */
-    private $productRepository = null;
+    private $productRepository;
 
 
     /**
@@ -122,9 +122,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository|null
      */
-    private $surveyConfigurationRepository = null;
+    private $surveyConfigurationRepository;
 
 
     /**
@@ -189,14 +189,14 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnOrder()
+    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnOrderIfOrderContainsSingleProductAssociatedWithSurveyConfiguration()
     {
 
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
-         * Given an orderItem-object that is persisted and belongs to that order-object
+         * Given a single orderItem-object that is persisted and belongs to that order-object
          * Given a product-object is persisted and is contained within that orderItem-object
          * Given a surveyConfiguration is associated with product-object
          * Given the surveyConfiguration-property targetGroup is set to the order-property targetGroup
@@ -208,6 +208,70 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the surveyRequest-object is persisted
          */
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\FrontendUserRepository::class);
+        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $process */
+        $process = $this->processRepository->findByUid(1);
+
+        /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
+        $frontendUser = $this->frontendUserRepository->findByUid(1);
+
+        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
+        $targetGroup = $this->targetGroupRepository->findByUid(1);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = $this->subject->createSurveyRequest($process);
+
+        self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
+        self::assertEquals($process, $surveyRequest->getProcess());
+        self::assertEquals(get_class($process), $surveyRequest->getProcessType());
+        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
+        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(1, $surveyRequestsDb);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestDb = $surveyRequestsDb->getFirst();
+        self::assertEquals($surveyRequest, $surveyRequestDb);
+        self::assertEquals($process, $surveyRequestDb->getProcess());
+        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
+
+    }
+
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnOrderIfOrderContainsAtLeastOneProductAssociatedWithSurveyConfiguration()
+    {
+
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given an orderItem-object that is persisted and belongs to that order-object
+         * Given a product-object is persisted and is contained within that orderItem-object
+         * Given a surveyConfiguration is associated with product-object
+         * Given a second orderItem-object that is persisted and belongs to that order-object
+         * Given a product-object is persisted and is contained within that orderItem-object
+         * Given the product-object is not assiociated with any surveyConfiguration
+         * Given the surveyConfiguration-property targetGroup is set to the order-property targetGroup
+         * When the method is called
+         * Then an instance of \RKW\RkwOutcome\Model\SurveyRequest is returned
+         * Then the order-property of this instance is set to the order-object
+         * Then the frontendUser-property of this instance is set to the frontendUser-object
+         * Then the targetGroup-property of this instance is set to targetGroup-property of the order-object
+         * Then the surveyRequest-object is persisted
+         */
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check15.xml');
 
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
@@ -453,7 +517,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyRequest-object
          * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that order
-         * @todo Given the order-property crdate is set to now - surveyWaitingTime
+         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
          * Then the surveyRequest-property processSubject is set to that product-object
@@ -471,10 +535,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
         //  @todo: How to set waiting time aka tolerance in test?
-        //  @todo: Besser auf ein orderedTstamp bzw. shippedTstamp umsteigen, das bei Erstellen der Order automatisch analog zu crdate gesetzt wird,
-        //  bis dann per Soap vom AVS angeliefert. Damit wäre es dann auch möglich, im Testkontext ein passendes shippedTstamp zu setzen, so dass dieses nicht
-        //  durch das Fixture crdate unflexibel gesetzt wird
-
 
         $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
         self::assertCount(1, $notifiedSurveyRequests);
@@ -489,6 +549,82 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         $process->getOrderItem()->rewind();
         self::assertEquals($process->getOrderItem()->current()->getProduct(), $surveyRequestDb->getProcessSubject());
+
+        self::assertEquals(1, $surveyRequestDb->getProcessSubject()->getUid());
+
+    }
+
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfSurveyRequestContainsAnOrderAndSetsProcessSubjectToSingleProductAssociatedWithSurveyConfiguration()
+    {
+
+        // @todo: Theoretisch könnten die Felder shipped_tstamp und target_group auch in der
+        // für die Tabelle tx_rkwshop_domain_model_order in der rkw_outcome angelegt werden?
+
+        //  CommandController->processPendingSurveyRequestsCommand
+        //  findAllPendingSurveyRequests
+        //  @todo finde alle SurveyRequests im passenden Zeitraum
+        //  @todo filtere alle Formate mit zugeordneter Umfrage
+        //  @todo filtere auf passende Zielgruppe
+        //  @todo checke den orderTstamp + SurveyWaitingTime
+        //  @todo gruppiere nach Format
+        //  @todo ggfs. zufällige Auswahl aus der Gruppierung nach Format
+        //  foreach found PendingSurveyRequest
+        //  processSurveyRequest($surveyRequest)->returns true/false
+        //  sendNotification()->returns true/false
+        //  setNotifiedTstamp(time())
+        //  setProcessSubject(product, event)
+        //  endforeach
+
+        /**
+         * Scenario:
+         *
+         * @todo Given the surveyWaitingTime is set to 172800 (2 days)
+         * Given a persisted product
+         * Given a persisted surveyConfiguration-object
+         * Given the surveyConfiguration-property is set to that product-object
+         * Given a second persisted product
+         * Given a persisted order-object
+         * Given the order-object contains two orderItem-objects
+         * Given the product-property of the first orderItem-object is set to the first product-object
+         * Given the product-property of the second orderItem-object is set to the second product-object
+         * Given a persisted surveyRequest-object
+         * @todo: Check targetGroup
+         * Given the surveyRequest-property process is set to that order
+         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
+         * When the method is called
+         * Then the surveyRequest-property notifiedTstamp is set to > 0
+         * Then the surveyRequest-property processSubject is set to the first product-object set in first orderItem-object
+         * Then the surveyRequest-property processSubject is not set to the second product-object set in second orderItem-object
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check55.xml');
+
+        //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
+        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
+
+        //  @todo: How to set waiting time aka tolerance in test?
+
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        self::assertCount(1, $notifiedSurveyRequests);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
+        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
+        self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
+        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
+
+        self::assertEquals(1, $surveyRequestDb->getProcessSubject()->getUid());
+        self::assertNotEquals(2, $surveyRequestDb->getProcessSubject()->getUid());
 
     }
 
@@ -508,7 +644,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  @todo finde alle SurveyRequests im passenden Zeitraum
         //  @todo filtere alle Formate mit zugeordneter Umfrage
         //  @todo filtere auf passende Zielgruppe
-        //  @todo checke den crdate (später shippedTstamp)
+        //  @todo checke den shippedTstamp (derzeit = crdate, später per SOAP)
         //  @todo gruppiere nach Format
         //  @todo ggfs. zufällige Auswahl aus der Gruppierung nach Format
         //  foreach found PendingSurveyRequest
@@ -530,7 +666,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyRequest-object
          * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that eventReservation-object
-         * @todo Given the order-property crdate is set to now - surveyWaitingTime
+         * @todo Given the order-property shipped_tstamp is set to now - surveyWaitingTime
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
          * Then the surveyRequest-property processSubject is set to that eventReservation-object
@@ -560,7 +696,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfOrderHasNotBeenShippedYet() //  @todo: Switch to order->crdate and check on notifiable (including waitingTime)
+    public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfOrderHasNotBeenShippedYet()
     {
 
         // @todo: Theoretisch könnten die Felder shipped_tstamp und target_group auch in der
@@ -571,7 +707,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  @todo finde alle SurveyRequests im passenden Zeitraum
         //  @todo filtere alle Formate mit zugeordneter Umfrage
         //  @todo filtere auf passende Zielgruppe
-        //  @todo checke den crdate, später shippedTstamp
+        //  @todo checke den shippedTstamp
         //  @todo gruppiere nach Format
         //  @todo ggfs. zufällige Auswahl aus der Gruppierung nach Format
         //  foreach found PendingSurveyRequest
@@ -593,7 +729,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyRequest-object
          * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that order
-         * @todo Given the order-property crdate is set to now - surveyWaitingTime
+         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to 0
          * Then the surveyRequest-property processSubject is set to null
@@ -658,7 +794,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyRequest-object
          * @todo: Check targetGroup
          * Given the surveyRequest-property process is set to that eventReservation-object
-         * @todo Given the order-property crdate is set to now - surveyWaitingTime
+         * @todo Given the order-property shippedTstamp is set to now - surveyWaitingTime
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to 0
          * Then the surveyRequest-property processSubject is set to null
