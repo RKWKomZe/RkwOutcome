@@ -297,18 +297,19 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             ) {
                 /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
                 foreach ($process->getOrderItem() as $orderItem) {
-                    /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+                    /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                     if (
-                        ($survey = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
-                        && $survey->getTargetGroup() === $process->getTargetGroup()
+                        ($surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
+                        && $surveyConfiguration->getTargetGroup() === $process->getTargetGroup()
                     ) {
                         $notifiableObjects[] = $orderItem->getProduct();
                     }
                 }
+
             }
 
         }
-        //  check contained products
+        //  check contained events
         if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
 
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
@@ -320,10 +321,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                 && $endTstamp < time() // @todo: Plus SurveyWaitingTime, ...
             ) {
 
-                /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+                /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                 if (
-                    ($survey = $this->surveyConfigurationRepository->findByEventUid($event->getUid()))
-                    && $survey->getTargetGroup() === $process->getTargetGroup()
+                    ($surveyConfiguration = $this->surveyConfigurationRepository->findByEventUid($event->getUid()))
+                    && $surveyConfiguration->getTargetGroup() === $process->getTargetGroup()
                 ) {
                     $notifiableObjects[] = $event;
                 }
@@ -421,8 +422,29 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         $process = $surveyRequest->getProcess();
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-            $process->getOrderItem()->rewind();
-            $surveyRequest->setProcessSubject($process->getOrderItem()->current()->getProduct());
+
+            //  check products associated with corresponding survey configuration and randomly select from them
+            $notifiableObjects = [];
+
+            /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
+            foreach ($process->getOrderItem() as $orderItem) {
+                /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+                if (
+                    ($surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
+                    && $surveyConfiguration->getTargetGroup() === $process->getTargetGroup()
+                ) {
+                    $notifiableObjects[] = $orderItem->getProduct();
+                }
+            }
+
+            $randomKey = array_rand($notifiableObjects);
+            $processSubject = $notifiableObjects[$randomKey];
+            $surveyRequest->setProcessSubject($processSubject);
+            //  set suitable survey @todo: only suitable, if not only product, but also target groups is fitting!!!
+            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+            $surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($processSubject);
+            $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
+
         } else {
             $surveyRequest->setProcessSubject($process->getEvent());
         }
