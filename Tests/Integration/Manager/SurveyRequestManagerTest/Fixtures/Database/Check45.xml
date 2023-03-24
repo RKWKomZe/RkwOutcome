@@ -12,49 +12,31 @@
         <zip>10969</zip>
         <city>Hamburg</city>
     </fe_users>
-    <!-- order -->
-    <tx_rkwshop_domain_model_order>
+    <tx_rkwevents_domain_model_event>
         <uid>1</uid>
         <pid>1</pid>
-        <frontend_user>1</frontend_user>
-        <order_item>1</order_item>
+        <title>Shoptalk</title>
+    </tx_rkwevents_domain_model_event>
+    <tx_rkwevents_domain_model_eventreservation>
+        <uid>1</uid>
+        <pid>1</pid>
+        <fe_user>1</fe_user>
+        <event>1</event>
         <email>test@dummy.de</email>
-        <remark>Toller Hinweis!!!</remark>
         <target_group>1</target_group>
-    </tx_rkwshop_domain_model_order>
-    <!-- orderitems -->
-    <tx_rkwshop_domain_model_orderitem>
-        <uid>1</uid>
-        <pid>1</pid>
-        <amount>1</amount>
-        <product>1</product>
-        <ext_order>1</ext_order>
-    </tx_rkwshop_domain_model_orderitem>
-    <!-- products -->
-    <tx_rkwshop_domain_model_product>
-        <uid>1</uid>
-        <pid>1</pid>
-        <title>Produkt mit Fragebogen</title>
-        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
-        <admin_email>test3@test.de</admin_email>
-        <stock>1</stock>
-        <backend_user />
-    </tx_rkwshop_domain_model_product>
-    <!-- targetgroups -->
+    </tx_rkwevents_domain_model_eventreservation>
     <tx_rkwbasics_domain_model_target_group>
         <uid>1</uid>
         <pid>1</pid>
         <name>Unternehmen</name>
     </tx_rkwbasics_domain_model_target_group>
-    <!-- surveyConfigurations -->
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
-        <product>1</product>
+        <event>1</event>
         <survey>1</survey>
         <target_group>1</target_group>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
-    <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>

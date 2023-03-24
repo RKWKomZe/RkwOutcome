@@ -22,7 +22,6 @@ use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Manager\SurveyRequestManager;
-use RKW\RkwShop\Domain\Model\Order;
 use RKW\RkwShop\Domain\Repository\OrderRepository;
 use RKW\RkwShop\Domain\Repository\ProductRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -189,23 +188,26 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnOrderIfOrderContainsSingleProductAssociatedWithSurveyConfiguration()
+    public function createSurveyRequestCreatesSurveyRequestIfOrderContainsAProductAssociatedWithSurveyConfigurationWithSameTargetGroup()
     {
 
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
-         * Given a single orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and is contained within that orderItem-object
-         * Given a surveyConfiguration is associated with product-object
-         * Given the surveyConfiguration-property targetGroup is set to the order-property targetGroup
+         * Given the order-property frontendUser is set to that frontendUser-object
+         * Given a frontendUser-object that is persisted and belongs to that order-object
+         * Given a targetGroup-object that is persisted and belongs to that order-object
+         * Given an orderItem-object that is persisted and belongs to that order-object
+         * Given a product-object is persisted and belongs to that orderItem-object
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
+         * Given the surveyConfiguration-property targetGroup is set to the same targetGroup as the order-property targetGroup
          * When the method is called
-         * Then an instance of \RKW\RkwOutcome\Model\SurveyRequest is returned
-         * Then the order-property of this instance is set to the order-object
-         * Then the frontendUser-property of this instance is set to the frontendUser-object
-         * Then the targetGroup-property of this instance is set to targetGroup-property of the order-object
-         * Then the surveyRequest-object is persisted
+         * Then a single surveyRequest-object is persisted
+         * Then the order-property of this persisted surveyRequest-object is set to the order-object
+         * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
+         * Then the targetGroup-property of this persisted surveyRequest-object is set to targetGroup-property of the order-object
          */
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
@@ -226,13 +228,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($process);
 
-        self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
-        self::assertEquals($process, $surveyRequest->getProcess());
-        self::assertEquals(get_class($process), $surveyRequest->getProcessType());
-        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
-        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
-
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(1, $surveyRequestsDb);
@@ -240,8 +235,14 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
         self::assertEquals($surveyRequest, $surveyRequestDb);
+        self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
+
         self::assertEquals($process, $surveyRequestDb->getProcess());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
+        self::assertEquals(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
+        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
+        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
 
     }
 
@@ -250,28 +251,31 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnOrderIfOrderContainsAtLeastOneProductAssociatedWithSurveyConfiguration()
+    public function createSurveyRequestCreatesSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductAssociatedWithSurveyConfiguration()
     {
 
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
-         * Given an orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and is contained within that orderItem-object
-         * Given a surveyConfiguration is associated with product-object
-         * Given a second orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and is contained within that orderItem-object
-         * Given the product-object is not assiociated with any surveyConfiguration
-         * Given the surveyConfiguration-property targetGroup is set to the order-property targetGroup
+         * Given the order-property frontendUser is set to that frontendUser-object
+         * Given a frontendUser-object that is persisted and belongs to that order-object
+         * Given a targetGroup-object that is persisted and belongs to that order-object
+         * Given an orderItem-object 1 that is persisted and belongs to that order-object
+         * Given a product-object 1 that is persisted and belongs to that orderItem-object 1
+         * Given an orderItem-object 2 that is persisted and belongs to that order-object
+         * Given a product-object 2 that is persisted and belongs to that orderItem-object 2
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to product-object 1
+         * Given the surveyConfiguration-property targetGroup is set to the same targetGroup as the order-property targetGroup
          * When the method is called
-         * Then an instance of \RKW\RkwOutcome\Model\SurveyRequest is returned
-         * Then the order-property of this instance is set to the order-object
-         * Then the frontendUser-property of this instance is set to the frontendUser-object
-         * Then the targetGroup-property of this instance is set to targetGroup-property of the order-object
-         * Then the surveyRequest-object is persisted
+         * Then a single surveyRequest-object is persisted
+         * Then the order-property of this persisted surveyRequest-object is set to the order-object
+         * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
+         * Then the targetGroup-property of this persisted surveyRequest-object is set to targetGroup-property of the order-object
          */
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check15.xml');
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check20.xml');
 
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
@@ -290,13 +294,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($process);
 
-        self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
-        self::assertEquals($process, $surveyRequest->getProcess());
-        self::assertEquals(get_class($process), $surveyRequest->getProcessType());
-        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
-        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
-
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(1, $surveyRequestsDb);
@@ -304,10 +301,114 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
         self::assertEquals($surveyRequest, $surveyRequestDb);
+        self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
+
         self::assertEquals($process, $surveyRequestDb->getProcess());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
+        self::assertEquals(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
+        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
+        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
 
     }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedProducts()
+    {
+
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given the order-property frontendUser is set to that frontendUser-object
+         * Given a frontendUser-object that is persisted and belongs to that order-object
+         * Given a targetGroup-object that is persisted and belongs to that order-object
+         * Given an orderItem-object that is persisted and belongs to that order-object
+         * Given a product-object 1 that is persisted and belongs to that orderItem-object
+         * Given a product-object 2 that is persisted and does not belong to that order
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to product-object 2
+         * Given the surveyConfiguration-property targetGroup is set to the same targetGroup as the order-property targetGroup
+         * When the method is called
+         * Then the method returns null
+         * Then no surveyRequest-object is persisted
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check30.xml');
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $process */
+        $process = $this->processRepository->findByUid(1);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = $this->subject->createSurveyRequest($process);
+        self::assertNull($surveyRequest);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+
+    }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestDoesNotCreateSurveyRequestIfAssociatedSurveyConfigurationIsNotSetToSameTargetGroupAsOrder()
+    {
+
+        /**
+         * Scenario:
+         *
+         * Given a targetGroup-object 1 is persisted
+         * Given a targetGroup-object 2 is persisted
+         * Given an order-object that is persisted
+         * Given the targetGroup-property of that order-object ss set to targetGroup-object 1
+         * Given an orderItem-object that is persisted and belongs to that order-object
+         * Given a product-object is persisted and belongs to that orderItem-object
+         * Given a surveyConfiguration-object is persisted
+         * Given the product-property of that surveyConfiguration-object is that product-object
+         * Given the targetGroup-property of that surveyConfiguration-object is set to targetGroup-object 2
+         * When the method is called
+         * Then the method returns null
+         * Then no surveyRequest-object is persisted
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check40.xml');
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\FrontendUserRepository::class);
+        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $process */
+        $process = $this->processRepository->findByUid(1);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = $this->subject->createSurveyRequest($process);
+        self::assertNull($surveyRequest);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+
+    }
+
+
+
+
+
+
+
+
+
+
 
 
     /**
@@ -331,7 +432,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the targetGroup-property of this instance is set to targetGroup-property of the order-object
          * Then the surveyRequest-object is persisted
          */
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check20.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check45.xml');
 
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
@@ -376,47 +477,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     //  @todo: Check, if connected survey is due (in between starttime <> endtime)
 
     /**
-     * @test
-     * @throws \Exception
-     */
-    public function createSurveyRequestTriggeredByAnOrderDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedProduct()
-    {
-
-        /**
-         * Scenario:
-         *
-         * Given an order-object that is persisted
-         * Given an orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and is contained within that orderItem-object
-         * Given no survey is associated with product-object
-         * When the method is called
-         * Then null is returned
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check30.xml');
-
-        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
-        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\FrontendUserRepository::class);
-        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
-
-        /** @var \RKW\RkwShop\Domain\Model\Order $process */
-        $process = $this->processRepository->findByUid(1);
-
-        /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
-        $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($process);
-        self::assertNull($surveyRequest);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-        self::assertCount(0, $surveyRequestsDb);
-
-    }
-
-    /**
      * @throws \Exception
      */
     public function createSurveyRequestTriggeredByAnEventDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedEvent()
@@ -424,48 +484,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     }
 
-    /**
-     * @test
-     * @throws \Exception
-     */
-    public function createSurveyRequestTriggeredByAnOrderDoesNotCreateSurveyRequestIfAssociatedSurveyDoesNotUseSameTargetgroupAsOrder()
-    {
-
-        /**
-         * Scenario:
-         *
-         * Given an order-object that is persisted
-         * Given the targetGroup-property of this instance is set to uid 1
-         * Given an orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and is contained within that orderItem-object
-         * Given a survey is associated with product-object
-         * Given the targetGroup-property of this associated survey is set to uid 2
-         * When the method is called
-         * Then null is returned
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check40.xml');
-
-        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
-        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\FrontendUserRepository::class);
-        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
-
-        /** @var \RKW\RkwShop\Domain\Model\Order $process */
-        $process = $this->processRepository->findByUid(1);
-
-        /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
-        $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($process);
-        self::assertNull($surveyRequest);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-        self::assertCount(0, $surveyRequestsDb);
-
-    }
 
 
     /**
