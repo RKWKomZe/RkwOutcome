@@ -220,11 +220,11 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     }
 
     /**
-     * Returns the surevy
+     * Returns the survey
      *
-     * @return \RKW\RkwSurvey\Domain\Model\Survey
+     * @return \RKW\RkwSurvey\Domain\Model\Survey|null
      */
-    public function getSurvey(): \RKW\RkwSurvey\Domain\Model\Survey
+    public function getSurvey()
     {
         return $this->survey;
     }

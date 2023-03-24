@@ -12,6 +12,7 @@
         <zip>10969</zip>
         <city>Hamburg</city>
     </fe_users>
+    <!-- orders -->
     <tx_rkwshop_domain_model_order>
         <uid>1</uid>
         <pid>1</pid>
@@ -21,6 +22,7 @@
         <remark>Toller Hinweis!!!</remark>
         <target_group>1</target_group>
     </tx_rkwshop_domain_model_order>
+    <!-- orderItems -->
     <tx_rkwshop_domain_model_orderitem>
         <uid>1</uid>
         <pid>1</pid>
@@ -28,20 +30,23 @@
         <product>1</product>
         <ext_order>1</ext_order>
     </tx_rkwshop_domain_model_orderitem>
+    <!-- products -->
     <tx_rkwshop_domain_model_product>
         <uid>1</uid>
         <pid>1</pid>
-        <title>Leitfaden deluxe</title>
+        <title>Produkt mit Fragebogen</title>
         <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
         <admin_email>test3@test.de</admin_email>
         <stock>1</stock>
         <backend_user />
     </tx_rkwshop_domain_model_product>
+    <!-- targetGroups -->
     <tx_rkwbasics_domain_model_target_group>
         <uid>1</uid>
         <pid>1</pid>
         <name>Unternehmen</name>
     </tx_rkwbasics_domain_model_target_group>
+    <!--surveyConfigurations -->
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
@@ -49,6 +54,7 @@
         <survey>1</survey>
         <target_group>1</target_group>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
