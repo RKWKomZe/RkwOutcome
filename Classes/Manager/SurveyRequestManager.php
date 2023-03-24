@@ -206,7 +206,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                  )
              );
 
-             if ($surveyRequest->getProcess()) {
+             if (
+                 $surveyRequest->getProcess()
+                 && $surveyRequest->getNotifiedTstamp() === 0
+             ) {
                  if ($this->isNotifiable($surveyRequest->getProcess(), $tolerance)) {
 
                      $this->logInfo(
@@ -451,6 +454,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
         /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
         foreach ($process->getOrderItem() as $orderItem) {
+
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
             if (
                 ($surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))

@@ -772,6 +772,63 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     }
 
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function processPendingSurveyRequestIgnoresAlreadyProcessedSurveyRequest()
+    {
+
+        //  @todo: do it
+
+        //  return notifiedSurveyRequests->count() = 1
+
+        /**
+         * Scenario:
+         *
+         * Given a persisted surveyRequest-object 1
+         * Given property notifiedTstamp of surveyRequest-object 1 is set to 1
+         * Given a persisted surveyRequest-object 2
+         * When the method is called
+         * Then the number of processed requests is 1
+         * Then the property notifiedTstamp of surveyRequest-object 1 remains 1
+         * Then the property notifiedTstamp of surveyRequest-object 2 is greater than 1
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check110.xml');
+
+        //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+        $order->setShippedTstamp(strtotime('-10 days'));
+        $this->orderRepository->update($order);
+
+        $order = $this->orderRepository->findByUid(2);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
+        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 1);
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestAlreadyNotifiedDb */
+        $surveyRequestAlreadyNotifiedDb = $this->surveyRequestRepository->findByUid(1);
+        $surveyRequestAlreadyNotifiedDb->setNotifiedTstamp(1);
+        $this->surveyRequestRepository->update($surveyRequestAlreadyNotifiedDb);
+
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        self::assertCount(1, $notifiedSurveyRequests);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestAlreadyNotifiedDb */
+        $surveyRequestAlreadyNotifiedDb = $this->surveyRequestRepository->findByUid(1);
+        self::assertSame(1, $surveyRequestAlreadyNotifiedDb->getNotifiedTstamp());
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb */
+        $surveyRequestProcessedDb = $this->surveyRequestRepository->findByUid(2);
+        self::assertGreaterThan(1, $surveyRequestProcessedDb->getNotifiedTstamp());
+
+    }
+
 
     /**
      * @throws \Exception
@@ -944,30 +1001,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->surveyRequestRepository->add($surveyRequest);
         $this->persistenceManager->persistAll();
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
-        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
-        self::assertEquals($process, $surveyRequestDb->getProcess());
-        self::assertInstanceOf($model, $surveyRequestDb->getProcess());
-
-
-//        $processDb = $this->orderRepository->findByUid(1);
-//
-//        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-//        $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
-//        $surveyRequest->setProcess($processDb);
-//        $surveyRequest->setProcessType(get_class($processDb));
-//        $surveyRequest->setFrontendUser($processDb->getFrontendUser()); //  @todo: Entweder direkt oder per $process->getFrontendUser()
-//        $surveyRequest->setTargetGroup($processDb->getTargetGroup());
-//        $this->surveyRequestRepository->add($surveyRequest);
-//        $this->persistenceManager->persistAll();
-//
-//        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
-//        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
-//        self::assertEquals($processDb, $surveyRequestDb->getProcess());
-//        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
-
-
-//        return $process;
     }
 
 }
