@@ -240,15 +240,15 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertEquals($surveyRequest, $surveyRequestDb);
+        self::assertSame($surveyRequest, $surveyRequestDb);
         self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
 
-        self::assertEquals($process, $surveyRequestDb->getProcess());
+        self::assertSame($process, $surveyRequestDb->getProcess());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
-        self::assertEquals(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
+        self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
+        self::assertSame($frontendUser, $surveyRequest->getFrontendUser());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
+        self::assertSame($targetGroup, $surveyRequest->getTargetGroup());
 
     }
 
@@ -306,15 +306,15 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertEquals($surveyRequest, $surveyRequestDb);
+        self::assertSame($surveyRequest, $surveyRequestDb);
         self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
 
-        self::assertEquals($process, $surveyRequestDb->getProcess());
+        self::assertSame($process, $surveyRequestDb->getProcess());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
-        self::assertEquals(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
+        self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
+        self::assertSame($frontendUser, $surveyRequest->getFrontendUser());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
+        self::assertSame($targetGroup, $surveyRequest->getTargetGroup());
 
     }
 
@@ -459,11 +459,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequest = $this->subject->createSurveyRequest($process);
 
         self::assertInstanceOf(SurveyRequest::class, $surveyRequest);
-        self::assertEquals($process, $surveyRequest->getProcess());
-        self::assertEquals(get_class($process), $surveyRequest->getProcessType());
-        self::assertEquals($frontendUser, $surveyRequest->getFrontendUser());
+        self::assertSame($process, $surveyRequest->getProcess());
+        self::assertSame(get_class($process), $surveyRequest->getProcessType());
+        self::assertSame($frontendUser, $surveyRequest->getFrontendUser());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertEquals($targetGroup, $surveyRequest->getTargetGroup());
+        self::assertSame($targetGroup, $surveyRequest->getTargetGroup());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -471,8 +471,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertEquals($surveyRequest, $surveyRequestDb);
-        self::assertEquals($process, $surveyRequestDb->getProcess());
+        self::assertSame($surveyRequest, $surveyRequestDb);
+        self::assertSame($process, $surveyRequestDb->getProcess());
         self::assertInstanceOf(EventReservation::class, $surveyRequestDb->getProcess());
 
     }
@@ -549,8 +549,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
-        self::assertEquals($order->getUid(), $surveyRequestDb->getProcessSubject()->getUid());
-        self::assertEquals($surveyDb, $surveyRequestDb->getSurvey());
+        self::assertSame($order->getUid(), $surveyRequestDb->getProcessSubject()->getUid());
+        self::assertSame($surveyDb, $surveyRequestDb->getSurvey());
     }
 
 
@@ -596,9 +596,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
-        self::assertEquals(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertEquals(null, $surveyRequestDb->getProcessSubject());
-        self::assertEquals(null, $surveyRequestDb->getSurvey());
+        self::assertSame(0, $surveyRequestDb->getNotifiedTstamp());
+        self::assertSame(null, $surveyRequestDb->getProcessSubject());
+        self::assertSame(null, $surveyRequestDb->getSurvey());
 
     }
 
@@ -648,9 +648,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
 
-        self::assertEquals(1, $surveyRequestDb->getProcessSubject()->getUid());
-        self::assertNotEquals(2, $surveyRequestDb->getProcessSubject()->getUid());
-        self::assertEquals(2, $surveyRequestDb->getSurvey()->getUid());
+        self::assertSame(1, $surveyRequestDb->getProcessSubject()->getUid());
+        self::assertNotSame(2, $surveyRequestDb->getProcessSubject()->getUid());
+        self::assertSame(2, $surveyRequestDb->getSurvey()->getUid());
 
     }
 
@@ -706,9 +706,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
 
-        self::assertEquals(1, $surveyRequestDb->getProcessSubject()->getUid());
-        self::assertNotEquals(2, $surveyRequestDb->getProcessSubject()->getUid());
-        self::assertEquals(2, $surveyRequestDb->getSurvey()->getUid());
+        self::assertSame(1, $surveyRequestDb->getProcessSubject()->getUid());
+        self::assertNotSame(2, $surveyRequestDb->getProcessSubject()->getUid());
+        self::assertSame(2, $surveyRequestDb->getSurvey()->getUid());
 
     }
 
@@ -896,7 +896,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process */
         $process = $surveyRequestDb->getProcess();
-        self::assertEquals($process->getEvent(), $surveyRequestDb->getProcessSubject());
+        self::assertSame($process->getEvent(), $surveyRequestDb->getProcessSubject());
 
     }
 
@@ -955,8 +955,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
-        self::assertEquals(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertEquals(null, $surveyRequestDb->getProcessSubject());
+        self::assertSame(0, $surveyRequestDb->getNotifiedTstamp());
+        self::assertSame(null, $surveyRequestDb->getProcessSubject());
 
     }
 
