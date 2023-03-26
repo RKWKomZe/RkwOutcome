@@ -217,10 +217,16 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                      )
                  );
 
+                 $surveyRequest = $this->setProcessable($surveyRequest);
+
+                 // @todo: See processPendingSurveyRequestMarksAllConsideredSurveyRequestsAsNotifiedAndSetsProcessSubjectOnlyInSurveyRequestContainingTheSelectedProduct
+
                  if ($this->sendNotification($surveyRequest)) {
+
                      $this->markAsNotified($surveyRequest);
 
                      $notifiedSurveyRequests[] = $surveyRequest;
+
                  }
              }
          }
@@ -406,25 +412,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     protected function markAsNotified(SurveyRequest $surveyRequest): void
     {
 
-        //  @todo select product or event
-        $process = $surveyRequest->getProcess();
-
-        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-
-            $notifiableObjects = $this->getNotifiableObjects($process);
-
-            $randomKey = array_rand($notifiableObjects);
-            $processSubject = $notifiableObjects[$randomKey];
-            $surveyRequest->setProcessSubject($processSubject);
-            //  set suitable survey @todo: only suitable, if not only product, but also target groups is fitting!!!
-            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-            $surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($processSubject);
-            $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
-
-        } else {
-            $surveyRequest->setProcessSubject($process->getEvent());
-        }
-
         $surveyRequest->setNotifiedTstamp(time());
 
         $this->surveyRequestRepository->update($surveyRequest);
@@ -460,6 +447,39 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         }
 
         return $notifiableObjects;
+    }
+
+    /**
+     * @param SurveyRequest $surveyRequest
+     *
+     * @return SurveyRequest $surveyRequest
+     */
+    protected function setProcessable(SurveyRequest $surveyRequest): SurveyRequest
+    {
+        //  @todo select product or event
+        $process = $surveyRequest->getProcess();
+
+        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+
+            $notifiableObjects = $this->getNotifiableObjects($process);
+
+        } else {
+
+            $notifiableObjects = [$process->getEvent()];
+
+        }
+
+        $randomKey = array_rand($notifiableObjects);
+        $processSubject = $notifiableObjects[$randomKey];
+
+        $surveyRequest->setProcessSubject($processSubject);
+
+        //  set suitable survey @todo: only suitable, if not only product, but also target groups is fitting!!!
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+        $surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($processSubject);
+        $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
+
+        return $surveyRequest;
     }
 
 
