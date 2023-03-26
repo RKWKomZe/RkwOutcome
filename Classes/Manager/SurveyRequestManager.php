@@ -185,7 +185,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      public function processPendingSurveyRequests(int $tolerance = 0, int $timestampNow = 0):array {
 
          /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-         $surveyRequests = $this->surveyRequestRepository->findAllPendingSurveyRequests();
+         $surveyRequests = $this->surveyRequestRepository->findAllPendingSurveyRequests($tolerance);
 
          $this->logInfo(
              sprintf(
@@ -210,23 +210,18 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
              if (
                  $surveyRequest->getProcess()
              ) {
-                 if ($this->isNotifiable($surveyRequest->getProcess(), $tolerance)) {
+                 $this->logInfo(
+                     sprintf(
+                         'Survey request with uid %s is notifiable.',
+                         $surveyRequest->getUid()
+                     )
+                 );
 
-                     $this->logInfo(
-                         sprintf(
-                             'Survey request with uid %s is notifiable.',
-                             $surveyRequest->getUid()
-                         )
-                     );
+                 if ($this->sendNotification($surveyRequest)) {
+                     $this->markAsNotified($surveyRequest);
 
-                     if ($this->sendNotification($surveyRequest)) {
-                         $this->markAsNotified($surveyRequest);
-
-                         $notifiedSurveyRequests[] = $surveyRequest;
-                     }
-
+                     $notifiedSurveyRequests[] = $surveyRequest;
                  }
-
              }
          }
 

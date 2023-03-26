@@ -418,7 +418,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     *
      * @throws \Exception
      */
     public function createSurveyRequestCreatesSurveyRequestTriggeredByAnEventReservation()
@@ -587,6 +586,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $order = $this->orderRepository->findByUid(1);
         $order->setShippedTstamp(strtotime('-1 day'));
         $this->orderRepository->update($order);
+        $this->persistenceManager->persistAll();
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');

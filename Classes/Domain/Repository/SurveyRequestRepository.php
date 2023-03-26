@@ -39,22 +39,27 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
 
     /**
-     * findAllPendingSurveyRequests
+     * findAllPendingSurveyRequestsWithinTolerance
+     *
+     * @param int $tolerance
      *
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     * @comment implicitly tested @todo actually explicitly tested
+     * @comment implicitly tested
      */
-    public function findAllPendingSurveyRequests(
-    ): QueryResultInterface
+    public function findAllPendingSurveyRequests(int $tolerance): QueryResultInterface
     {
         $query = $this->createQuery();
 
 
         $constraints = [];
 
+        //  @todo: Check on eventReservation.event.endTime, too!? - see former method isNotifiable
         $constraints[] =
-            $query->equals('notifiedTstamp', 0)
+            $query->logicalAnd(
+                $query->equals('notifiedTstamp', 0),
+                $query->lessThan('process.shippedTstamp', time() - $tolerance)
+            )
         ;
 
         // NOW: construct final query!
