@@ -206,9 +206,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                  )
              );
 
+
              if (
                  $surveyRequest->getProcess()
-                 && $surveyRequest->getNotifiedTstamp() === 0
              ) {
                  if ($this->isNotifiable($surveyRequest->getProcess(), $tolerance)) {
 

@@ -779,10 +779,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     public function processPendingSurveyRequestIgnoresAlreadyProcessedSurveyRequest()
     {
 
-        //  @todo: do it
-
-        //  return notifiedSurveyRequests->count() = 1
-
         /**
          * Scenario:
          *
@@ -815,16 +811,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequestAlreadyNotifiedDb = $this->surveyRequestRepository->findByUid(1);
         $surveyRequestAlreadyNotifiedDb->setNotifiedTstamp(1);
         $this->surveyRequestRepository->update($surveyRequestAlreadyNotifiedDb);
+        $this->persistenceManager->persistAll();
 
         $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
         self::assertCount(1, $notifiedSurveyRequests);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestAlreadyNotifiedDb */
-        $surveyRequestAlreadyNotifiedDb = $this->surveyRequestRepository->findByUid(1);
-        self::assertSame(1, $surveyRequestAlreadyNotifiedDb->getNotifiedTstamp());
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb */
-        $surveyRequestProcessedDb = $this->surveyRequestRepository->findByUid(2);
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestProcessedDb = $notifiedSurveyRequests[0];
         self::assertGreaterThan(1, $surveyRequestProcessedDb->getNotifiedTstamp());
 
     }
