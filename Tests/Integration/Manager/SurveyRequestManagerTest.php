@@ -816,12 +816,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
         self::assertCount(1, $notifiedSurveyRequests);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequestProcessedDb = $notifiedSurveyRequests[0];
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb */
+        $surveyRequestProcessedDb = $this->surveyRequestRepository->findByUid(2);
         self::assertGreaterThan(1, $surveyRequestProcessedDb->getNotifiedTstamp());
 
     }
-
 
     /**
      * @throws \Exception
