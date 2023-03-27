@@ -18,14 +18,14 @@ return [
         ],
         // do only make requestUpdate, if token-list should be shown on check
         // 'requestUpdate' => 'access_restricted',
-        'searchFields' => 'product, event, survey',
+        'searchFields' => 'product, event, survey, taregt_category',
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyconfiguration.gif'
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group',
+        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, target_category',
     ],
     'types' => [
-        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
+        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, target_category'],
     ],
     'columns' => [
 

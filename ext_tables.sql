@@ -46,6 +46,7 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyconfiguration (
 	pid int(11) DEFAULT '0' NOT NULL,
 
 	target_group int(11) unsigned DEFAULT '0',
+  target_category varchar(255) DEFAULT '' NOT NULL,
 
   process_type varchar(255) DEFAULT '\RKW\RkwShop\Domain\Model\Product' NOT NULL,
 	product int(11) unsigned DEFAULT '0',
