@@ -186,26 +186,23 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
          /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
          $surveyRequests = $this->surveyRequestRepository->findAllPendingSurveyRequests($tolerance);
+         $surveyRequestsGroupedByFrontendUser = $this->groupSurveyRequestsByFrontendUser($surveyRequests) ;
 
          $this->logInfo(
              sprintf(
                  'Get on with %s survey requests.',
-//                 $surveyRequests->count()
                  count($surveyRequests)
              )
          );
 
-         $notifiedSurveyRequests = [];
+         $notifiableSurveyRequests = [];
 
-         foreach ($surveyRequestsGroupedByFrontendUser = $this->groupSurveyRequestsByFrontendUser($surveyRequests) as $surveyRequestsByUser) {
+         foreach ($surveyRequestsGroupedByFrontendUser as $surveyRequestsByUser) {
 
-//             $surveyRequestsByUser = $this->setProcessable($surveyRequestsByUser);
              $processableSubject = $this->getProcessable($surveyRequestsByUser);
 
              /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
              foreach ($surveyRequestsByUser as $surveyRequest) {
-
-                 // if surveyRequest contains $processable
 
                  $containsProcessableSubject = false;
 
@@ -217,11 +214,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
                  if ($containsProcessableSubject) {
 
-                     //  set process subject in surveyrequest->process containing process subject
                      $surveyRequest->setProcessSubject($processableSubject);
-                     //  set suitable survey @todo: only suitable, if not only product, but also target groups is fitting!!!
                      /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-                     $surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($processableSubject->getUid());
+                     $surveyConfiguration = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
                      $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
                      $this->persistenceManager->persistAll();
 
@@ -229,24 +224,24 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
                  }
 
-                 $notifiedSurveyRequests[] = $surveyRequest;
+                 $notifiableSurveyRequests[] = $surveyRequest;
 
              }
 
          }
 
-         foreach ($notifiedSurveyRequests as $notifiedSurveyRequest) {
+         foreach ($notifiableSurveyRequests as $notifiedSurveyRequest) {
              $this->markAsNotified($notifiedSurveyRequest);
          }
 
          $this->logInfo(
              sprintf(
                  '%s pending request have been processed.',
-                 count($notifiedSurveyRequests)
+                 count($notifiableSurveyRequests)
              )
          );
 
-         return $notifiedSurveyRequests;
+         return $notifiableSurveyRequests;
 
     }
 
@@ -310,15 +305,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
             foreach ($process->getOrderItem() as $orderItem) {
 
-                /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
-                $survey = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct());
-
-                /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+                /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                 if (
-                    ($survey = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
-//                    && $survey->getTargetGroup() === $process->getTargetGroup()
-                    //  @todo: Fix this ... notwendig, da derzeit noch die Bestellung lediglich ein Textfeld mit der Zielgruppe befüllt!!!
-                    && $survey->getTargetGroup()->getUid() === $process->getTargetGroup()->getUid()
+                    $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup())
                 ) {
                     $surveyableObjects[] = $orderItem->getProduct();
                 }
@@ -331,10 +320,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
             $event = $process->getEvent();
 
-            /** @var \RKW\RkwOutcome\Domain\Model\Survey $survey */
+            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
             if (
-                ($survey = $this->surveyConfigurationRepository->findByEventUid($event->getUid()))
-                && $survey->getTargetGroup() === $process->getTargetGroup()
+                $this->surveyConfigurationRepository->findByEvent($event, $process->getTargetGroup())
             ) {
                 $surveyableObjects[] = $event;
             }
@@ -394,8 +382,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
             if (
-                ($surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($orderItem->getProduct()))
-                && $surveyConfiguration->getTargetGroup() === $process->getTargetGroup()
+                $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup())
             ) {
                 $notifiableObjects[] = $orderItem->getProduct();
             }
@@ -439,6 +426,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests
+     *
      * @return array
      */
     protected function groupSurveyRequestsByFrontendUser(\TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests): array

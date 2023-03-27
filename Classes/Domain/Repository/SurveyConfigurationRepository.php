@@ -40,22 +40,21 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
     /**
      * Finds a survey configuration matching the given identifier.
      *
-     * @param int $uid The identifier of the object to find
-     * @return \RKW\RkwShop\Domain\Model\Product The matching object if found, otherwise NULL
+     * @param \RKW\RkwShop\Domain\Model\Product $product
+     *
+     * @return object|null The object for the identifier if it is known, or NULL
      */
-    public function findByProductUid($uid)
+    public function findByProduct(\RKW\RkwShop\Domain\Model\Product $product)
     {
         $query = $this->createQuery();
-        //  @todo: Check, if these settings are okay?
-        $query->getQuerySettings()->setIgnoreEnableFields(true);
-        $query->getQuerySettings()->setIncludeDeleted(true);
 
         $query->matching(
-            $query->equals('product', $uid)
+            $query->equals('product', $product)
         );
 
         $query->setLimit(1);
 
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
         return $query->execute()->getFirst();
     }
 
@@ -63,16 +62,66 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
     /**
      * Finds a survey configuration matching the given identifier.
      *
-     * @param int $uid The identifier of the object to find
-     * @return \RKW\RkwEvents\Domain\Model\Event The matching object if found, otherwise NULL
+     * @param \RKW\RkwShop\Domain\Model\Product $product
+     * @param \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup
+     *
+     * @return object|null The object for the identifier if it is known, or NULL
      */
-    public function findByEventUid($uid)
+    public function findByProductAndTargetGroup(\RKW\RkwShop\Domain\Model\Product $product, \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup)
     {
         $query = $this->createQuery();
-        $query->getQuerySettings()->setIncludeDeleted(true);
 
         $query->matching(
-            $query->equals('event', $uid)
+            $query->logicalAnd(
+                $query->equals('product', $product),
+                $query->equals('targetGroup', $targetGroup)
+            )
+        );
+
+        $query->setLimit(1);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+        return $query->execute()->getFirst();
+    }
+
+
+    /**
+     * Finds a survey configuration matching the given identifier.
+     *
+     * @param \RKW\RkwEvents\Domain\Model\Event $event
+     *
+     * @return object|null The object for the identifier if it is known, or NULL
+     */
+    public function findByEvent(\RKW\RkwEvents\Domain\Model\Event $event)
+    {
+        $query = $this->createQuery();
+
+        $query->matching(
+            $query->equals('event', $event)
+        );
+
+        $query->setLimit(1);
+
+        return $query->execute()->getFirst();
+    }
+
+    /**
+     * Finds a survey configuration matching the given identifier.
+     *
+     * @param \RKW\RkwEvents\Domain\Model\Event $event
+     * @param \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup
+     *
+     * @return object|null The object for the identifier if it is known, or NULL
+     */
+    public function findByEventAndTargetGroup(\RKW\RkwEvents\Domain\Model\Event $event, \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup)
+    {
+        $query = $this->createQuery();
+
+        $query->matching(
+            $query->logicalAnd(
+                $query->equals('event', $event),
+                $query->equals('targetGroup', $targetGroup)
+            )
         );
 
         $query->setLimit(1);
