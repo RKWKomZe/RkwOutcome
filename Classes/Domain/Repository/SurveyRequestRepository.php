@@ -14,12 +14,7 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwOutcome\Domain\Model\SurveyRequest;
-use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
-use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * SurveyRequestRepository
@@ -73,6 +68,34 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         }
 
         return $query->execute();
+
+    }
+
+
+    /**
+     * findAllPendingSurveyRequestsGroupedByFrontendUser
+     *
+     * @param int $tolerance
+     *
+     * @return array
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @comment implicitly tested
+     */
+    public function findAllPendingSurveyRequestsGroupedByFrontendUser(int $tolerance): array
+    {
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequests = $this->findAllPendingSurveyRequests($tolerance);
+
+        $surveyRequestsGroupedByFrontendUser = [];
+
+        foreach ($surveyRequests as $surveyRequest) {
+
+            $surveyRequestsGroupedByFrontendUser[$surveyRequest->getFrontendUser()->getUid()][] = $surveyRequest;
+
+        }
+
+        return $surveyRequestsGroupedByFrontendUser;
 
     }
 

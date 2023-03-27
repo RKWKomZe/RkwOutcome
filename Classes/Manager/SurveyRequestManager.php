@@ -16,6 +16,7 @@ namespace RKW\RkwOutcome\Manager;
 
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Service\LogTrait;
+use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -175,23 +176,20 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * Processes all pending survey requests
      *
      * @param int $tolerance
-     * @param int $timestampNow
      * @return array
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      * @throws \TYPO3\CMS\Core\Type\Exception\InvalidEnumerationValueException
      */
-     public function processPendingSurveyRequests(int $tolerance = 0, int $timestampNow = 0):array {
+     public function processPendingSurveyRequests(int $tolerance = 0):array {
 
-         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-         $surveyRequests = $this->surveyRequestRepository->findAllPendingSurveyRequests($tolerance);
-         $surveyRequestsGroupedByFrontendUser = $this->groupSurveyRequestsByFrontendUser($surveyRequests) ;
+         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findAllPendingSurveyRequestsGroupedByFrontendUser($tolerance) ;
 
          $this->logInfo(
              sprintf(
                  'Get on with %s survey requests.',
-                 count($surveyRequests)
+                 count($surveyRequestsGroupedByFrontendUser)
              )
          );
 
@@ -204,20 +202,13 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                  /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
                  foreach ($surveyRequestsByUser as $surveyRequest) {
 
-                     $containsProcessableSubject = false;
-
-                     foreach ($this->getNotifiableObjects($surveyRequest->getProcess()) as $notifiableObject) {
-                         if ($notifiableObject->getUid() === $processableSubject->getUid()) {
-                             $containsProcessableSubject = true;
-                         }
-                     }
-
-                     if ($containsProcessableSubject) {
+                     if ($this->containsProcessableSubject($surveyRequest, $processableSubject)) {
 
                          $surveyRequest->setProcessSubject($processableSubject);
                          /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                          $surveyConfiguration = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
                          $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
+                         $this->surveyRequestRepository->update($surveyRequest);
                          $this->persistenceManager->persistAll();
 
                          $this->sendNotification($surveyRequest);
@@ -399,22 +390,21 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     }
 
     /**
-     * @param \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests
-     *
-     * @return array
+     * @param SurveyRequest $surveyRequest
+     * @param Product       $processableSubject
+     * @return bool
      */
-    protected function groupSurveyRequestsByFrontendUser(\TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests): array
+    protected function containsProcessableSubject(SurveyRequest $surveyRequest, Product $processableSubject): bool
     {
-        $surveyRequestsGroupedByFrontendUser = [];
+        $containsProcessableSubject = false;
 
-        foreach ($surveyRequests as $surveyRequest) {
-
-            $surveyRequestsGroupedByFrontendUser[$surveyRequest->getFrontendUser()->getUid()][] = $surveyRequest;
-
+        foreach ($this->getNotifiableObjects($surveyRequest->getProcess()) as $notifiableObject) {
+            if ($notifiableObject->getUid() === $processableSubject->getUid()) {
+                $containsProcessableSubject = true;
+            }
         }
 
-        return $surveyRequestsGroupedByFrontendUser;
+        return $containsProcessableSubject;
     }
-
 
 }
