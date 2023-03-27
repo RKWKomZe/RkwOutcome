@@ -14,6 +14,10 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Generic\Mapper\DataMapper;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
@@ -47,10 +51,10 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * @comment implicitly tested
      */
-    public function findAllPendingSurveyRequests(int $tolerance): QueryResultInterface
+    public function findAllPendingSurveyRequests(int $tolerance): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
     {
-        $query = $this->createQuery();
 
+        $query = $this->createQuery();
 
         $constraints = [];
 
@@ -58,7 +62,8 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $constraints[] =
             $query->logicalAnd(
                 $query->equals('notifiedTstamp', 0),
-                $query->lessThan('process.shippedTstamp', time() - $tolerance)
+                $query->lessThan('process.shippedTstamp', time() - $tolerance),
+                $query->greaterThan('process', 0)
             )
         ;
 
@@ -68,8 +73,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         }
 
         return $query->execute();
+
     }
 
-
-    
 }

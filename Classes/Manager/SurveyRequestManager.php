@@ -190,45 +190,53 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
          $this->logInfo(
              sprintf(
                  'Get on with %s survey requests.',
-                 $surveyRequests->count()
+//                 $surveyRequests->count()
+                 count($surveyRequests)
              )
          );
 
          $notifiedSurveyRequests = [];
 
-         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-         foreach ($surveyRequests as $surveyRequest) {
+         foreach ($surveyRequestsGroupedByFrontendUser = $this->groupSurveyRequestsByFrontendUser($surveyRequests) as $surveyRequestsByUser) {
 
-             $this->logInfo(
-                 sprintf(
-                     'Get on with survey request with uid %s.',
-                     $surveyRequest->getUid()
-                 )
-             );
+//             $surveyRequestsByUser = $this->setProcessable($surveyRequestsByUser);
+             $processableSubject = $this->getProcessable($surveyRequestsByUser);
 
+             /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+             foreach ($surveyRequestsByUser as $surveyRequest) {
 
-             if (
-                 $surveyRequest->getProcess()
-             ) {
-                 $this->logInfo(
-                     sprintf(
-                         'Survey request with uid %s is notifiable.',
-                         $surveyRequest->getUid()
-                     )
-                 );
+                 // if surveyRequest contains $processable
 
-                 $surveyRequest = $this->setProcessable($surveyRequest);
+                 $containsProcessableSubject = false;
 
-                 // @todo: See processPendingSurveyRequestMarksAllConsideredSurveyRequestsAsNotifiedAndSetsProcessSubjectOnlyInSurveyRequestContainingTheSelectedProduct
+                 foreach ($this->getNotifiableObjects($surveyRequest->getProcess()) as $notifiableObject) {
+                     if ($notifiableObject->getUid() === $processableSubject->getUid()) {
+                         $containsProcessableSubject = true;
+                     }
+                 }
 
-                 if ($this->sendNotification($surveyRequest)) {
+                 if ($containsProcessableSubject) {
 
-                     $this->markAsNotified($surveyRequest);
+                     //  set process subject in surveyrequest->process containing process subject
+                     $surveyRequest->setProcessSubject($processableSubject);
+                     //  set suitable survey @todo: only suitable, if not only product, but also target groups is fitting!!!
+                     /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+                     $surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($processableSubject->getUid());
+                     $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
+                     $this->persistenceManager->persistAll();
 
-                     $notifiedSurveyRequests[] = $surveyRequest;
+                     $this->sendNotification($surveyRequest);
 
                  }
+
+                 $notifiedSurveyRequests[] = $surveyRequest;
+
              }
+
+         }
+
+         foreach ($notifiedSurveyRequests as $notifiedSurveyRequest) {
+             $this->markAsNotified($notifiedSurveyRequest);
          }
 
          $this->logInfo(
@@ -238,7 +246,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
              )
          );
 
-        return $notifiedSurveyRequests;
+         return $notifiedSurveyRequests;
 
     }
 
@@ -277,60 +285,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     }
 
-
-    /**
-     * Checks, if process is associated with a valid survey
-     *
-     * @param \RKW\RkwShop\Domain\Model\Order $process
-     * @param int $tolerance
-     * @return bool
-     */
-    protected function isNotifiable(\RKW\RkwShop\Domain\Model\Order $process, int $tolerance = 0): bool
-    {
-
-        $notifiableObjects = [];
-
-        //  check contained products
-        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-
-            $shippedTstamp = $process->getShippedTstamp();
-
-            if (
-                $shippedTstamp > 0
-                && $shippedTstamp < time() - $tolerance // @todo: Plus SurveyWaitingTime, ...
-            ) {
-                $notifiableObjects = $this->getNotifiableObjects($process, $notifiableObjects);
-            }
-
-        }
-        //  check contained events
-        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
-
-            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
-            $event = $process->getEvent();
-            $endTstamp = $event->getEnd();
-
-            if (
-                $endTstamp > 0
-                && $endTstamp < time() // @todo: Plus SurveyWaitingTime, ...
-            ) {
-
-                /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-                if (
-                    ($surveyConfiguration = $this->surveyConfigurationRepository->findByEventUid($event->getUid()))
-                    && $surveyConfiguration->getTargetGroup() === $process->getTargetGroup()
-                ) {
-                    $notifiableObjects[] = $event;
-                }
-
-            }
-
-        }
-
-        return count($notifiableObjects) > 0;
-
-
-    }
 
     /**
      * Checks, if process is associated with a valid survey
@@ -428,11 +382,12 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param \RKW\RkwShop\Domain\Model\Order $process
-     * @param array                           $notifiableObjects
      * @return array
      */
-    protected function getNotifiableObjects(\RKW\RkwShop\Domain\Model\Order $process, array $notifiableObjects = []): array
+    protected function getNotifiableObjects(\RKW\RkwShop\Domain\Model\Order $process): array
     {
+
+        $notifiableObjects = [];
 
         /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
         foreach ($process->getOrderItem() as $orderItem) {
@@ -450,36 +405,53 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     }
 
     /**
-     * @param SurveyRequest $surveyRequest
+     * @param array $surveyRequestsByUser
      *
-     * @return SurveyRequest $surveyRequest
+     * @return \RKW\RkwShop\Domain\Model\Product
      */
-    protected function setProcessable(SurveyRequest $surveyRequest): SurveyRequest
+    protected function getProcessable(array $surveyRequestsByUser): \RKW\RkwShop\Domain\Model\Product
     {
-        //  @todo select product or event
-        $process = $surveyRequest->getProcess();
 
-        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+        $notifiableObjects = [];
 
-            $notifiableObjects = $this->getNotifiableObjects($process);
+        foreach ($surveyRequestsByUser as $surveyRequest) {
 
-        } else {
+            //  @todo select product or event
+            $process = $surveyRequest->getProcess();
 
-            $notifiableObjects = [$process->getEvent()];
+            if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+
+                /* @todo fix array_merge */
+                $notifiableObjects = array_merge($notifiableObjects, $this->getNotifiableObjects($process));
+
+            } else {
+
+                $notifiableObjects = [$process->getEvent()];
+
+            }
 
         }
 
         $randomKey = array_rand($notifiableObjects);
-        $processSubject = $notifiableObjects[$randomKey];
 
-        $surveyRequest->setProcessSubject($processSubject);
+        return $notifiableObjects[$randomKey];
+    }
 
-        //  set suitable survey @todo: only suitable, if not only product, but also target groups is fitting!!!
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-        $surveyConfiguration = $this->surveyConfigurationRepository->findByProductUid($processSubject);
-        $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
+    /**
+     * @param \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests
+     * @return array
+     */
+    protected function groupSurveyRequestsByFrontendUser(\TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests): array
+    {
+        $surveyRequestsGroupedByFrontendUser = [];
 
-        return $surveyRequest;
+        foreach ($surveyRequests as $surveyRequest) {
+
+            $surveyRequestsGroupedByFrontendUser[$surveyRequest->getFrontendUser()->getUid()][] = $surveyRequest;
+
+        }
+
+        return $surveyRequestsGroupedByFrontendUser;
     }
 
 

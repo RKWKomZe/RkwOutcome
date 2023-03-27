@@ -773,6 +773,17 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     }
 
     /**
+     * @todo
+     *
+     * @throws \Exception
+     */
+    public function processPendingSurveyRequestsSendsTwoNotificationsIfTwoSeparateUsersTriggeredRequests()
+    {
+
+
+    }
+
+    /**
      * @test
      * @throws \Exception
      */
@@ -819,6 +830,75 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb */
         $surveyRequestProcessedDb = $this->surveyRequestRepository->findByUid(2);
         self::assertGreaterThan(1, $surveyRequestProcessedDb->getNotifiedTstamp());
+
+    }
+
+    /**
+     * @test
+     *
+     * @throws \Exception
+     */
+    public function processPendingSurveyRequestMarksAllConsideredSurveyRequestsAsNotifiedAndSetsProcessSubjectOnlyInSurveyRequestContainingTheSelectedProduct()
+    {
+
+        /** Es liegen mehrere SurveyRequests vor, aus denen ein Produkt ausgewählt wird,
+         *  aber nur bei der SurveyRequest, die das ausgewählte Produkt beinhaltet, wird
+         *  das processSubject gesetzt. Bei den anderen wird lediglich der notifiedTstamp gesetzt oder es wird gelöscht?
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check120.xml');
+
+        //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
+        $order = $this->orderRepository->findByUid(2);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
+        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 1);
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
+
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        self::assertCount(2, $notifiedSurveyRequests);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid1 */
+        $surveyRequestProcessedDbUid1 = $this->surveyRequestRepository->findByUid(1);
+        self::assertGreaterThan(0, $surveyRequestProcessedDbUid1->getNotifiedTstamp());
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid2 */
+        $surveyRequestProcessedDbUid2 = $this->surveyRequestRepository->findByUid(2);
+        self::assertSame($surveyRequestProcessedDbUid1->getNotifiedTstamp(), $surveyRequestProcessedDbUid2->getNotifiedTstamp());
+
+        self::assertNotSame($surveyRequestProcessedDbUid1->getProcessSubject(), $surveyRequestProcessedDbUid2->getProcessSubject());
+        self::assertNotSame($surveyRequestProcessedDbUid1->getSurvey(), $surveyRequestProcessedDbUid2->getSurvey());
+
+        foreach ($notifiedSurveyRequests as $surveyRequest) {
+            if ($surveyRequest->getProcessSubject()) {
+                self::assertSame($surveyRequest->getUid(), $surveyRequest->getProcessSubject()->getUid());
+            } else {
+                self::assertNull($surveyRequest->getProcessSubject());
+            }
+        }
+
+    }
+
+    /**
+     * @todo
+     * @throws \Exception
+     */
+    public function processPendingSurveyRequestsRespectsSeparateFrontendUsers()
+    {
+
+        /** Es liegen je zwei SurveyRequests zweier Personen vor, aus denen jeweils ein Produkt ausgewählt wird,
+         *  Am Ende muss je eine SurveyRequest je Nutzer existieren, bei der ein ProcessSubject gesetzt ist und
+         *  dabei dem Produkt aus der Bestellung des Nutzers entspricht.
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check130.xml');
 
     }
 
@@ -996,3 +1076,4 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     }
 
 }
+
