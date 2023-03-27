@@ -379,20 +379,20 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
             if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
 
-                /* @todo fix array_merge */
-                $notifiableObjects = array_merge($notifiableObjects, $this->getNotifiableObjects($process));
+                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($process);
 
             } else {
 
-                $notifiableObjects = [$process->getEvent()];
+                $notifiableObjects[$surveyRequest->getUid()] = [$process->getEvent()];
 
             }
 
         }
 
-        $randomKey = array_rand($notifiableObjects);
+        $mergedNotifiableObjects = array_merge(...$notifiableObjects);
+        $randomKey = array_rand($mergedNotifiableObjects);
 
-        return $notifiableObjects[$randomKey];
+        return $mergedNotifiableObjects[$randomKey];
     }
 
     /**
