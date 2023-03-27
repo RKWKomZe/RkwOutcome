@@ -887,7 +887,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     }
 
     /**
-     * @todo
+     * @test
+     *
      * @throws \Exception
      */
     public function processPendingSurveyRequestsRespectsSeparateFrontendUsers()
@@ -899,6 +900,35 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check130.xml');
+
+        //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
+        $order = $this->orderRepository->findByUid(2);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
+        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 1);
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
+
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        self::assertCount(2, $notifiedSurveyRequests);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid1 */
+        $surveyRequestProcessedDbUid1 = $this->surveyRequestRepository->findByUid(1);
+        self::assertGreaterThan(0, $surveyRequestProcessedDbUid1->getNotifiedTstamp());
+        self::assertSame(1, $surveyRequestProcessedDbUid1->getProcessSubject()->getUid());
+        self::assertSame(1, $surveyRequestProcessedDbUid1->getSurvey()->getUid());
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid2 */
+        $surveyRequestProcessedDbUid2 = $this->surveyRequestRepository->findByUid(2);
+        self::assertGreaterThan(0, $surveyRequestProcessedDbUid2->getNotifiedTstamp());
+        self::assertSame(2, $surveyRequestProcessedDbUid2->getProcessSubject()->getUid());
+        self::assertSame(2, $surveyRequestProcessedDbUid2->getSurvey()->getUid());
 
     }
 

@@ -199,40 +199,43 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
          foreach ($surveyRequestsGroupedByFrontendUser as $surveyRequestsByUser) {
 
-             $processableSubject = $this->getProcessable($surveyRequestsByUser);
+             if ($processableSubject = $this->getProcessable($surveyRequestsByUser)) {
 
-             /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-             foreach ($surveyRequestsByUser as $surveyRequest) {
+                 /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+                 foreach ($surveyRequestsByUser as $surveyRequest) {
 
-                 $containsProcessableSubject = false;
+                     $containsProcessableSubject = false;
 
-                 foreach ($this->getNotifiableObjects($surveyRequest->getProcess()) as $notifiableObject) {
-                     if ($notifiableObject->getUid() === $processableSubject->getUid()) {
-                         $containsProcessableSubject = true;
+                     foreach ($this->getNotifiableObjects($surveyRequest->getProcess()) as $notifiableObject) {
+                         if ($notifiableObject->getUid() === $processableSubject->getUid()) {
+                             $containsProcessableSubject = true;
+                         }
                      }
+
+                     if ($containsProcessableSubject) {
+
+                         $surveyRequest->setProcessSubject($processableSubject);
+                         /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+                         $surveyConfiguration = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
+                         $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
+                         $this->persistenceManager->persistAll();
+
+                         $this->sendNotification($surveyRequest);
+
+                     }
+
+                     $notifiableSurveyRequests[] = $surveyRequest;
+
                  }
 
-                 if ($containsProcessableSubject) {
-
-                     $surveyRequest->setProcessSubject($processableSubject);
-                     /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-                     $surveyConfiguration = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
-                     $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
-                     $this->persistenceManager->persistAll();
-
-                     $this->sendNotification($surveyRequest);
-
+                 foreach ($notifiableSurveyRequests as $notifiedSurveyRequest) {
+                     $this->markAsNotified($notifiedSurveyRequest);
                  }
-
-                 $notifiableSurveyRequests[] = $surveyRequest;
 
              }
 
          }
 
-         foreach ($notifiableSurveyRequests as $notifiedSurveyRequest) {
-             $this->markAsNotified($notifiedSurveyRequest);
-         }
 
          $this->logInfo(
              sprintf(
@@ -365,9 +368,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     /**
      * @param array $surveyRequestsByUser
      *
-     * @return \RKW\RkwShop\Domain\Model\Product
+     * @return \RKW\RkwShop\Domain\Model\Product|null
      */
-    protected function getProcessable(array $surveyRequestsByUser): \RKW\RkwShop\Domain\Model\Product
+    protected function getProcessable(array $surveyRequestsByUser): ?\RKW\RkwShop\Domain\Model\Product
     {
 
         $notifiableObjects = [];
@@ -392,7 +395,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         $mergedNotifiableObjects = array_merge(...$notifiableObjects);
         $randomKey = array_rand($mergedNotifiableObjects);
 
-        return $mergedNotifiableObjects[$randomKey];
+        return (empty($mergedNotifiableObjects)) ? null : $mergedNotifiableObjects[$randomKey];
     }
 
     /**
