@@ -282,25 +282,29 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
 
     /**
-     * Checks, if process is associated with a valid survey
-     *
      * @param \RKW\RkwShop\Domain\Model\Order $process
+     *
      * @return bool
      */
     protected function isSurveyable(\RKW\RkwShop\Domain\Model\Order $process): bool
     {
-        $isSurveyable = false;
-        $surveyableObjects = [];
 
-        //  check contained products
+        return count($this->getNotifiableObjects($process)) > 0;
+
+    }
+
+
+    /**
+     * @param \RKW\RkwShop\Domain\Model\Order $process
+     *
+     * @return array
+     */
+    protected function getNotifiableObjects(\RKW\RkwShop\Domain\Model\Order $process): array
+    {
+
+        $notifiableObjects = [];
+
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-
-            $this->logInfo(
-                sprintf(
-                    'Check surveyable for order uid %s.',
-                    $process->getUid()
-                )
-            );
 
             /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
             foreach ($process->getOrderItem() as $orderItem) {
@@ -309,12 +313,12 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                 if (
                     $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup())
                 ) {
-                    $surveyableObjects[] = $orderItem->getProduct();
+                    $notifiableObjects[] = $orderItem->getProduct();
                 }
             }
 
         }
-        //  check contained products
+
         if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
 
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
@@ -322,32 +326,21 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
             if (
-                $this->surveyConfigurationRepository->findByEvent($event, $process->getTargetGroup())
+                $this->surveyConfigurationRepository->findByEventAndTargetGroup($event, $process->getTargetGroup())
             ) {
-                $surveyableObjects[] = $event;
+                $notifiableObjects[] = $event;
             }
 
         }
 
-        $isSurveyable = count($surveyableObjects) > 0;
-
-        $isStringSurveyable = ($isSurveyable) ? 'true' : 'false';
-
-        $this->logInfo(
-            sprintf(
-                'Process with uid %s is surveyable %s.',
-                $process->getUid(),
-                $isStringSurveyable
-            )
-        );
-
-        return $isSurveyable;
+        return $notifiableObjects;
     }
 
 
     /**
      * @param SurveyRequest $surveyRequest
      * @return void
+     *
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      */
@@ -368,28 +361,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     }
 
-    /**
-     * @param \RKW\RkwShop\Domain\Model\Order $process
-     * @return array
-     */
-    protected function getNotifiableObjects(\RKW\RkwShop\Domain\Model\Order $process): array
-    {
-
-        $notifiableObjects = [];
-
-        /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
-        foreach ($process->getOrderItem() as $orderItem) {
-
-            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-            if (
-                $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup())
-            ) {
-                $notifiableObjects[] = $orderItem->getProduct();
-            }
-        }
-
-        return $notifiableObjects;
-    }
 
     /**
      * @param array $surveyRequestsByUser
