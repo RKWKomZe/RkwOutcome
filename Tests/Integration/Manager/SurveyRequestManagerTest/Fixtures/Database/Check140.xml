@@ -26,9 +26,18 @@
         <uid>2</uid>
         <pid>1</pid>
         <frontend_user>1</frontend_user>
-        <order_item>3</order_item>
+        <order_item>2</order_item>
         <email>test@dummy.de</email>
         <remark>Zweite Bestellung</remark>
+        <target_group>1</target_group>
+    </tx_rkwshop_domain_model_order>
+    <tx_rkwshop_domain_model_order>
+        <uid>3</uid>
+        <pid>1</pid>
+        <frontend_user>1</frontend_user>
+        <order_item>3</order_item>
+        <email>test@dummy.de</email>
+        <remark>Dritte Bestellung</remark>
         <target_group>1</target_group>
     </tx_rkwshop_domain_model_order>
     <!-- orderitems -->
@@ -44,14 +53,14 @@
         <pid>1</pid>
         <amount>1</amount>
         <product>2</product>
-        <ext_order>1</ext_order>
+        <ext_order>2</ext_order>
     </tx_rkwshop_domain_model_orderitem>
     <tx_rkwshop_domain_model_orderitem>
         <uid>3</uid>
         <pid>1</pid>
         <amount>1</amount>
         <product>3</product>
-        <ext_order>2</ext_order>
+        <ext_order>3</ext_order>
     </tx_rkwshop_domain_model_orderitem>
     <!-- products -->
     <tx_rkwshop_domain_model_product>

@@ -1016,36 +1016,45 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given maxSurveysPerPeriodAndFrontendUser is set to 1
          * Given a persisted frontendUser 1
          * Given a persisted surveyRequest-object 1 that belongs to frontendUser-object 1
-         * When the method is called
-         * Then the number of processed requests is 1
          * Given a persisted surveyRequest-object 2 that belongs to frontendUser-object 1
+         * When the method is called
+         * Then the number of processed requests is 2
+         * Given a persisted surveyRequest-object 3 that belongs to frontendUser-object 1
          * When the method is called
          * Then the number of processed requests is 0
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check140.xml');
 
+        //
+
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(2);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 1);
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
 
         $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
             $checkPeriod = $this->checkPeriod,
             $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
             $surveyWaitingTime = (1 * 24 * 60 * 60)
         );
-        self::assertCount(1, $notifiedSurveyRequests);
+        self::assertCount(2, $notifiedSurveyRequests);
 
         $order = $this->orderRepository->findByUid(2);
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
-        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 3);
 
         $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
             $checkPeriod = $this->checkPeriod,
