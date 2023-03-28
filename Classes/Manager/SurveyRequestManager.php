@@ -178,17 +178,18 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     /**
      * Processes all pending survey requests
      *
-     * @param int $tolerance
      * @param int $checkPeriod
      * @param int $maxSurveysPerPeriodAndFrontendUser
+     * @param int $tolerance
+     * @param int $currentTime
      * @return array
-     * @throws InvalidQueryException
      * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
      * @throws UnknownObjectException
      */
-     public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $tolerance = 0):array {
+     public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $tolerance = 0, int $currentTime = 0):array {
 
-         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findAllPendingSurveyRequestsGroupedByFrontendUser($tolerance) ;
+         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findAllPendingSurveyRequestsGroupedByFrontendUser($tolerance, $currentTime) ;
 
          $this->logInfo(
              sprintf(
@@ -202,7 +203,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
          foreach ($surveyRequestsGroupedByFrontendUser as $frontendUserUid => $surveyRequestsByUser) {
 
              if (
-                 !$this->isNotificationLimitReached($frontendUserUid, $checkPeriod, $maxSurveysPerPeriodAndFrontendUser)
+                 !$this->isNotificationLimitReached($frontendUserUid, $checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $currentTime)
                  && $processableSubject = $this->getProcessable($surveyRequestsByUser)
              ) {
 
@@ -227,7 +228,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                  }
 
                  foreach ($notifiableSurveyRequests as $notifiedSurveyRequest) {
-                     $this->markAsNotified($notifiedSurveyRequest);
+                     if (! $currentTime) {
+                         $currentTime = time();
+                     }
+                     $this->markAsNotified($notifiedSurveyRequest, $currentTime);
                  }
 
              }
@@ -340,15 +344,20 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param SurveyRequest $surveyRequest
+     * @param int           $currentTime
      * @return void
      *
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
-    protected function markAsNotified(SurveyRequest $surveyRequest): void
+    protected function markAsNotified(SurveyRequest $surveyRequest, int $currentTime = 0): void
     {
 
-        $surveyRequest->setNotifiedTstamp(time());
+        if (! $currentTime) {
+            $currentTime = time();
+        }
+
+        $surveyRequest->setNotifiedTstamp($currentTime);
 
         $this->surveyRequestRepository->update($surveyRequest);
         $this->persistenceManager->persistAll();
@@ -418,13 +427,14 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * @param int $frontendUserUid
      * @param int $checkPeriod
      * @param int $maxSurveysPerPeriodAndFrontendUser
+     * @param int $currentTime
      * @return bool
      * @throws InvalidQueryException
      */
-    protected function isNotificationLimitReached(int $frontendUserUid, int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser): bool
+    protected function isNotificationLimitReached(int $frontendUserUid, int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $currentTime): bool
     {
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $alreadyNotifiedRequests = $this->surveyRequestRepository->findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser($frontendUserUid, $checkPeriod);
+        $alreadyNotifiedRequests = $this->surveyRequestRepository->findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser($frontendUserUid, $checkPeriod, $currentTime);
 
         return count($alreadyNotifiedRequests) >= $maxSurveysPerPeriodAndFrontendUser;
     }

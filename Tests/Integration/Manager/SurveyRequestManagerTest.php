@@ -14,6 +14,7 @@ namespace RKW\RkwOutcome\Tests\Integration\Manager;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Carbon\Carbon;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwBasics\Domain\Repository\TargetGroupRepository;
 use RKW\RkwEvents\Domain\Model\EventReservation;
@@ -1026,45 +1027,54 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check140.xml');
 
-        //
+        //  set now to initial shipping date = first workday of the year
+        $initialDate = Carbon::create(2023, 1, 2, 0, 0);
+        Carbon::setTestNow($initialDate);
 
+        //  First two orders shipped on $initialDate
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
-        $order->setShippedTstamp(strtotime('-2 days'));
+        $order->setShippedTstamp(Carbon::now()->timestamp);
         $this->orderRepository->update($order);
 
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(2);
-        $order->setShippedTstamp(strtotime('-2 days'));
+        $order->setShippedTstamp(Carbon::now()->timestamp);
         $this->orderRepository->update($order);
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 1);
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
 
+        //  Processing pending survey requests on $initialDate + 1 day
         $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
             $checkPeriod = $this->checkPeriod,
             $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+            $surveyWaitingTime = 0,
+            $currentTime = Carbon::now()->addDays(1)->timestamp
         );
         self::assertCount(2, $notifiedSurveyRequests);
 
+        //  Third order on $initialDate + 2 days
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(2);
-        $order->setShippedTstamp(strtotime('-2 days'));
+        $order->setShippedTstamp(Carbon::now()->addDays(2)->timestamp);
         $this->orderRepository->update($order);
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 3);
 
+        //  Processing pending survey requests on $initialDate + 3 days
         $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
             $checkPeriod = $this->checkPeriod,
             $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+            $surveyWaitingTime = 0,
+            $currentTime = Carbon::now()->addDays(3)->timestamp
         );
         self::assertCount(0, $notifiedSurveyRequests);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $pendingSurveyRequestsDb = $this->surveyRequestRepository->findAllPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        $pendingSurveyRequestsDb = $this->surveyRequestRepository->findAllPendingSurveyRequests();
         self::assertCount(1, $pendingSurveyRequestsDb);
 
     }

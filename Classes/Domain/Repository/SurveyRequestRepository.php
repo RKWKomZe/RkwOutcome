@@ -16,6 +16,7 @@ namespace RKW\RkwOutcome\Domain\Repository;
 
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
+use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * SurveyRequestRepository
@@ -42,13 +43,17 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      * findAllPendingSurveyRequestsWithinTolerance
      *
      * @param int $tolerance
-     *
-     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @param int $currentTime
+     * @return QueryResultInterface
+     * @throws InvalidQueryException
      * @comment implicitly tested
      */
-    public function findAllPendingSurveyRequests(int $tolerance): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findAllPendingSurveyRequests(int $tolerance = 0, int $currentTime = 0): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
     {
+
+        if (! $currentTime) {
+            $currentTime = time();
+        }
 
         $query = $this->createQuery();
 
@@ -58,7 +63,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $constraints[] =
             $query->logicalAnd(
                 $query->equals('notifiedTstamp', 0),
-                $query->lessThan('process.shippedTstamp', time() - $tolerance),
+                $query->lessThan('process.shippedTstamp', $currentTime - $tolerance),
                 $query->greaterThan('process', 0)
             )
         ;
@@ -77,16 +82,16 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      * findAllPendingSurveyRequestsGroupedByFrontendUser
      *
      * @param int $tolerance
-     *
+     * @param int $currentTime
      * @return array
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws InvalidQueryException
      * @comment implicitly tested
      */
-    public function findAllPendingSurveyRequestsGroupedByFrontendUser(int $tolerance): array
+    public function findAllPendingSurveyRequestsGroupedByFrontendUser(int $tolerance, int $currentTime): array
     {
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequests = $this->findAllPendingSurveyRequests($tolerance);
+        $surveyRequests = $this->findAllPendingSurveyRequests($tolerance, $currentTime);
 
         $surveyRequestsGroupedByFrontendUser = [];
 
@@ -106,13 +111,17 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      *
      * @param int $frontendUserUid
      * @param int $period
-     *
-     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+     * @param int $currentTime
+     * @return QueryResultInterface
      * @throws InvalidQueryException
      * @comment implicitly tested
      */
-    public function findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser(int $frontendUserUid, int $period): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser(int $frontendUserUid, int $period, int $currentTime = 0): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
     {
+
+        if (! $currentTime) {
+            $currentTime = time();
+        }
 
         $query = $this->createQuery();
 
@@ -120,7 +129,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
         $constraints[] =
             $query->logicalAnd(
-                $query->greaterThan('notifiedTstamp', time() - $period),
+                $query->greaterThan('notifiedTstamp', $currentTime - $period),
                 $query->equals('frontend_user', $frontendUserUid)
             )
         ;
