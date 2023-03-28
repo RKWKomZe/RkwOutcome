@@ -19,6 +19,9 @@ use RKW\RkwOutcome\Service\LogTrait;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 /**
  * SurveyRequestCommandController
@@ -45,10 +48,15 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
     /**
      * process all pending survey requests
      *
+     * @param int $checkPeriod
+     * @param int $maxSurveysPerPeriodAndFrontendUser
      * @param int $tolerance Tolerance for creating next issue according to last time an issue was built (in seconds)
      * @return void
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws UnknownObjectException
      */
-    public function processSurveyRequestsCommand(int $tolerance = 0): void
+    public function processSurveyRequestsCommand(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $tolerance = 0): void
     {
 
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
@@ -56,7 +64,7 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
 
         /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $surveyRequestManager */
         $surveyRequestManager = $objectManager->get(SurveyRequestManager::class);
-        $surveyRequestManager->processPendingSurveyRequests($tolerance);
+        $surveyRequestManager->processPendingSurveyRequests($checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $tolerance);
 
 
 //        try {

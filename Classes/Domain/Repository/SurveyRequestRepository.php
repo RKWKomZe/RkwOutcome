@@ -14,6 +14,7 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 
 /**
@@ -96,6 +97,40 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         }
 
         return $surveyRequestsGroupedByFrontendUser;
+
+    }
+
+
+    /**
+     * findAllPendingSurveyRequestsGroupedByFrontendUser
+     *
+     * @param int $frontendUserUid
+     * @param int $period
+     *
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+     * @throws InvalidQueryException
+     * @comment implicitly tested
+     */
+    public function findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser(int $frontendUserUid, int $period): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    {
+
+        $query = $this->createQuery();
+
+        $constraints = [];
+
+        $constraints[] =
+            $query->logicalAnd(
+                $query->greaterThan('notifiedTstamp', time() - $period),
+                $query->equals('frontend_user', $frontendUserUid)
+            )
+        ;
+
+        // NOW: construct final query!
+        if ($constraints) {
+            $query->matching($query->logicalAnd($constraints));
+        }
+
+        return $query->execute();
 
     }
 
