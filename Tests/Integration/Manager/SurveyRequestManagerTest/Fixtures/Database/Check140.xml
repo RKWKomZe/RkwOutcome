@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<dataset>
+    <fe_users>
+        <uid>1</uid>
+        <pid>0</pid>
+        <username>spd@test.de</username>
+        <email>lauterbach@spd.de</email>
+        <first_name />
+        <last_name />
+        <company />
+        <address />
+        <zip>10969</zip>
+        <city>Hamburg</city>
+    </fe_users>
+    <!-- orders -->
+    <tx_rkwshop_domain_model_order>
+        <uid>1</uid>
+        <pid>1</pid>
+        <frontend_user>1</frontend_user>
+        <order_item>1</order_item>
+        <email>test@dummy.de</email>
+        <remark>Erste Bestellung</remark>
+        <target_group>1</target_group>
+    </tx_rkwshop_domain_model_order>
+    <tx_rkwshop_domain_model_order>
+        <uid>2</uid>
+        <pid>1</pid>
+        <frontend_user>1</frontend_user>
+        <order_item>2</order_item>
+        <email>test@dummy.de</email>
+        <remark>Zweite Bestellung</remark>
+        <target_group>1</target_group>
+    </tx_rkwshop_domain_model_order>
+    <tx_rkwshop_domain_model_order>
+        <uid>3</uid>
+        <pid>1</pid>
+        <frontend_user>1</frontend_user>
+        <order_item>3</order_item>
+        <email>test@dummy.de</email>
+        <remark>Dritte Bestellung</remark>
+        <target_group>1</target_group>
+    </tx_rkwshop_domain_model_order>
+    <!-- orderitems -->
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>1</uid>
+        <pid>1</pid>
+        <amount>1</amount>
+        <product>1</product>
+        <ext_order>1</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>2</uid>
+        <pid>1</pid>
+        <amount>1</amount>
+        <product>2</product>
+        <ext_order>2</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>3</uid>
+        <pid>1</pid>
+        <amount>1</amount>
+        <product>3</product>
+        <ext_order>3</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <!-- products -->
+    <tx_rkwshop_domain_model_product>
+        <uid>1</uid>
+        <pid>1</pid>
+        <title>Leitfaden Personal</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <tx_rkwshop_domain_model_product>
+        <uid>2</uid>
+        <pid>1</pid>
+        <title>Workbook Gründen</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <tx_rkwshop_domain_model_product>
+        <uid>3</uid>
+        <pid>1</pid>
+        <title>Leitfaden Canvas</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <!-- targetgroups -->
+    <tx_rkwbasics_domain_model_target_group>
+        <uid>1</uid>
+        <pid>1</pid>
+        <name>Unternehmen</name>
+    </tx_rkwbasics_domain_model_target_group>
+    <!-- surveyConfigurations -->
+    <tx_rkwoutcome_domain_model_surveyconfiguration>
+        <uid>1</uid>
+        <pid>1</pid>
+        <product>1</product>
+        <survey>1</survey>
+        <target_group>1</target_group>
+    </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <tx_rkwoutcome_domain_model_surveyconfiguration>
+        <uid>2</uid>
+        <pid>1</pid>
+        <product>2</product>
+        <survey>2</survey>
+        <target_group>1</target_group>
+    </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <tx_rkwoutcome_domain_model_surveyconfiguration>
+        <uid>3</uid>
+        <pid>1</pid>
+        <product>3</product>
+        <survey>3</survey>
+        <target_group>1</target_group>
+    </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <!-- surveys -->
+    <tx_rkwsurvey_domain_model_survey>
+        <uid>1</uid>
+        <pid>1</pid>
+        <name>Erste Umfrage</name>
+    </tx_rkwsurvey_domain_model_survey>
+    <tx_rkwsurvey_domain_model_survey>
+        <uid>2</uid>
+        <pid>1</pid>
+        <name>Zweite Umfrage</name>
+    </tx_rkwsurvey_domain_model_survey>
+    <tx_rkwsurvey_domain_model_survey>
+        <uid>3</uid>
+        <pid>1</pid>
+        <name>Dritte Umfrage</name>
+    </tx_rkwsurvey_domain_model_survey>
+</dataset>
