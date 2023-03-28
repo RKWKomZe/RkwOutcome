@@ -879,9 +879,18 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     public function processPendingSurveyRequestMarksAllConsideredSurveyRequestsAsNotifiedAndSetsProcessSubjectOnlyInSurveyRequestContainingTheSelectedProduct()
     {
 
-        /** Es liegen mehrere SurveyRequests vor, aus denen ein Produkt ausgewählt wird,
-         *  aber nur bei der SurveyRequest, die das ausgewählte Produkt beinhaltet, wird
-         *  das processSubject gesetzt. Bei den anderen wird lediglich der notifiedTstamp gesetzt oder es wird gelöscht?
+        /**
+         * Scenario:
+         *
+         * Given a persisted surveyRequest-object 1
+         * Given a persisted order-object 1 that belongs to surveyRequest-object 1
+         * Given a persisted surveyRequest-object 2
+         * Given a persisted order-object 2 that belongs to surveyRequest-object 2
+         * When the method is called
+         * Then the number of processed requests is 2
+         * Then the property notifiedTstamp of both surveyRequest-objects is greater than 1
+         * Then the property notifiedTstamp of both surveyRequest-objects is the same
+         * Then the property processedSubject of only one surveyRequest-object is set
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check120.xml');
@@ -936,9 +945,23 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     public function processPendingSurveyRequestsRespectsSeparateFrontendUsers()
     {
 
-        /** Es liegen je zwei SurveyRequests zweier Personen vor, aus denen jeweils ein Produkt ausgewählt wird,
-         *  Am Ende muss je eine SurveyRequest je Nutzer existieren, bei der ein ProcessSubject gesetzt ist und
-         *  dabei dem Produkt aus der Bestellung des Nutzers entspricht.
+        /**
+         * Scenario:
+         *
+         * Given a persisted frontendUser 1
+         * Given a persisted surveyRequest-object 1 that belongs to frontendUser-object 1
+         * Given a persisted order-object 1 that belongs to surveyRequest-object 1
+         * Given a persisted product-object 1 that belongs to order-object 1
+         * Given a persisted frontendUser 2
+         * Given a persisted surveyRequest-object 2 that belongs to frontendUser-object 2
+         * Given a persisted order-object 2 that belongs to surveyRequest-object 2
+         * Given a persisted product-object 2 that belongs to order-object 2
+         * When the method is called
+         * Then the number of processed requests is 2
+         * Then the property notifiedTstamp of both surveyRequest-objects is greater than 1
+         * Then the property processedSubject of both surveyRequest-objects is set
+         * Then the property processSubject of surveyRequest-object 1 is set to product-object 1
+         * Then the property processSubject of surveyRequest-object 2 is set to product-object 2
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check130.xml');
