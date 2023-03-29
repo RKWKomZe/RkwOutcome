@@ -14,6 +14,7 @@ namespace RKW\RkwOutcome\Tests\Integration\Manager;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Carbon\Carbon;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwBasics\Domain\Repository\TargetGroupRepository;
 use RKW\RkwEvents\Domain\Model\EventReservation;
@@ -138,6 +139,16 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     protected $persistenceManager;
 
+    /**
+     * @var int
+     */
+    protected $checkPeriod;
+
+    /**
+     * @var int
+     */
+    protected $maxSurveysPerPeriodAndFrontendUser;
+
 
     /**
      * Setup
@@ -186,6 +197,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailReplyName'] = 'RKW';
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailReplyToAddress'] = 'reply@mein.rkw.de';
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailReturnAddress'] = 'bounces@mein.rkw.de';
+
+        $this->checkPeriod = 7 * 24 * 60 * 60;
+        $this->maxSurveysPerPeriodAndFrontendUser = 1;
 
     }
 
@@ -538,7 +552,12 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        );
+
         self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwSurvey\Domain\Model\Survey $surveyDb */
@@ -591,7 +610,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (2 * 24 * 60 * 60));
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = (2 * 24 * 60 * 60)
+        );
         self::assertCount(0, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
@@ -640,7 +663,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        );
         self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
@@ -698,7 +725,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        );
         self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
@@ -756,7 +787,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        );
         self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
@@ -824,7 +859,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->surveyRequestRepository->update($surveyRequestAlreadyNotifiedDb);
         $this->persistenceManager->persistAll();
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        );
         self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb */
@@ -841,9 +880,18 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     public function processPendingSurveyRequestMarksAllConsideredSurveyRequestsAsNotifiedAndSetsProcessSubjectOnlyInSurveyRequestContainingTheSelectedProduct()
     {
 
-        /** Es liegen mehrere SurveyRequests vor, aus denen ein Produkt ausgewählt wird,
-         *  aber nur bei der SurveyRequest, die das ausgewählte Produkt beinhaltet, wird
-         *  das processSubject gesetzt. Bei den anderen wird lediglich der notifiedTstamp gesetzt oder es wird gelöscht?
+        /**
+         * Scenario:
+         *
+         * Given a persisted surveyRequest-object 1
+         * Given a persisted order-object 1 that belongs to surveyRequest-object 1
+         * Given a persisted surveyRequest-object 2
+         * Given a persisted order-object 2 that belongs to surveyRequest-object 2
+         * When the method is called
+         * Then the number of processed requests is 2
+         * Then the property notifiedTstamp of both surveyRequest-objects is greater than 1
+         * Then the property notifiedTstamp of both surveyRequest-objects is the same
+         * Then the property processedSubject of only one surveyRequest-object is set
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check120.xml');
@@ -862,7 +910,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 1);
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        );
         self::assertCount(2, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid1 */
@@ -894,9 +946,23 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     public function processPendingSurveyRequestsRespectsSeparateFrontendUsers()
     {
 
-        /** Es liegen je zwei SurveyRequests zweier Personen vor, aus denen jeweils ein Produkt ausgewählt wird,
-         *  Am Ende muss je eine SurveyRequest je Nutzer existieren, bei der ein ProcessSubject gesetzt ist und
-         *  dabei dem Produkt aus der Bestellung des Nutzers entspricht.
+        /**
+         * Scenario:
+         *
+         * Given a persisted frontendUser 1
+         * Given a persisted surveyRequest-object 1 that belongs to frontendUser-object 1
+         * Given a persisted order-object 1 that belongs to surveyRequest-object 1
+         * Given a persisted product-object 1 that belongs to order-object 1
+         * Given a persisted frontendUser 2
+         * Given a persisted surveyRequest-object 2 that belongs to frontendUser-object 2
+         * Given a persisted order-object 2 that belongs to surveyRequest-object 2
+         * Given a persisted product-object 2 that belongs to order-object 2
+         * When the method is called
+         * Then the number of processed requests is 2
+         * Then the property notifiedTstamp of both surveyRequest-objects is greater than 1
+         * Then the property processedSubject of both surveyRequest-objects is set
+         * Then the property processSubject of surveyRequest-object 1 is set to product-object 1
+         * Then the property processSubject of surveyRequest-object 2 is set to product-object 2
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check130.xml');
@@ -915,7 +981,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 1);
         $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests($surveyWaitingTime = (1 * 24 * 60 * 60));
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        );
         self::assertCount(2, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid1 */
@@ -933,10 +1003,79 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     }
 
     /**
+     * @test
+     *
      * @throws \Exception
      */
-    public function processingTwoPendingSurveyRequestMarksBothProcessedSurveyRequestAsNotifiedButOnlySetsProcessSubjectInSurveyRequestWhichContainsSelectedProduct()
+    public function processPendingSurveyRequestsRespectsSurveyTimeSlotAndSurveryPerTimeSlotAndFrontendUser()
     {
+
+        /**
+         * Scenario:
+         *
+         * Given checkPeriod is set to 7 * 24 * 60 * 60 (last 7 days)
+         * Given maxSurveysPerPeriodAndFrontendUser is set to 1
+         * Given a persisted frontendUser 1
+         * Given a persisted surveyRequest-object 1 that belongs to frontendUser-object 1
+         * Given a persisted surveyRequest-object 2 that belongs to frontendUser-object 1
+         * When the method is called
+         * Then the number of processed requests is 2
+         * Given a persisted surveyRequest-object 3 that belongs to frontendUser-object 1
+         * When the method is called
+         * Then the number of processed requests is 0
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check140.xml');
+
+        //  set now to initial shipping date = first workday of the year
+        $initialDate = Carbon::create(2023, 1, 2, 0, 0);
+        Carbon::setTestNow($initialDate);
+
+        //  First two orders shipped on $initialDate
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+        $order->setShippedTstamp(Carbon::now()->timestamp);
+        $this->orderRepository->update($order);
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(2);
+        $order->setShippedTstamp(Carbon::now()->timestamp);
+        $this->orderRepository->update($order);
+
+        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 1);
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 2);
+
+        //  Processing pending survey requests on $initialDate + 1 day
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = 0,
+            $currentTime = Carbon::now()->addDays(1)->timestamp
+        );
+        self::assertCount(2, $notifiedSurveyRequests);
+
+        //  Third order on $initialDate + 2 days
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(2);
+        $order->setShippedTstamp(Carbon::now()->addDays(2)->timestamp);
+        $this->orderRepository->update($order);
+
+        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
+        $this->setUpSurveyRequest('\RKW\RkwShop\Domain\Model\Order', 3);
+
+        //  Processing pending survey requests on $initialDate + 3 days
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = 0,
+            $currentTime = Carbon::now()->addDays(3)->timestamp
+        );
+        self::assertCount(0, $notifiedSurveyRequests);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $pendingSurveyRequestsDb = $this->surveyRequestRepository->findAllPendingSurveyRequests();
+        self::assertCount(1, $pendingSurveyRequestsDb);
 
     }
 
@@ -988,7 +1127,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwEvents\Domain\Model\EventReservation');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests();
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = 0
+        );
         self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
@@ -1052,7 +1195,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest('\RKW\RkwEvents\Domain\Model\EventReservation');
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests();
+        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+            $checkPeriod = $this->checkPeriod,
+            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
+            $surveyWaitingTime = 0
+        );
         self::assertCount(0, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */

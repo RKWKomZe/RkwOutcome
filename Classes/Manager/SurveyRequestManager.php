@@ -18,6 +18,9 @@ use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Service\LogTrait;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
 
 /**
  * SurveyRequestManager
@@ -175,16 +178,18 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     /**
      * Processes all pending survey requests
      *
+     * @param int $checkPeriod
+     * @param int $maxSurveysPerPeriodAndFrontendUser
      * @param int $tolerance
+     * @param int $currentTime
      * @return array
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
-     * @throws \TYPO3\CMS\Core\Type\Exception\InvalidEnumerationValueException
+     * @throws IllegalObjectTypeException
+     * @throws InvalidQueryException
+     * @throws UnknownObjectException
      */
-     public function processPendingSurveyRequests(int $tolerance = 0):array {
+     public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $tolerance = 0, int $currentTime = 0):array {
 
-         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findAllPendingSurveyRequestsGroupedByFrontendUser($tolerance) ;
+         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findAllPendingSurveyRequestsGroupedByFrontendUser($tolerance, $currentTime) ;
 
          $this->logInfo(
              sprintf(
@@ -195,9 +200,12 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
          $notifiableSurveyRequests = [];
 
-         foreach ($surveyRequestsGroupedByFrontendUser as $surveyRequestsByUser) {
+         foreach ($surveyRequestsGroupedByFrontendUser as $frontendUserUid => $surveyRequestsByUser) {
 
-             if ($processableSubject = $this->getProcessable($surveyRequestsByUser)) {
+             if (
+                 !$this->isNotificationLimitReached($frontendUserUid, $checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $currentTime)
+                 && $processableSubject = $this->getProcessable($surveyRequestsByUser)
+             ) {
 
                  /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
                  foreach ($surveyRequestsByUser as $surveyRequest) {
@@ -220,7 +228,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                  }
 
                  foreach ($notifiableSurveyRequests as $notifiedSurveyRequest) {
-                     $this->markAsNotified($notifiedSurveyRequest);
+                     if (! $currentTime) {
+                         $currentTime = time();
+                     }
+                     $this->markAsNotified($notifiedSurveyRequest, $currentTime);
                  }
 
              }
@@ -333,15 +344,20 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param SurveyRequest $surveyRequest
+     * @param int           $currentTime
      * @return void
      *
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
+     * @throws IllegalObjectTypeException
+     * @throws UnknownObjectException
      */
-    protected function markAsNotified(SurveyRequest $surveyRequest): void
+    protected function markAsNotified(SurveyRequest $surveyRequest, int $currentTime = 0): void
     {
 
-        $surveyRequest->setNotifiedTstamp(time());
+        if (! $currentTime) {
+            $currentTime = time();
+        }
+
+        $surveyRequest->setNotifiedTstamp($currentTime);
 
         $this->surveyRequestRepository->update($surveyRequest);
         $this->persistenceManager->persistAll();
@@ -405,6 +421,22 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         }
 
         return $containsProcessableSubject;
+    }
+
+    /**
+     * @param int $frontendUserUid
+     * @param int $checkPeriod
+     * @param int $maxSurveysPerPeriodAndFrontendUser
+     * @param int $currentTime
+     * @return bool
+     * @throws InvalidQueryException
+     */
+    protected function isNotificationLimitReached(int $frontendUserUid, int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $currentTime): bool
+    {
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $alreadyNotifiedRequests = $this->surveyRequestRepository->findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser($frontendUserUid, $checkPeriod, $currentTime);
+
+        return count($alreadyNotifiedRequests) >= $maxSurveysPerPeriodAndFrontendUser;
     }
 
 }
