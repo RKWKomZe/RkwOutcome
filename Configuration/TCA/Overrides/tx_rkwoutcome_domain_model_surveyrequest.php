@@ -6,7 +6,7 @@
 // Add an extra categories selection field to the pages table
 \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::makeCategorizable(
     'examples',
-    'tx_rkwoutcome_domain_model_surveyconfiguration',
+    'tx_rkwoutcome_domain_model_surveyrequest',
     // Do not use the default field name ("categories") for pages, tt_content, sys_file_metadata, which is already used
     'target_category',
     array(
@@ -32,5 +32,5 @@
 );
 
 //  @todo: Does not work as TCEFORM.tx_rkwoutcome_domain_model_surveyconfiguration.target_category.config.treeConfig.rootUid = 147 in 50-categories.typoscript!?
-$GLOBALS['TCA']['tx_rkwoutcome_domain_model_surveyconfiguration']['columns']['target_category']['config']['treeConfig']['rootUid'] = 147;
+$GLOBALS['TCA']['tx_rkwoutcome_domain_model_surveyrequest']['columns']['target_category']['config']['treeConfig']['rootUid'] = 147;
 

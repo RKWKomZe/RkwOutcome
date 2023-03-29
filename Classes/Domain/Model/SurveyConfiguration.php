@@ -52,6 +52,38 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
+     * TargetCategory
+     *
+     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
+     */
+    protected $targetCategory;
+
+
+
+    /**
+     * __construct
+     */
+    public function __construct()
+    {
+        //Do not remove the next line: It would break the functionality
+        $this->initStorageObjects();
+    }
+
+    /**
+     * Initializes all ObjectStorage properties
+     * Do not modify this method!
+     * It will be rewritten on each save in the extension builder
+     * You may modify the constructor of this class instead
+     *
+     * @return void
+     */
+    protected function initStorageObjects()
+    {
+        $this->targetCategory = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+    }
+
+
+    /**
      * Returns the product
      *
      * @return \RKW\RkwShop\Domain\Model\Product|null $product
@@ -117,6 +149,28 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     public function setTargetGroup(\RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup): void
     {
         $this->targetGroup = $targetGroup;
+    }
+
+
+    /**
+     * Returns the targetCategory
+     *
+     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetCategory
+     */
+    public function getTargetCategory()
+    {
+        return $this->targetCategory;
+    }
+
+    /**
+     * Sets the targetCategory
+     *
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetCategory
+     * @return void
+     */
+    public function setTargetCategory(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetCategory)
+    {
+        $this->targetCategory = $targetCategory;
     }
 
 }

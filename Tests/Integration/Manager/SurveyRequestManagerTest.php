@@ -206,7 +206,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestCreatesSurveyRequestIfOrderContainsAProductAssociatedWithSurveyConfigurationWithSameTargetGroup()
     {
@@ -242,9 +242,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
-        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
-        $targetGroup = $this->targetGroupRepository->findByUid(1);
-
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($process);
 
@@ -262,14 +259,18 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
         self::assertSame($frontendUser, $surveyRequest->getFrontendUser());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertSame($targetGroup, $surveyRequest->getTargetGroup());
+
+        $process->getTargetCategory()->rewind();
+        $surveyRequest->getTargetCategory()->rewind();
+
+        self::assertSame($process->getTargetCategory()->current(), $surveyRequest->getTargetCategory()->current());
 
     }
 
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestCreatesSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductAssociatedWithSurveyConfiguration()
     {
@@ -334,7 +335,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedProducts()
     {
@@ -378,7 +379,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestDoesNotCreateSurveyRequestIfAssociatedSurveyConfigurationIsNotSetToSameTargetGroupAsOrder()
     {
@@ -432,7 +433,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestCreatesSurveyRequestTriggeredByAnEventReservation()
     {
@@ -496,7 +497,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     //  @todo: Check, if connected survey is due (in between starttime <> endtime)
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestTriggeredByAnEventDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedEvent()
     {
@@ -506,7 +507,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestTriggeredByAnEventDoesNotCreateSurveyRequestIfAssociatedSurveyDoesNotUseSameTargetgroupAsEventReservation()
     {
@@ -517,7 +518,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime()
     {
@@ -574,7 +575,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime()
     {
@@ -628,7 +629,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfiguration()
     {
@@ -683,7 +684,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationEvenIfASecondProductWithNotMatchingSurveyConfigurationExists()
     {
@@ -746,7 +747,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestSetsSurveyRequestPropertyProcessSubjectToRandomProductAssociatedWithSurveyConfiguration()
     {
@@ -810,7 +811,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @todo
      *
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestsSendsTwoNotificationsIfTwoSeparateUsersTriggeredRequests()
     {
@@ -820,7 +821,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestIgnoresAlreadyProcessedSurveyRequest()
     {
@@ -875,7 +876,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @test
      *
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestMarksAllConsideredSurveyRequestsAsNotifiedAndSetsProcessSubjectOnlyInSurveyRequestContainingTheSelectedProduct()
     {
@@ -941,7 +942,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @test
      *
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestsRespectsSeparateFrontendUsers()
     {
@@ -1005,7 +1006,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @test
      *
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestsRespectsSurveyTimeSlotAndSurveryPerTimeSlotAndFrontendUser()
     {
@@ -1081,7 +1082,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfSurveyRequestContainsAnEvent()
     {
@@ -1149,7 +1150,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfEventHasNotEndedYet()
     {

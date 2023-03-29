@@ -60,6 +60,14 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
+     * TargetCategory
+     *
+     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
+     */
+    protected $targetCategory;
+
+
+    /**
      * notifiedTstamp
      *
      * @var int
@@ -82,6 +90,30 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @var \RKW\RkwSurvey\Domain\Model\Survey|null
      */
     protected $survey;
+
+
+    /**
+     * __construct
+     */
+    public function __construct()
+    {
+        //Do not remove the next line: It would break the functionality
+        $this->initStorageObjects();
+    }
+
+    /**
+     * Initializes all ObjectStorage properties
+     * Do not modify this method!
+     * It will be rewritten on each save in the extension builder
+     * You may modify the constructor of this class instead
+     *
+     * @return void
+     */
+    protected function initStorageObjects()
+    {
+        $this->targetCategory = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+    }
+
 
     /**
      * Returns the process
@@ -239,6 +271,49 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     public function setSurvey(\RKW\RkwSurvey\Domain\Model\Survey $survey): void
     {
         $this->survey = $survey;
+    }
+
+    /**
+     * Returns the targetCategory
+     *
+     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetCategory
+     */
+    public function getTargetCategory()
+    {
+        return $this->targetCategory;
+    }
+
+    /**
+     * Sets the targetCategory
+     *
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetCategory
+     * @return void
+     */
+    public function setTargetCategory(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetCategory)
+    {
+        $this->targetCategory = $targetCategory;
+    }
+
+    /**
+     * Adds a Category
+     *
+     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetCategory
+     * @return void
+     */
+    public function addTargetCategory(\TYPO3\CMS\Extbase\Domain\Model\Category $targetCategory): void
+    {
+        $this->targetCategory->attach($targetCategory);
+    }
+
+    /**
+     * Removes a Category
+     *
+     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetCategoryToRemove The Category to be removed
+     * @return void
+     */
+    public function removeTargetCategory(\TYPO3\CMS\Extbase\Domain\Model\Category $targetCategoryToRemove)
+    {
+        $this->targetCategory->detach($targetCategoryToRemove);
     }
 
 

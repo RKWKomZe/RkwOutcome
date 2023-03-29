@@ -151,7 +151,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             //  @todo: TargetGroups über die sys_categories steuern
             //  @todo: targetGroup must be mandatory in order form, otherwise this next condition crashes:
             //  Argument 1 passed to RKW\RkwOutcome\Domain\Model\SurveyRequest::setTargetGroup() must be an instance of RKW\RkwBasics\Domain\Model\TargetGroup, null given
-            $surveyRequest->setTargetGroup($process->getTargetGroup());
+//            $surveyRequest->setTargetGroup($process->getTargetGroup());
+
+            $process->getTargetCategory()->rewind();
+            $surveyRequest->addTargetCategory($process->getTargetCategory()->current());
 
             $this->surveyRequestRepository->add($surveyRequest);
             $this->persistenceManager->persistAll();
@@ -316,7 +319,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
                 /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                 if (
-                    $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup())
+                    $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetCategory())
                 ) {
                     $notifiableObjects[] = $orderItem->getProduct();
                 }

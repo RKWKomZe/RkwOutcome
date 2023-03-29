@@ -14,8 +14,9 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwBasics\Helper\QueryTypo3;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
-use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * SurveyConfigurationRepository
@@ -62,26 +63,71 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
     /**
      * Finds a survey configuration matching the given identifier.
      *
-     * @param \RKW\RkwShop\Domain\Model\Product $product
-     * @param \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup
+     * @param \RKW\RkwShop\Domain\Model\Product            $product
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetCategpries
      *
      * @return object|null The object for the identifier if it is known, or NULL
+     * @throws InvalidQueryException
      */
-    public function findByProductAndTargetGroup(\RKW\RkwShop\Domain\Model\Product $product, \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup)
+    public function findByProductAndTargetGroup(\RKW\RkwShop\Domain\Model\Product $product, \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetCategories)
     {
-        $query = $this->createQuery();
 
-        $query->matching(
-            $query->logicalAnd(
-                $query->equals('product', $product),
-                $query->equals('targetGroup', $targetGroup)
-            )
-        );
+        // 1. build uid list
+        $sysCategoriesList = [];
 
-        $query->setLimit(1);
+        /** @var \TYPO3\CMS\Extbase\Domain\Model\Category $category */
+        foreach ($targetCategories as $category) {
+            if ($category instanceof \TYPO3\CMS\Extbase\Domain\Model\Category) {
+                $sysCategoriesList[] = $category->getUid();
+            }
+        }
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-        return $query->execute()->getFirst();
+        if (count($sysCategoriesList)) {
+
+            // 2. set leftJoin over categories
+            $leftJoin = '
+                LEFT JOIN sys_category_record_mm AS sys_category_record_mm 
+                    ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign 
+                    AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\' 
+                    AND sys_category_record_mm.fieldname = \'target_category\'
+                LEFT JOIN sys_category AS sys_category
+                    ON sys_category_record_mm.uid_local=sys_category.uid
+                    AND sys_category.deleted = 0
+            ';
+
+            // 3. set constraints
+            $constraints = [
+                '(((sys_category.sys_language_uid IN (0,-1))) OR sys_category.uid IS NULL)',
+                'tx_rkwoutcome_domain_model_surveyconfiguration.product = ' . $product->getUid(),
+            ];
+
+            // 5. Final statement
+            $finalStatement = '
+                SELECT tx_rkwoutcome_domain_model_surveyconfiguration.*
+                FROM tx_rkwoutcome_domain_model_surveyconfiguration 
+                ' . $leftJoin . '
+                WHERE 
+                    sys_category.uid IN(' . implode(',', $sysCategoriesList) . ')
+                    AND ' . implode(' AND ', $constraints) .
+                QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
+                QueryTypo3::getWhereClauseForDeleteFields('tx_rkwoutcome_domain_model_surveyconfiguration')
+                ;
+
+            // build final query
+            $query = $this->createQuery();
+            $query->getQuerySettings()->setRespectStoragePage(false);
+            $query->statement(
+                $finalStatement . '
+                LIMIT 1'
+            );
+
+            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+            return $query->execute()->getFirst();
+
+        }
+
+        return null;
+
     }
 
 
