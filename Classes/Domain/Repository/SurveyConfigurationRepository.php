@@ -64,32 +64,32 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
      * Finds a survey configuration matching the given identifier.
      *
      * @param \RKW\RkwShop\Domain\Model\Product            $product
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetCategpries
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
      *
      * @return object|null The object for the identifier if it is known, or NULL
      * @throws InvalidQueryException
      */
-    public function findByProductAndTargetGroup(\RKW\RkwShop\Domain\Model\Product $product, \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetCategories)
+    public function findByProductAndTargetGroup(\RKW\RkwShop\Domain\Model\Product $product, \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups)
     {
 
         // 1. build uid list
-        $sysCategoriesList = [];
+        $targetGroupsList = [];
 
         /** @var \TYPO3\CMS\Extbase\Domain\Model\Category $category */
-        foreach ($targetCategories as $category) {
-            if ($category instanceof \TYPO3\CMS\Extbase\Domain\Model\Category) {
-                $sysCategoriesList[] = $category->getUid();
+        foreach ($targetGroups as $targetGroup) {
+            if ($targetGroup instanceof \TYPO3\CMS\Extbase\Domain\Model\Category) {
+                $targetGroupsList[] = $targetGroup->getUid();
             }
         }
 
-        if (count($sysCategoriesList)) {
+        if (count($targetGroupsList)) {
 
             // 2. set leftJoin over categories
             $leftJoin = '
                 LEFT JOIN sys_category_record_mm AS sys_category_record_mm 
                     ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign 
                     AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\' 
-                    AND sys_category_record_mm.fieldname = \'target_category\'
+                    AND sys_category_record_mm.fieldname = \'target_group\'
                 LEFT JOIN sys_category AS sys_category
                     ON sys_category_record_mm.uid_local=sys_category.uid
                     AND sys_category.deleted = 0
@@ -107,7 +107,7 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                 FROM tx_rkwoutcome_domain_model_surveyconfiguration 
                 ' . $leftJoin . '
                 WHERE 
-                    sys_category.uid IN(' . implode(',', $sysCategoriesList) . ')
+                    sys_category.uid IN(' . implode(',', $targetGroupsList) . ')
                     AND ' . implode(' AND ', $constraints) .
                 QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
                 QueryTypo3::getWhereClauseForDeleteFields('tx_rkwoutcome_domain_model_surveyconfiguration')
@@ -117,12 +117,11 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             $query = $this->createQuery();
             $query->getQuerySettings()->setRespectStoragePage(false);
             $query->statement(
-                $finalStatement . '
-                LIMIT 1'
+                $finalStatement
             );
 
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-            return $query->execute()->getFirst();
+            return $query->execute();
 
         }
 

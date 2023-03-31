@@ -60,7 +60,7 @@ class TcaProcFunc
                 ->where(
                     $queryBuilder->expr()->eq('sc_mm.uid_foreign', $queryBuilder->createNamedParameter($params['row']['uid'], \PDO::PARAM_INT)),
                     $queryBuilder->expr()->eq('sc_mm.tablenames', $queryBuilder->createNamedParameter($params['table'], \PDO::PARAM_STR)),
-                    $queryBuilder->expr()->eq('sc_mm.fieldname', $queryBuilder->createNamedParameter('target_category', \PDO::PARAM_STR))
+                    $queryBuilder->expr()->eq('sc_mm.fieldname', $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR))
                 )
                 ->execute();
 

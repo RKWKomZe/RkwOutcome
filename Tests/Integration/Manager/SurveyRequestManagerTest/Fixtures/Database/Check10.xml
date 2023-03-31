@@ -39,12 +39,6 @@
         <stock>1</stock>
         <backend_user />
     </tx_rkwshop_domain_model_product>
-    <!-- targetgroups -->
-    <tx_rkwbasics_domain_model_target_group>
-        <uid>1</uid>
-        <pid>1</pid>
-        <name>Unternehmen</name>
-    </tx_rkwbasics_domain_model_target_group>
     <!-- surveyConfigurations -->
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
@@ -71,7 +65,7 @@
         <tablenames>tx_rkwshop_domain_model_order</tablenames>
         <sorting>0</sorting>
         <sorting_foreign>1</sorting_foreign>
-        <fieldname>target_category</fieldname>
+        <fieldname>target_group</fieldname>
     </sys_category_record_mm>
     <sys_category_record_mm>
         <uid_local>1</uid_local>
@@ -79,6 +73,6 @@
         <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
         <sorting>0</sorting>
         <sorting_foreign>1</sorting_foreign>
-        <fieldname>target_category</fieldname>
+        <fieldname>target_group</fieldname>
     </sys_category_record_mm>
 </dataset>

@@ -8,7 +8,7 @@
     'examples',
     'tx_rkwoutcome_domain_model_surveyrequest',
     // Do not use the default field name ("categories") for pages, tt_content, sys_file_metadata, which is already used
-    'target_category',
+    'target_group',
     array(
         // Set a custom label
         'label' => 'LLL:EXT:examples/Resources/Private/Language/locallang.xlf:additional_categories',
@@ -31,6 +31,6 @@
     )
 );
 
-//  @todo: Does not work as TCEFORM.tx_rkwoutcome_domain_model_surveyconfiguration.target_category.config.treeConfig.rootUid = 147 in 50-categories.typoscript!?
-$GLOBALS['TCA']['tx_rkwoutcome_domain_model_surveyrequest']['columns']['target_category']['config']['treeConfig']['rootUid'] = 147;
+//  @todo: Does not work as TCEFORM.tx_rkwoutcome_domain_model_surveyconfiguration.target_group.config.treeConfig.rootUid = 147 in 50-categories.typoscript!?
+$GLOBALS['TCA']['tx_rkwoutcome_domain_model_surveyrequest']['columns']['target_group']['config']['treeConfig']['rootUid'] = 147;
 

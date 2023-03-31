@@ -44,19 +44,11 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * targetGroup
-     *
-     * @var \RKW\RkwBasics\Domain\Model\TargetGroup|null
-     */
-    protected $targetGroup = null;
-
-
-    /**
-     * TargetCategory
+     * TargetGroup
      *
      * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
      */
-    protected $targetCategory;
+    protected $targetGroup;
 
 
 
@@ -79,7 +71,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      */
     protected function initStorageObjects()
     {
-        $this->targetCategory = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+        $this->targetGroup = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
     }
 
 
@@ -132,45 +124,22 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the targetGroup
      *
-     * @return \RKW\RkwBasics\Domain\Model\TargetGroup
+     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
      */
-    public function getTargetGroup(): \RKW\RkwBasics\Domain\Model\TargetGroup
+    public function getTargetGroup()
     {
         return $this->targetGroup;
     }
 
-
     /**
      * Sets the targetGroup
      *
-     * @param \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
      * @return void
      */
-    public function setTargetGroup(\RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup): void
+    public function setTargetGroup(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroup)
     {
         $this->targetGroup = $targetGroup;
-    }
-
-
-    /**
-     * Returns the targetCategory
-     *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetCategory
-     */
-    public function getTargetCategory()
-    {
-        return $this->targetCategory;
-    }
-
-    /**
-     * Sets the targetCategory
-     *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetCategory
-     * @return void
-     */
-    public function setTargetCategory(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetCategory)
-    {
-        $this->targetCategory = $targetCategory;
     }
 
 }

@@ -51,20 +51,13 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      protected $processType;
 
 
-    /**
-     * targetGroup
-     *
-     * @var \RKW\RkwBasics\Domain\Model\TargetGroup|null
-     */
-    protected $targetGroup;
-
 
     /**
-     * TargetCategory
+     * TargetGroup
      *
      * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
      */
-    protected $targetCategory;
+    protected $targetGroup;
 
 
     /**
@@ -111,7 +104,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      */
     protected function initStorageObjects()
     {
-        $this->targetCategory = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+        $this->targetGroup = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
     }
 
 
@@ -185,29 +178,6 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the targetGroup
-     *
-     * @return \RKW\RkwBasics\Domain\Model\TargetGroup
-     */
-    public function getTargetGroup(): \RKW\RkwBasics\Domain\Model\TargetGroup
-    {
-        return $this->targetGroup;
-    }
-
-
-    /**
-     * Sets the targetGroup
-     *
-     * @param \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup
-     * @return void
-     */
-    public function setTargetGroup(\RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup): void
-    {
-        $this->targetGroup = $targetGroup;
-    }
-
-
-    /**
      * Returns the notifiedTstamp
      *
      * @return int
@@ -274,46 +244,46 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     }
 
     /**
-     * Returns the targetCategory
+     * Returns the targetGroup
      *
-     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetCategory
+     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
      */
-    public function getTargetCategory()
+    public function getTargetGroup()
     {
-        return $this->targetCategory;
+        return $this->targetGroup;
     }
 
     /**
-     * Sets the targetCategory
+     * Sets the targetGroup
      *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetCategory
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
      * @return void
      */
-    public function setTargetCategory(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetCategory)
+    public function setTargetGroup(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroup)
     {
-        $this->targetCategory = $targetCategory;
+        $this->targetGroup = $targetGroup;
     }
 
     /**
      * Adds a Category
      *
-     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetCategory
+     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroup
      * @return void
      */
-    public function addTargetCategory(\TYPO3\CMS\Extbase\Domain\Model\Category $targetCategory): void
+    public function addTargetGroup(\TYPO3\CMS\Extbase\Domain\Model\Category $targetGroup): void
     {
-        $this->targetCategory->attach($targetCategory);
+        $this->targetGroup->attach($targetGroup);
     }
 
     /**
      * Removes a Category
      *
-     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetCategoryToRemove The Category to be removed
+     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroupToRemove
      * @return void
      */
-    public function removeTargetCategory(\TYPO3\CMS\Extbase\Domain\Model\Category $targetCategoryToRemove)
+    public function removeTargetGroup(\TYPO3\CMS\Extbase\Domain\Model\Category $targetGroupToRemove)
     {
-        $this->targetCategory->detach($targetCategoryToRemove);
+        $this->targetGroup->detach($targetGroupToRemove);
     }
 
 

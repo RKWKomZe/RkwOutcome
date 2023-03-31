@@ -30,6 +30,14 @@
                 <source>Survey</source>
             </trans-unit>
 
+
+            <!-- ##################################################### -->
+            <!-- tx_rkwoutcome_domain_model_surveyrequest              -->
+            <!-- ##################################################### -->
+            <trans-unit id="tx_rkwoutcome_domain_model_surveyrequest">
+                <source>RKW Outcome: Request</source>
+            </trans-unit>
+
             <!-- ##################################################### -->
             <!-- fe_user                                               -->
             <!-- ##################################################### -->

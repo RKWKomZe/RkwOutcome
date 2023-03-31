@@ -22,10 +22,10 @@ return [
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyconfiguration.gif'
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, target_category',
+        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group',
     ],
     'types' => [
-        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, target_category'],
+        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group'],
     ],
     'columns' => [
 
@@ -165,19 +165,6 @@ return [
                 'foreign_table_where' => ' AND ((\'###PAGE_TSCONFIG_IDLIST###\' <> \'0\' AND FIND_IN_SET(tx_rkwsurvey_domain_model_survey.pid,\'###PAGE_TSCONFIG_IDLIST###\')) OR (\'###PAGE_TSCONFIG_IDLIST###\' = \'0\')) AND tx_rkwsurvey_domain_model_survey.hidden = 0 AND tx_rkwsurvey_domain_model_survey.deleted = 0',
                 'size' => 1,
                 'minitems' => 0,
-                'maxitems' => 1,
-            ],
-        ],
-
-        'target_group' => [
-            'exclude' => 0,
-            'label' => 'LLL:EXT:rkw_events/Resources/Private/Language/locallang_db.xlf:tx_rkwevents_domain_model_event.target_group',
-            'config' => [
-                'type' => 'select',
-                'renderType' => 'selectSingle',
-                'foreign_table' => 'tx_rkwbasics_domain_model_target_group',
-                'foreign_table_where' => 'AND tx_rkwbasics_domain_model_target_group.deleted = 0 ORDER BY name ASC',
-                'minitems' => 1,
                 'maxitems' => 1,
             ],
         ],
