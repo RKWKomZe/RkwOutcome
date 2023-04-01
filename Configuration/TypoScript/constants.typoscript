@@ -9,14 +9,16 @@ plugin.tx_rkwoutcome {
 
 		# cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template partials (FE)
 		partialRootPath = EXT:rkw_outcome/Resources/Private/Partials/
-		
 	}
 	persistence {
 		# cat=plugin.tx_rkwoutcome//a; type=string; label=Default storage PID
-		storagePid = 4161
+		storagePid =
 	}
 
 	settings {
+
+        # cat=plugin.tx_rkwoutcome//a; type=integer; label=Pid of target groups
+        targetGroupsPid =
 
 	}
 }

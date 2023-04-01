@@ -126,18 +126,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         //  @todo: use a custom Signal in OrderManager->saveOrder to provide FE-User instead of BE-User
         //  @todo: Alternativ: Wie kann ich $frontendUser und $backendUserForProductMap ignorieren?
 
-
         //  @todo: Lässt sich das auch über einen Accessor o. ä. lösen?
         /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = (method_exists($process, 'getFrontendUser')) ? $process->getFrontendUser() : $process->getFeUser();
-
-        $this->logInfo(
-            sprintf(
-                'Created surveyRequest for process with uid=%s of by frontenduser with %s.',
-                $process->getUid(),
-                $frontendUser->getUid()
-            )
-        );
 
         //  @todo: only surveyable, if same target group
         if ($this->isSurveyable($process)) {
@@ -148,27 +139,33 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             $surveyRequest->setProcessType(get_class($process));
             $surveyRequest->setFrontendUser($frontendUser);
 
-            //  @todo: TargetGroups über die sys_categories steuern
             //  @todo: targetGroup must be mandatory in order form, otherwise this next condition crashes:
-            //  Argument 1 passed to RKW\RkwOutcome\Domain\Model\SurveyRequest::setTargetGroup() must be an instance of RKW\RkwBasics\Domain\Model\TargetGroup, null given
-            $surveyRequest->setTargetGroup($process->getTargetGroup());
+            $process->getTargetGroup()->rewind();
+            $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
 
             $this->surveyRequestRepository->add($surveyRequest);
             $this->persistenceManager->persistAll();
 
             $this->logDebug(
                 sprintf(
-//                'Created surveyRequest for order with id=%s of by frontenduser with id=%s.',
-                    'Created surveyRequest for process with id=%s of type=%s by frontenduser with id=',
+                    'Created surveyRequest for process with uid=%s of type=%s by frontenduser with uid=%s',
                     $process->getUid(),
-                    get_class($process)
-//                $issue->getUid()
+                    get_class($process),
+                    $frontendUser->getUid()
                 )
             );
 
             return $surveyRequest;
 
         }
+
+        $this->logInfo(
+            sprintf(
+                'No surveyRequest has been created for process with uid=%s by frontenduser with %s.',
+                $process->getUid(),
+                $frontendUser->getUid()
+            )
+        );
 
         return null;
 
@@ -203,7 +200,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
          foreach ($surveyRequestsGroupedByFrontendUser as $frontendUserUid => $surveyRequestsByUser) {
 
              if (
-                 !$this->isNotificationLimitReached($frontendUserUid, $checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $currentTime)
+                 ! $this->isNotificationLimitReached($frontendUserUid, $checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $currentTime)
                  && $processableSubject = $this->getProcessable($surveyRequestsByUser)
              ) {
 
@@ -213,11 +210,21 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                      if ($this->containsProcessableSubject($surveyRequest, $processableSubject)) {
 
                          $surveyRequest->setProcessSubject($processableSubject);
+
+                         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
+                         $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
                          /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-                         $surveyConfiguration = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
+                         $surveyConfiguration = $surveyConfigurations->getFirst();
                          $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
                          $this->surveyRequestRepository->update($surveyRequest);
-                         $this->persistenceManager->persistAll();
+
+                         $this->logInfo(
+                             sprintf(
+                                 'Pending request %s with process_subject %s will be notified.',
+                                 $surveyRequest->getUid(),
+                                 $processableSubject->getUid()
+                             )
+                         );
 
                          $this->sendNotification($surveyRequest);
 
@@ -261,6 +268,13 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
         if ($recipient = $surveyRequest->getFrontendUser()) {
 
+            $this->logInfo(
+                sprintf(
+                    'Sending notification for %s will be dispatched.',
+                    $surveyRequest->getUid()
+                )
+            );
+
             // Signal for e.g. E-Mails
             $this->signalSlotDispatcher->dispatch(
                 __CLASS__,
@@ -303,9 +317,18 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * @param \RKW\RkwShop\Domain\Model\Order $process
      *
      * @return array
+     * @throws InvalidQueryException
      */
     protected function getNotifiableObjects(\RKW\RkwShop\Domain\Model\Order $process): array
     {
+
+        $this->logInfo(
+            sprintf(
+                'Looking for configurations matching process with uid %s and targetGroup %s',
+                $process->getUid(),
+                json_encode($process->getTargetGroup())
+            )
+        );
 
         $notifiableObjects = [];
 
@@ -314,9 +337,17 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
             foreach ($process->getOrderItem() as $orderItem) {
 
-                /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+                $this->logInfo(
+                    sprintf(
+                        'Looking for configurations matching orderItem with uid %s.',
+                        $orderItem->getUid()
+                    )
+                );
+
+                /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
+                $result = $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup());
                 if (
-                    $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup())
+                    $result->count() > 0
                 ) {
                     $notifiableObjects[] = $orderItem->getProduct();
                 }

@@ -28,6 +28,7 @@ use RKW\RkwShop\Domain\Repository\ProductRepository;
 use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 /**
@@ -206,7 +207,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestCreatesSurveyRequestIfOrderContainsAProductAssociatedWithSurveyConfigurationWithSameTargetGroup()
     {
@@ -217,17 +218,17 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given an order-object that is persisted
          * Given the order-property frontendUser is set to that frontendUser-object
          * Given a frontendUser-object that is persisted and belongs to that order-object
-         * Given a targetGroup-object that is persisted and belongs to that order-object
+         * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object that is persisted and belongs to that order-object
          * Given a product-object is persisted and belongs to that orderItem-object
          * Given a surveyConfiguration-object that is persisted
          * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
-         * Given the surveyConfiguration-property targetGroup is set to the same targetGroup as the order-property targetGroup
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
          * When the method is called
          * Then a single surveyRequest-object is persisted
          * Then the order-property of this persisted surveyRequest-object is set to the order-object
          * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
-         * Then the targetGroup-property of this persisted surveyRequest-object is set to targetGroup-property of the order-object
+         * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
          */
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
@@ -241,9 +242,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
-        $targetGroup = $this->targetGroupRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($process);
@@ -262,16 +260,20 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
         self::assertSame($frontendUser, $surveyRequest->getFrontendUser());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertSame($targetGroup, $surveyRequest->getTargetGroup());
+
+        $process->getTargetGroup()->rewind();
+        $surveyRequest->getTargetGroup()->rewind();
+
+        self::assertSame($process->getTargetGroup()->current(), $surveyRequest->getTargetGroup()->current());
 
     }
 
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestCreatesSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductAssociatedWithSurveyConfiguration()
+    public function createSurveyRequestCreatesSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductAssociatedWithSurveyConfiguration(): void
     {
 
         /**
@@ -280,19 +282,19 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given an order-object that is persisted
          * Given the order-property frontendUser is set to that frontendUser-object
          * Given a frontendUser-object that is persisted and belongs to that order-object
-         * Given a targetGroup-object that is persisted and belongs to that order-object
+         * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object 1 that is persisted and belongs to that order-object
          * Given a product-object 1 that is persisted and belongs to that orderItem-object 1
          * Given an orderItem-object 2 that is persisted and belongs to that order-object
          * Given a product-object 2 that is persisted and belongs to that orderItem-object 2
          * Given a surveyConfiguration-object that is persisted
          * Given the surveyConfiguration-property product is set to product-object 1
-         * Given the surveyConfiguration-property targetGroup is set to the same targetGroup as the order-property targetGroup
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
          * When the method is called
          * Then a single surveyRequest-object is persisted
          * Then the order-property of this persisted surveyRequest-object is set to the order-object
          * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
-         * Then the targetGroup-property of this persisted surveyRequest-object is set to targetGroup-property of the order-object
+         * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check20.xml');
@@ -326,15 +328,19 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertSame($process, $surveyRequestDb->getProcess());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcess());
         self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertSame($frontendUser, $surveyRequest->getFrontendUser());
-        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertSame($targetGroup, $surveyRequest->getTargetGroup());
+        self::assertSame($frontendUser, $surveyRequestDb->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
+
+        $process->getTargetGroup()->rewind();
+        $surveyRequestDb->getTargetGroup()->rewind();
+
+        self::assertSame($process->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
 
     }
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedProducts()
     {
@@ -345,13 +351,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given an order-object that is persisted
          * Given the order-property frontendUser is set to that frontendUser-object
          * Given a frontendUser-object that is persisted and belongs to that order-object
-         * Given a targetGroup-object that is persisted and belongs to that order-object
+         * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object that is persisted and belongs to that order-object
          * Given a product-object 1 that is persisted and belongs to that orderItem-object
          * Given a product-object 2 that is persisted and does not belong to that order
          * Given a surveyConfiguration-object that is persisted
          * Given the surveyConfiguration-property product is set to product-object 2
-         * Given the surveyConfiguration-property targetGroup is set to the same targetGroup as the order-property targetGroup
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
          * When the method is called
          * Then the method returns null
          * Then no surveyRequest-object is persisted
@@ -378,9 +384,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestDoesNotCreateSurveyRequestIfAssociatedSurveyConfigurationIsNotSetToSameTargetGroupAsOrder()
+    public function createSurveyRequestDoesNotCreateSurveyRequestIfAssociatedSurveyConfigurationIsNotSetToSameTargetGroupAsOrder(): void
     {
 
         /**
@@ -389,12 +395,12 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a targetGroup-object 1 is persisted
          * Given a targetGroup-object 2 is persisted
          * Given an order-object that is persisted
-         * Given the targetGroup-property of that order-object ss set to targetGroup-object 1
+         * Given the targetGroup-object 1 is attached to that order-object
          * Given an orderItem-object that is persisted and belongs to that order-object
          * Given a product-object is persisted and belongs to that orderItem-object
          * Given a surveyConfiguration-object is persisted
          * Given the product-property of that surveyConfiguration-object is that product-object
-         * Given the targetGroup-property of that surveyConfiguration-object is set to targetGroup-object 2
+         * Given the targetGroup-object 2 is attached to that surveyConfiguration-object
          * When the method is called
          * Then the method returns null
          * Then no surveyRequest-object is persisted
@@ -420,19 +426,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestCreatesSurveyRequestTriggeredByAnEventReservation()
     {
@@ -496,7 +491,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     //  @todo: Check, if connected survey is due (in between starttime <> endtime)
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestTriggeredByAnEventDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedEvent()
     {
@@ -506,7 +501,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestTriggeredByAnEventDoesNotCreateSurveyRequestIfAssociatedSurveyDoesNotUseSameTargetgroupAsEventReservation()
     {
@@ -517,9 +512,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws IllegalObjectTypeException
      */
-    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime()
+    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime(): void
     {
 
         /**
@@ -531,9 +527,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyConfiguration-object
          * Given the surveyConfiguration-property survey is set to that survey-object
          * Given the surveyConfiguration-property product is set to that product-object
+         * Given the targetGroup-object 1 is attached to that surveyConfiguration-object
          * Given a persisted order-object
          * Given the order-property shippedTstamp is set to greater than (now (time()) - surveyWaitingTime (1 day))
          * Given the product-property ot the contained orderItem-object is set to the same product-object
+         * Given the targetGroup-object 1 is attached to that order-object
          * Given a persisted surveyRequest-object
          * Given the surveyRequest-property process is set to that order-object
          * When the method is called
@@ -574,7 +572,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime()
     {
@@ -588,15 +586,17 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted surveyConfiguration-object
          * Given the surveyConfiguration-property survey is set to that survey-object
          * Given the surveyConfiguration-property product is set to that product-object
+         * Given the targetGroup-object 1 is attached to that surveyConfiguration-object
          * Given a persisted order-object
          * Given the order-property shippedTstamp is set to greater than (now (time()) - surveyWaitingTime (2 days))
          * Given the product-property ot the contained orderItem-object is set to the same product-object
+         * Given the targetGroup-object 1 is attached to that order-object
          * Given a persisted surveyRequest-object
          * Given the surveyRequest-property process is set to that order-object
          * When the method is called
-         * Then the surveyRequest-property notifiedTstamp is set to > 0
-         * Then the surveyRequest-property processSubject is set to that product-object
-         * Then the surveyRequest-property survey is set to that survey-object
+         * Then the surveyRequest-property notifiedTstamp remains 0
+         * Then the surveyRequest-property processSubject remains null
+         * Then the surveyRequest-property survey remains null
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check70.xml');
@@ -628,9 +628,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws IllegalObjectTypeException
      */
-    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfiguration()
+    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationIfOtherProductsExist()
     {
 
         /**
@@ -683,7 +684,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationEvenIfASecondProductWithNotMatchingSurveyConfigurationExists()
     {
@@ -696,13 +697,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted product 1
          * Given a persisted surveyConfiguration-object 1
          * Given the surveyConfiguration-property is set to that product-object 1
-         * Given the property targetGroup of surveyConfiguration 1 is set to targetGroup 1
+         * Given the targetGroup 1 is attached to surveyConfiguration 1
          * Given a second persisted product 2
          * Given a persisted surveyConfiguration-object 2
          * Given the surveyConfiguration-property is set to that product-object 2
-         * Given the property targetGroup of surveyConfiguration 2 is set to targetGroup 2
+         * Given the targetGroup 2 is attached to surveyConfiguration 2
          * Given a persisted order-object
-         * Given the order-property targetGroup is set to targetGroup 1
+         * Given the targetGroup 1 is attached to the order-object
          * Given the order-object contains two orderItem-objects
          * Given the product-property of the first orderItem-object is set to the product-object 1
          * Given the product-property of the second orderItem-object is set to the product-object 2
@@ -746,7 +747,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestSetsSurveyRequestPropertyProcessSubjectToRandomProductAssociatedWithSurveyConfiguration()
     {
@@ -810,7 +811,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @todo
      *
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestsSendsTwoNotificationsIfTwoSeparateUsersTriggeredRequests()
     {
@@ -820,9 +821,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestIgnoresAlreadyProcessedSurveyRequest()
+    public function processPendingSurveyRequestIgnoresAlreadyProcessedSurveyRequest(): void
     {
 
         /**
@@ -875,7 +876,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @test
      *
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestMarksAllConsideredSurveyRequestsAsNotifiedAndSetsProcessSubjectOnlyInSurveyRequestContainingTheSelectedProduct()
     {
@@ -941,7 +942,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @test
      *
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestsRespectsSeparateFrontendUsers()
     {
@@ -1005,9 +1006,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @test
      *
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestsRespectsSurveyTimeSlotAndSurveryPerTimeSlotAndFrontendUser()
+    public function processPendingSurveyRequestsRespectsSurveyTimeSlotAndSurveryPerTimeSlotAndFrontendUser(): void
     {
 
         /**
@@ -1081,7 +1082,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfSurveyRequestContainsAnEvent()
     {
@@ -1149,7 +1150,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @throws \Exception
+     * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfEventHasNotEndedYet()
     {
@@ -1246,7 +1247,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequest->setProcess($process);
         $surveyRequest->setProcessType(get_class($process));
         $surveyRequest->setFrontendUser($frontendUser);
-        $surveyRequest->setTargetGroup($process->getTargetGroup());
+
+        $process->getTargetGroup()->rewind();
+        $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
+
         $this->surveyRequestRepository->add($surveyRequest);
         $this->persistenceManager->persistAll();
 

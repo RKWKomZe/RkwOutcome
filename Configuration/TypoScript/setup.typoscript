@@ -1,7 +1,7 @@
 config.tx_extbase.persistence {
 
     // make sure ref_index is updated
-#    updateReferenceIndex = 1
+    updateReferenceIndex = 1
 
     // enableAutomaticCacheClearing = 1
     classes {
@@ -17,6 +17,13 @@ config.tx_extbase.persistence {
 #                tableName = tx_rkwshop_domain_model_order
 #            }
 #        }
+
+        RKW\RkwOutcome\Domain\Model\SurveyRequest {
+
+            # very important to set the storagePid explicit - otherwise it will add to the pid of related objects
+            newRecordStoragePid = {$plugin.tx_rkwoutcome.persistence.storagePid}
+
+        }
 
     }
 }
@@ -45,14 +52,14 @@ plugin.tx_rkwoutcome {
 	}
 
 	settings {
-
+        targetGroupsPid = {$plugin.tx_rkwoutcome.settings.targetGroupsPid}
 	}
 }
 
 # Module configuration
 module.tx_rkwoutcome {
     persistence {
-        storagePid = {$module.tx_outcome.persistence.storagePid}
+        storagePid = {$module.tx_rkwoutcome.persistence.storagePid}
     }
     view {
         layoutRootPaths {
@@ -69,5 +76,5 @@ module.tx_rkwoutcome {
         }
     }
 
-    settings < plugin.tx_rkwnewsletter.settings
+    settings < plugin.tx_rkwoutcome.settings
 }

@@ -51,10 +51,11 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      protected $processType;
 
 
+
     /**
-     * targetGroup
+     * TargetGroup
      *
-     * @var \RKW\RkwBasics\Domain\Model\TargetGroup|null
+     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
      */
     protected $targetGroup;
 
@@ -82,6 +83,30 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @var \RKW\RkwSurvey\Domain\Model\Survey|null
      */
     protected $survey;
+
+
+    /**
+     * __construct
+     */
+    public function __construct()
+    {
+        //Do not remove the next line: It would break the functionality
+        $this->initStorageObjects();
+    }
+
+    /**
+     * Initializes all ObjectStorage properties
+     * Do not modify this method!
+     * It will be rewritten on each save in the extension builder
+     * You may modify the constructor of this class instead
+     *
+     * @return void
+     */
+    protected function initStorageObjects()
+    {
+        $this->targetGroup = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+    }
+
 
     /**
      * Returns the process
@@ -153,29 +178,6 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the targetGroup
-     *
-     * @return \RKW\RkwBasics\Domain\Model\TargetGroup
-     */
-    public function getTargetGroup(): \RKW\RkwBasics\Domain\Model\TargetGroup
-    {
-        return $this->targetGroup;
-    }
-
-
-    /**
-     * Sets the targetGroup
-     *
-     * @param \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup
-     * @return void
-     */
-    public function setTargetGroup(\RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup): void
-    {
-        $this->targetGroup = $targetGroup;
-    }
-
-
-    /**
      * Returns the notifiedTstamp
      *
      * @return int
@@ -239,6 +241,49 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     public function setSurvey(\RKW\RkwSurvey\Domain\Model\Survey $survey): void
     {
         $this->survey = $survey;
+    }
+
+    /**
+     * Returns the targetGroup
+     *
+     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
+     */
+    public function getTargetGroup()
+    {
+        return $this->targetGroup;
+    }
+
+    /**
+     * Sets the targetGroup
+     *
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
+     * @return void
+     */
+    public function setTargetGroup(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroup)
+    {
+        $this->targetGroup = $targetGroup;
+    }
+
+    /**
+     * Adds a Category
+     *
+     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroup
+     * @return void
+     */
+    public function addTargetGroup(\TYPO3\CMS\Extbase\Domain\Model\Category $targetGroup): void
+    {
+        $this->targetGroup->attach($targetGroup);
+    }
+
+    /**
+     * Removes a Category
+     *
+     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroupToRemove
+     * @return void
+     */
+    public function removeTargetGroup(\TYPO3\CMS\Extbase\Domain\Model\Category $targetGroupToRemove)
+    {
+        $this->targetGroup->detach($targetGroupToRemove);
     }
 
 

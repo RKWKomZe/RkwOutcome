@@ -37,6 +37,14 @@
             </trans-unit>
 
             <!-- ##################################################### -->
+            <!-- tx_rkwoutcome_domain_model_surveyrequest              -->
+            <!-- ##################################################### -->
+            <trans-unit id="tx_rkwoutcome_domain_model_surveyrequest">
+                <source>RKW Outcome: Request</source>
+                <target>RKW Outcome: Anfrage</target>
+            </trans-unit>
+
+            <!-- ##################################################### -->
             <!-- pages                                                 -->
             <!-- ##################################################### -->
 
