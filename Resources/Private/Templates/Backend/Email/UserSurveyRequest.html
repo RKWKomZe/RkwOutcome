@@ -5,10 +5,13 @@
 <f:layout name="Email/{mailType}" />
 
 <!-- PLAINTEXT -->
-<f:section name="Plaintext"><rkwMailer:plaintextLineBreaks>
-    <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
-    \n\n
-</rkwMailer:plaintextLineBreaks></f:section>
+<f:section name="Plaintext">
+    <rkwMailer:plaintextLineBreaks>
+        <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
+        \n\n
+        <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: surveyRequest.survey}' />
+    </rkwMailer:plaintextLineBreaks>
+</f:section>
 
 <!-- HTML -->
 <f:section name="Html">
@@ -16,9 +19,11 @@
         <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
     </h1>
     <p>
-        {surveyRequest}
+        {surveyRequest.survey.name}
     </p>
     <p>
-        {surveyRequest.survey.name}
+        <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: surveyRequest.survey}' />" target="_blank">
+            <rkwMailer:frontend.translate key="templates_email_sendSurveyForPastEvent.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwEvents" />
+        </a>
     </p>
 </f:section>
