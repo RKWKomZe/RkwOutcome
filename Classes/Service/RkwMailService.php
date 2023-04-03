@@ -17,6 +17,7 @@ namespace RKW\RkwOutcome\Service;
 
 use RKW\RkwMailer\Service\MailService;
 use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
@@ -84,11 +85,18 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 
             if ($recipient->getEmail()) {
 
+                //                $mySurvey = $survey ? $survey : $this->surveyRepository->findByIdentifierIgnoreEnableFields(intval($this->settings['selectedSurvey']));
+                //                // call it like that!!! -> http://rkw-kompetenzzentrum.rkw.local/index.php?id=6298&tx_rkwsurvey_survey[controller]=Survey&tx_rkwsurvey_survey[action]=start&tx_rkwsurvey_survey[survey]=2
+                //                DebuggerUtility::var_dump($survey);
+                //  @todo: do I need a token?????
+
                 // send new user an email with token
                 $mailService->setTo($recipient, [
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
+                        'sha1Token'    => sha1($recipient->getEmail() . $recipient->getUid() . $surveyRequest->getProcess()->getUid()),
+                        'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? 6298 : 0, //  @todo: Set via Settings
                     ]
                 ]);
 
