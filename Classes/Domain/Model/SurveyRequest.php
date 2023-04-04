@@ -35,12 +35,12 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * process
+     * order
      *
      * @var \RKW\RkwShop\Domain\Model\Order|null
      *
      */
-    protected $process;
+    protected $order;
 
 
     /**
@@ -109,25 +109,25 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the process
+     * Returns the order
      *
      * @return \RKW\RkwShop\Domain\Model\Order|null
      */
-    public function getProcess()
+    public function getOrder()
     {
-        return $this->process;
+        return $this->order;
     }
 
 
     /**
-     * Sets the process
+     * Sets the order
      *
-     * @param \RKW\RkwShop\Domain\Model\Order $process
+     * @param \RKW\RkwShop\Domain\Model\Order $order
      * @return void
      */
-    public function setProcess(\RKW\RkwShop\Domain\Model\Order $process): void
+    public function setOrder(\RKW\RkwShop\Domain\Model\Order $order): void
     {
-        $this->process = $process;
+        $this->order = $order;
     }
 
 

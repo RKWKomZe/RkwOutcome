@@ -63,8 +63,8 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $constraints[] =
             $query->logicalAnd(
                 $query->equals('notifiedTstamp', 0),
-                $query->lessThan('process.shippedTstamp', $currentTime - $tolerance),
-                $query->greaterThan('process', 0)
+                $query->lessThan('order.shippedTstamp', $currentTime - $tolerance),
+                $query->greaterThan('order', 0)
             )
         ;
 

@@ -95,7 +95,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
-                        'sha1Token'    => sha1($recipient->getEmail() . $recipient->getUid() . $surveyRequest->getProcess()->getUid()),
+//                        'sha1Token'    => sha1($recipient->getEmail() . $recipient->getUid() . $surveyRequest->getProcess()->getUid()),
                         'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? 6298 : 0, //  @todo: Set via Settings
                     ]
                 ]);
