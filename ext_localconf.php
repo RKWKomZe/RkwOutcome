@@ -50,6 +50,13 @@ call_user_func(
         );
 
         $signalSlotDispatcher->connect(
+            \RKW\RkwEvents\Controller\EventReservationController::class,
+            \RKW\RkwEvents\Controller\EventReservationController::SIGNAL_AFTER_RESERVATION_CREATED_USER,
+            \RKW\RkwOutcome\Manager\SurveyRequestManager::class,
+            'createSurveyRequestSignalSlot'
+        );
+
+        $signalSlotDispatcher->connect(
             \RKW\RkwOutcome\Manager\SurveyRequestManager::class,
             \RKW\RkwOutcome\Manager\SurveyRequestManager::SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST,
             \RKW\RkwOutcome\Service\RkwMailService::class,

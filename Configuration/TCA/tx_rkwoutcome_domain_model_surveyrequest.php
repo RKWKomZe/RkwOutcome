@@ -17,14 +17,14 @@ return [
         ],
         // do only make requestUpdate, if token-list should be shown on check
         // 'requestUpdate' => 'access_restricted',
-        'searchFields' => 'order, process_type, survey',
+        'searchFields' => 'order, event_reservation, process_type, survey',
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyrequest.gif'
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, order, process_type, survey, target_group',
+        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, order, event_reservation, process_type, survey, target_group',
     ],
     'types' => [
-        '1' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, order, process_type, survey, target_group, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
+        '1' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, order, event_reservation, process_type, survey, target_group, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
     ],
     'columns' => [
 
@@ -132,7 +132,21 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'foreign_table' => 'tx_rkwshop_domain_model_order',
-                'foreign_table_where' => 'AND tx_rkwshop_domain_model_order.deleted = 0 ORDER BY name ASC',
+                'foreign_table_where' => 'AND tx_rkwshop_domain_model_order.deleted = 0',
+                'minitems' => 1,
+                'maxitems' => 1,
+                'readOnly' => true
+            ],
+        ],
+
+        'event_reservation' => [
+            'exclude' => 0,
+            'label' => 'LLL:EXT:rkw_shop/Resources/Private/Language/locallang_db.xlf:tx_rkwshop_domain_model_orderitem.product',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'foreign_table' => 'tx_rkwevents_domain_model_eventreservation',
+                'foreign_table_where' => 'AND tx_rkwevents_domain_model_eventreservation.deleted = 0',
                 'minitems' => 1,
                 'maxitems' => 1,
                 'readOnly' => true
@@ -149,7 +163,7 @@ return [
             ],
         ],
 
-        'process_subject' => [
+        'order_subject' => [
             'exclude' => 0,
             'label' => 'LLL:EXT:rkw_shop/Resources/Private/Language/locallang_db.xlf:tx_rkwshop_domain_model_orderitem.product',
             'config' => [
@@ -157,6 +171,20 @@ return [
                 'renderType' => 'selectSingle',
                 'foreign_table' => 'tx_rkwshop_domain_model_product',
                 'foreign_table_where' => 'AND tx_rkwshop_domain_model_product.deleted = 0 ORDER BY name ASC',
+                'minitems' => 1,
+                'maxitems' => 1,
+                'readOnly' => true
+            ],
+        ],
+
+        'event_reservation_subject' => [
+            'exclude' => 0,
+            'label' => 'LLL:EXT:rkw_events/Resources/Private/Language/locallang_db.xlf:tx_rkwevents_domain_model_event.title',
+            'config' => [
+                'type' => 'select',
+                'renderType' => 'selectSingle',
+                'foreign_table' => 'tx_rkwevents_domain_model_event',
+                'foreign_table_where' => 'AND tx_rkwevents_domain_model_event.deleted = 0 ORDER BY title ASC',
                 'minitems' => 1,
                 'maxitems' => 1,
                 'readOnly' => true

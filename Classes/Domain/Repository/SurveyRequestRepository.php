@@ -17,6 +17,7 @@ namespace RKW\RkwOutcome\Domain\Repository;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
  * SurveyRequestRepository
@@ -59,12 +60,18 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
         $constraints = [];
 
-        //  @todo: Check on eventReservation.event.endTime, too!? - see former method isNotifiable
         $constraints[] =
-            $query->logicalAnd(
-                $query->equals('notifiedTstamp', 0),
-                $query->lessThan('order.shippedTstamp', $currentTime - $tolerance),
-                $query->greaterThan('order', 0)
+            $query->logicalOr(
+                $query->logicalAnd(
+                    $query->equals('notifiedTstamp', 0),
+                    $query->lessThan('order.shippedTstamp', $currentTime - $tolerance),
+                    $query->greaterThan('order', 0)
+                ),
+                $query->logicalAnd(
+                    $query->equals('notifiedTstamp', 0),
+                    $query->lessThan('eventReservation.event.end', $currentTime - $tolerance),
+                    $query->greaterThan('eventReservation', 0)
+                )
             )
         ;
 

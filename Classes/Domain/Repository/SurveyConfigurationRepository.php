@@ -153,25 +153,70 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
     /**
      * Finds a survey configuration matching the given identifier.
      *
-     * @param \RKW\RkwEvents\Domain\Model\Event $event
-     * @param \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup
+     * @param \RKW\RkwEvents\Domain\Model\Event            $event
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
      *
      * @return object|null The object for the identifier if it is known, or NULL
+     * @throws InvalidQueryException
      */
-    public function findByEventAndTargetGroup(\RKW\RkwEvents\Domain\Model\Event $event, \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup)
+    public function findByEventAndTargetGroup(\RKW\RkwEvents\Domain\Model\Event $event, \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups)
     {
-        $query = $this->createQuery();
 
-        $query->matching(
-            $query->logicalAnd(
-                $query->equals('event', $event),
-                $query->equals('targetGroup', $targetGroup)
-            )
-        );
+        // 1. build uid list
+        $targetGroupsList = [];
 
-        $query->setLimit(1);
+        /** @var \TYPO3\CMS\Extbase\Domain\Model\Category $category */
+        foreach ($targetGroups as $targetGroup) {
+            if ($targetGroup instanceof \TYPO3\CMS\Extbase\Domain\Model\Category) {
+                $targetGroupsList[] = $targetGroup->getUid();
+            }
+        }
 
-        return $query->execute()->getFirst();
+        if (count($targetGroupsList)) {
+
+            // 2. set leftJoin over categories
+            $leftJoin = '
+                LEFT JOIN sys_category_record_mm AS sys_category_record_mm 
+                    ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign 
+                    AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\' 
+                    AND sys_category_record_mm.fieldname = \'target_group\'
+                LEFT JOIN sys_category AS sys_category
+                    ON sys_category_record_mm.uid_local=sys_category.uid
+                    AND sys_category.deleted = 0
+            ';
+
+            // 3. set constraints
+            $constraints = [
+                '(((sys_category.sys_language_uid IN (0,-1))) OR sys_category.uid IS NULL)',
+                'tx_rkwoutcome_domain_model_surveyconfiguration.event = ' . $event->getUid(),
+            ];
+
+            // 5. Final statement
+            $finalStatement = '
+                SELECT tx_rkwoutcome_domain_model_surveyconfiguration.*
+                FROM tx_rkwoutcome_domain_model_surveyconfiguration 
+                ' . $leftJoin . '
+                WHERE 
+                    sys_category.uid IN(' . implode(',', $targetGroupsList) . ')
+                    AND ' . implode(' AND ', $constraints) .
+                QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
+                QueryTypo3::getWhereClauseForDeleteFields('tx_rkwoutcome_domain_model_surveyconfiguration')
+            ;
+
+            // build final query
+            $query = $this->createQuery();
+            $query->getQuerySettings()->setRespectStoragePage(false);
+            $query->statement(
+                $finalStatement
+            );
+
+            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+            return $query->execute();
+
+        }
+
+        return null;
+
     }
 
 }

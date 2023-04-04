@@ -44,6 +44,15 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
+     * eventReservation
+     *
+     * @var \RKW\RkwEvents\Domain\Model\EventReservation|null
+     *
+     */
+    protected $eventReservation;
+
+
+    /**
      * processType
      *
      * @var string
@@ -69,12 +78,21 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * processSubject
+     * orderSubject
      *
      * @var \RKW\RkwShop\Domain\Model\Product|null
      *
      */
-    protected $processSubject;
+    protected $orderSubject;
+
+
+    /**
+     * eventReservationSubject
+     *
+     * @var \RKW\RkwEvents\Domain\Model\EventReservation|null
+     *
+     */
+    protected $eventReservationSubject;
 
 
     /**
@@ -129,6 +147,25 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     {
         $this->order = $order;
     }
+
+
+
+    /**
+     * @return \RKW\RkwEvents\Domain\Model\EventReservation|null
+     */
+    public function getEventReservation(): ?\RKW\RkwEvents\Domain\Model\EventReservation
+    {
+        return $this->eventReservation;
+    }
+
+    /**
+     * @param \RKW\RkwEvents\Domain\Model\EventReservation|null $eventReservation
+     */
+    public function setEventReservation(?\RKW\RkwEvents\Domain\Model\EventReservation $eventReservation): void
+    {
+        $this->eventReservation = $eventReservation;
+    }
+
 
 
     /**
@@ -200,26 +237,43 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the processSubject
+     * Returns the orderSubject
      *
-     * @return \RKW\RkwShop\Domain\Model\Product|null $processSubject
+     * @return \RKW\RkwShop\Domain\Model\Product|null $orderSubject
      */
-    public function getProcessSubject()
+    public function getOrderSubject()
     {
-        return $this->processSubject;
+        return $this->orderSubject;
     }
 
 
     /**
-     * Sets the processSubject
+     * Sets the orderSubject
      *
-     * @param \RKW\RkwShop\Domain\Model\Product $processSubject
+     * @param \RKW\RkwShop\Domain\Model\Product $orderSubject
      * @return void
      */
-    public function setProcessSubject(\RKW\RkwShop\Domain\Model\Product $processSubject): void
+    public function setOrderSubject(\RKW\RkwShop\Domain\Model\Product $orderSubject): void
     {
-        $this->processSubject = $processSubject;
+        $this->orderSubject = $orderSubject;
     }
+
+    /**
+     * @return \RKW\RkwEvents\Domain\Model\Event|null
+     */
+    public function getEventReservationSubject(): ?\RKW\RkwEvents\Domain\Model\Event
+    {
+        return $this->eventReservationSubject;
+    }
+
+    /**
+     * @param \RKW\RkwEvents\Domain\Model\Event|null $eventReservationSubject
+     */
+    public function setEventReservationSubject(?\RKW\RkwEvents\Domain\Model\Event $eventReservationSubject): void
+    {
+        $this->eventReservationSubject = $eventReservationSubject;
+    }
+
 
     /**
      * Returns the survey
