@@ -29,7 +29,9 @@
             <trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.survey">
                 <source>Survey</source>
             </trans-unit>
-
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.targetGroups">
+				<source>Targetgroups</source>
+			</trans-unit>
 
             <!-- ##################################################### -->
             <!-- tx_rkwoutcome_domain_model_surveyrequest              -->
@@ -37,6 +39,33 @@
             <trans-unit id="tx_rkwoutcome_domain_model_surveyrequest">
                 <source>RKW Outcome: Request</source>
             </trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.notifiedTstamp">
+				<source>Notified at</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.survey">
+				<source>Survey</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.eventReservationSubject">
+				<source>Selected event</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.orderSubject">
+				<source>Select product</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.processType">
+				<source>Process type</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.eventReservation">
+				<source>Event reservation</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.order">
+				<source>Order</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.frontendUser">
+				<source>Frontend user</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.targetGroups">
+				<source>Targetgroups</source>
+			</trans-unit>
 
             <!-- ##################################################### -->
             <!-- fe_user                                               -->

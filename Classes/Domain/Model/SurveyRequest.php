@@ -89,7 +89,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * eventReservationSubject
      *
-     * @var \RKW\RkwEvents\Domain\Model\EventReservation|null
+     * @var \RKW\RkwEvents\Domain\Model\Event|null
      *
      */
     protected $eventReservationSubject;

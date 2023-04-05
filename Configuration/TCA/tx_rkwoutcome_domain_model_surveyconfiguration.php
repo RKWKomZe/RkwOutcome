@@ -2,7 +2,7 @@
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration',
-        'label' => 'event',
+        'label' => '',
         'label_userFunc' => \RKW\RkwOutcome\Utilities\TCA::class . '->surveyConfigurationTitle',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',

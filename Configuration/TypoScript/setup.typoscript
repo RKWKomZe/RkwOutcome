@@ -20,7 +20,7 @@ config.tx_extbase.persistence {
 
         RKW\RkwOutcome\Domain\Model\SurveyRequest {
 
-            # very important to set the storagePid explicit - otherwise it will add to the pid of related objects
+            # very important to set the storagePid explicitly - otherwise it will add to the pid of related objects
             newRecordStoragePid = {$plugin.tx_rkwoutcome.persistence.storagePid}
 
         }
