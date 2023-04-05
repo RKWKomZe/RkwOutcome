@@ -12,18 +12,6 @@
         <zip>10969</zip>
         <city>Hamburg</city>
     </fe_users>
-    <fe_users>
-        <uid>2</uid>
-        <pid>0</pid>
-        <username>cdu@test.de</username>
-        <email>spahn@cdu.de</email>
-        <first_name />
-        <last_name />
-        <company />
-        <address />
-        <zip>10115</zip>
-        <city>Berlin</city>
-    </fe_users>
     <!-- orders -->
     <tx_rkwshop_domain_model_order>
         <uid>1</uid>
@@ -31,15 +19,23 @@
         <frontend_user>1</frontend_user>
         <order_item>1</order_item>
         <email>test@dummy.de</email>
-        <remark>Toller Hinweis!!!</remark>
+        <remark>Erste Bestellung</remark>
     </tx_rkwshop_domain_model_order>
     <tx_rkwshop_domain_model_order>
         <uid>2</uid>
         <pid>1</pid>
-        <frontend_user>2</frontend_user>
+        <frontend_user>1</frontend_user>
         <order_item>2</order_item>
         <email>test@dummy.de</email>
-        <remark>Toller Hinweis!!!</remark>
+        <remark>Zweite Bestellung</remark>
+    </tx_rkwshop_domain_model_order>
+    <tx_rkwshop_domain_model_order>
+        <uid>3</uid>
+        <pid>1</pid>
+        <frontend_user>1</frontend_user>
+        <order_item>3</order_item>
+        <email>test@dummy.de</email>
+        <remark>Dritte Bestellung</remark>
     </tx_rkwshop_domain_model_order>
     <!-- orderitems -->
     <tx_rkwshop_domain_model_orderitem>
@@ -56,11 +52,18 @@
         <product>2</product>
         <ext_order>2</ext_order>
     </tx_rkwshop_domain_model_orderitem>
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>3</uid>
+        <pid>1</pid>
+        <amount>1</amount>
+        <product>3</product>
+        <ext_order>3</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
     <!-- products -->
     <tx_rkwshop_domain_model_product>
         <uid>1</uid>
         <pid>1</pid>
-        <title>Produkt mit Fragebogen</title>
+        <title>Leitfaden Personal</title>
         <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
         <admin_email>test3@test.de</admin_email>
         <stock>1</stock>
@@ -69,7 +72,16 @@
     <tx_rkwshop_domain_model_product>
         <uid>2</uid>
         <pid>1</pid>
-        <title>Zweites Produkt mit Fragebogen</title>
+        <title>Workbook Gründen</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <tx_rkwshop_domain_model_product>
+        <uid>3</uid>
+        <pid>1</pid>
+        <title>Leitfaden Canvas</title>
         <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
         <admin_email>test3@test.de</admin_email>
         <stock>1</stock>
@@ -88,6 +100,12 @@
         <product>2</product>
         <survey>2</survey>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <tx_rkwoutcome_domain_model_surveyconfiguration>
+        <uid>3</uid>
+        <pid>1</pid>
+        <product>3</product>
+        <survey>3</survey>
+    </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
@@ -98,6 +116,11 @@
         <uid>2</uid>
         <pid>1</pid>
         <name>Zweite Umfrage</name>
+    </tx_rkwsurvey_domain_model_survey>
+    <tx_rkwsurvey_domain_model_survey>
+        <uid>3</uid>
+        <pid>1</pid>
+        <name>Dritte Umfrage</name>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>
@@ -124,6 +147,14 @@
     </sys_category_record_mm>
     <sys_category_record_mm>
         <uid_local>1</uid_local>
+        <uid_foreign>3</uid_foreign>
+        <tablenames>tx_rkwshop_domain_model_order</tablenames>
+        <sorting>0</sorting>
+        <sorting_foreign>1</sorting_foreign>
+        <fieldname>target_group</fieldname>
+    </sys_category_record_mm>
+    <sys_category_record_mm>
+        <uid_local>1</uid_local>
         <uid_foreign>1</uid_foreign>
         <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
         <sorting>0</sorting>
@@ -133,6 +164,14 @@
     <sys_category_record_mm>
         <uid_local>1</uid_local>
         <uid_foreign>2</uid_foreign>
+        <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
+        <sorting>0</sorting>
+        <sorting_foreign>1</sorting_foreign>
+        <fieldname>target_group</fieldname>
+    </sys_category_record_mm>
+    <sys_category_record_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>3</uid_foreign>
         <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
         <sorting>0</sorting>
         <sorting_foreign>1</sorting_foreign>

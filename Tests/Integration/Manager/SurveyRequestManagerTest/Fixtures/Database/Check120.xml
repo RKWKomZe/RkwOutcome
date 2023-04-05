@@ -12,6 +12,18 @@
         <zip>10969</zip>
         <city>Hamburg</city>
     </fe_users>
+    <fe_users>
+        <uid>2</uid>
+        <pid>0</pid>
+        <username>cdu@test.de</username>
+        <email>spahn@cdu.de</email>
+        <first_name />
+        <last_name />
+        <company />
+        <address />
+        <zip>10115</zip>
+        <city>Berlin</city>
+    </fe_users>
     <!-- orders -->
     <tx_rkwshop_domain_model_order>
         <uid>1</uid>
@@ -24,8 +36,8 @@
     <tx_rkwshop_domain_model_order>
         <uid>2</uid>
         <pid>1</pid>
-        <frontend_user>1</frontend_user>
-        <order_item>1</order_item>
+        <frontend_user>2</frontend_user>
+        <order_item>2</order_item>
         <email>test@dummy.de</email>
         <remark>Toller Hinweis!!!</remark>
     </tx_rkwshop_domain_model_order>

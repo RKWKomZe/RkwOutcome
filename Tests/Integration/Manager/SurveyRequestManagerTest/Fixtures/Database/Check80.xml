@@ -12,36 +12,118 @@
         <zip>10969</zip>
         <city>Hamburg</city>
     </fe_users>
-    <tx_rkwevents_domain_model_event>
+    <!-- orders -->
+    <tx_rkwshop_domain_model_order>
         <uid>1</uid>
         <pid>1</pid>
-        <title>Shoptalk</title>
-        <start>1000</start>
-        <end>4100799599</end>
-    </tx_rkwevents_domain_model_event>
-    <tx_rkwevents_domain_model_eventreservation>
-        <uid>1</uid>
-        <pid>1</pid>
-        <fe_user>1</fe_user>
-        <event>1</event>
+        <frontend_user>1</frontend_user>
+        <order_item>1,2,3</order_item>
         <email>test@dummy.de</email>
-        <target_group>1</target_group>
-    </tx_rkwevents_domain_model_eventreservation>
-    <tx_rkwbasics_domain_model_target_group>
+        <remark>Toller Hinweis!!!</remark>
+    </tx_rkwshop_domain_model_order>
+    <!-- order items -->
+    <tx_rkwshop_domain_model_orderitem>
         <uid>1</uid>
         <pid>1</pid>
-        <name>Unternehmen</name>
-    </tx_rkwbasics_domain_model_target_group>
+        <amount>1</amount>
+        <product>1</product>
+        <ext_order>1</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>2</uid>
+        <pid>1</pid>
+        <amount>1</amount>
+        <product>2</product>
+        <ext_order>1</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>3</uid>
+        <pid>1</pid>
+        <amount>1</amount>
+        <product>3</product>
+        <ext_order>1</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <!-- products -->
+    <tx_rkwshop_domain_model_product>
+        <uid>1</uid>
+        <pid>1</pid>
+        <title>Produkt mit Fragebogen</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <tx_rkwshop_domain_model_product>
+        <uid>2</uid>
+        <pid>1</pid>
+        <title>Zweites Produkt mit Fragebogen</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <tx_rkwshop_domain_model_product>
+        <uid>3</uid>
+        <pid>1</pid>
+        <title>Drittes Produkt ohne Fragebogen</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <!-- survey configurations -->
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
-        <event>1</event>
+        <product>1</product>
         <survey>1</survey>
-        <target_group>1</target_group>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <tx_rkwoutcome_domain_model_surveyconfiguration>
+        <uid>2</uid>
+        <pid>1</pid>
+        <product>2</product>
+        <survey>2</survey>
+    </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
-        <name>Meine Umfrage</name>
+        <name>Meine erste Umfrage</name>
     </tx_rkwsurvey_domain_model_survey>
+    <tx_rkwsurvey_domain_model_survey>
+        <uid>2</uid>
+        <pid>1</pid>
+        <name>Meine zweite Umfrage</name>
+    </tx_rkwsurvey_domain_model_survey>
+    <!-- sys_category -->
+    <sys_category>
+        <uid>1</uid>
+        <pid>1</pid>
+        <title>Unternehmen</title>
+    </sys_category>
+    <!-- sys_category_record_mm -->
+    <sys_category_record_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>1</uid_foreign>
+        <tablenames>tx_rkwshop_domain_model_order</tablenames>
+        <sorting>0</sorting>
+        <sorting_foreign>1</sorting_foreign>
+        <fieldname>target_group</fieldname>
+    </sys_category_record_mm>
+    <sys_category_record_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>1</uid_foreign>
+        <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
+        <sorting>0</sorting>
+        <sorting_foreign>1</sorting_foreign>
+        <fieldname>target_group</fieldname>
+    </sys_category_record_mm>
+    <sys_category_record_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>2</uid_foreign>
+        <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
+        <sorting>0</sorting>
+        <sorting_foreign>1</sorting_foreign>
+        <fieldname>target_group</fieldname>
+    </sys_category_record_mm>
 </dataset>

@@ -17,16 +17,23 @@
         <uid>1</uid>
         <pid>1</pid>
         <frontend_user>1</frontend_user>
-        <order_item>1</order_item>
+        <order_item>1,2</order_item>
         <email>test@dummy.de</email>
-        <remark>Toller Hinweis!!!</remark>
+        <remark>Toller Hinweisssss!!!</remark>
     </tx_rkwshop_domain_model_order>
     <!-- orderItems -->
     <tx_rkwshop_domain_model_orderitem>
         <uid>1</uid>
         <pid>1</pid>
-        <amount>4</amount>
+        <amount>1</amount>
         <product>1</product>
+        <ext_order>1</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>2</uid>
+        <pid>1</pid>
+        <amount>1</amount>
+        <product>2</product>
         <ext_order>1</ext_order>
     </tx_rkwshop_domain_model_orderitem>
     <!-- products -->
@@ -39,18 +46,32 @@
         <stock>1</stock>
         <backend_user />
     </tx_rkwshop_domain_model_product>
-    <!--surveyConfigurations -->
+    <tx_rkwshop_domain_model_product>
+        <uid>2</uid>
+        <pid>1</pid>
+        <title>Produkt ohne Fragebogen</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <!-- surveyConfigurations -->
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
         <product>1</product>
-        <survey>1</survey>
+        <survey>2</survey>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
-        <name>Meine Umfrage</name>
+        <name>Nicht benutzte Umfrage</name>
+    </tx_rkwsurvey_domain_model_survey>
+    <tx_rkwsurvey_domain_model_survey>
+        <uid>2</uid>
+        <pid>1</pid>
+        <name>Benutzte Umfrage</name>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>

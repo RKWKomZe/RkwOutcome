@@ -25,11 +25,11 @@
         <uid>2</uid>
         <pid>1</pid>
         <frontend_user>1</frontend_user>
-        <order_item>2</order_item>
+        <order_item>1</order_item>
         <email>test@dummy.de</email>
         <remark>Toller Hinweis!!!</remark>
     </tx_rkwshop_domain_model_order>
-    <!-- orderItems -->
+    <!-- orderitems -->
     <tx_rkwshop_domain_model_orderitem>
         <uid>1</uid>
         <pid>1</pid>
@@ -57,7 +57,7 @@
     <tx_rkwshop_domain_model_product>
         <uid>2</uid>
         <pid>1</pid>
-        <title>Produkt ohne Fragebogen</title>
+        <title>Zweites Produkt mit Fragebogen</title>
         <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
         <admin_email>test3@test.de</admin_email>
         <stock>1</stock>
@@ -68,7 +68,7 @@
         <uid>1</uid>
         <pid>1</pid>
         <product>1</product>
-        <survey>2</survey>
+        <survey>1</survey>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>2</uid>
@@ -80,12 +80,12 @@
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
-        <name>Nicht benutzte Umfrage</name>
+        <name>Erste Umfrage</name>
     </tx_rkwsurvey_domain_model_survey>
     <tx_rkwsurvey_domain_model_survey>
         <uid>2</uid>
         <pid>1</pid>
-        <name>Benutzte Umfrage</name>
+        <name>Zweite Umfrage</name>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>
