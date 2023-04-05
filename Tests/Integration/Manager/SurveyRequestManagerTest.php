@@ -306,9 +306,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
-        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
-        $targetGroup = $this->targetGroupRepository->findByUid(1);
-
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($order);
 
@@ -1015,9 +1012,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwEvents\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwBasics\Domain\Model\TargetGroup $targetGroup */
-        $targetGroup = $this->targetGroupRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($eventReservation);
