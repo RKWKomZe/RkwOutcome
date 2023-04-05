@@ -62,6 +62,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 
         // get settings
         $settings = $this->getSettings(ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK);
+        $settingsDefault = $this->getSettings();
 
         $this->logInfo(
             sprintf(
@@ -96,7 +97,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
 //                        'sha1Token'    => sha1($recipient->getEmail() . $recipient->getUid() . $surveyRequest->getProcess()->getUid()),
-                        'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? 6298 : 0, //  @todo: Set via Settings
+//                        'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? 6298 : 0, //  @todo: Set via Settings
+                        'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? (int) $settingsDefault['surveyShowPid'] : 0,
                     ]
                 ]);
 
