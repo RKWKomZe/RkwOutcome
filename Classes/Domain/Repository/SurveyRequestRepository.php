@@ -41,15 +41,15 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
 
     /**
-     * findAllPendingSurveyRequestsWithinTolerance
+     * findAllPendingSurveyRequestsOlderThanNowMinusSurveyWaitingTime
      *
-     * @param int $tolerance
+     * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return QueryResultInterface
      * @throws InvalidQueryException
      * @comment implicitly tested
      */
-    public function findAllPendingSurveyRequests(int $tolerance = 0, int $currentTime = 0): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findAllPendingSurveyRequests(int $surveyWaitingTime = 0, int $currentTime = 0): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
     {
 
         if (! $currentTime) {
@@ -64,12 +64,12 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
             $query->logicalOr(
                 $query->logicalAnd(
                     $query->equals('notifiedTstamp', 0),
-                    $query->lessThan('order.shippedTstamp', $currentTime - $tolerance),
+                    $query->lessThan('order.shippedTstamp', $currentTime - $surveyWaitingTime),
                     $query->greaterThan('order', 0)
                 ),
                 $query->logicalAnd(
                     $query->equals('notifiedTstamp', 0),
-                    $query->lessThan('eventReservation.event.end', $currentTime - $tolerance),
+                    $query->lessThan('eventReservation.event.end', $currentTime - $surveyWaitingTime),
                     $query->greaterThan('eventReservation', 0)
                 )
             )
@@ -88,17 +88,17 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
     /**
      * findAllPendingSurveyRequestsGroupedByFrontendUser
      *
-     * @param int $tolerance
+     * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return array
      * @throws InvalidQueryException
      * @comment implicitly tested
      */
-    public function findAllPendingSurveyRequestsGroupedByFrontendUser(int $tolerance, int $currentTime): array
+    public function findAllPendingSurveyRequestsGroupedByFrontendUser(int $surveyWaitingTime, int $currentTime): array
     {
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequests = $this->findAllPendingSurveyRequests($tolerance, $currentTime);
+        $surveyRequests = $this->findAllPendingSurveyRequests($surveyWaitingTime, $currentTime);
 
         $surveyRequestsGroupedByFrontendUser = [];
 

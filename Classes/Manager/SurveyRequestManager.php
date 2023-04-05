@@ -186,16 +186,16 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      *
      * @param int $checkPeriod
      * @param int $maxSurveysPerPeriodAndFrontendUser
-     * @param int $tolerance
+     * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return array
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      */
-     public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $tolerance = 0, int $currentTime = 0):array {
+     public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $surveyWaitingTime = 0, int $currentTime = 0):array {
 
-         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findAllPendingSurveyRequestsGroupedByFrontendUser($tolerance, $currentTime) ;
+         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findAllPendingSurveyRequestsGroupedByFrontendUser($surveyWaitingTime, $currentTime) ;
 
          $this->logInfo(
              sprintf(

@@ -50,13 +50,13 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
      *
      * @param int $checkPeriod
      * @param int $maxSurveysPerPeriodAndFrontendUser
-     * @param int $tolerance Tolerance for creating next issue according to last time an issue was built (in seconds)
+     * @param int $surveyWaitingTime
      * @return void
      * @throws IllegalObjectTypeException
      * @throws InvalidQueryException
      * @throws UnknownObjectException
      */
-    public function processSurveyRequestsCommand(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $tolerance = 0): void
+    public function processSurveyRequestsCommand(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $surveyWaitingTime = 0): void
     {
 
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
@@ -64,7 +64,7 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
 
         /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $surveyRequestManager */
         $surveyRequestManager = $objectManager->get(SurveyRequestManager::class);
-        $surveyRequestManager->processPendingSurveyRequests($checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $tolerance);
+        $surveyRequestManager->processPendingSurveyRequests($checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $surveyWaitingTime);
 
 
 //        try {
@@ -74,7 +74,7 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
 //
 //            /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $surveyRequestManager */
 //            $surveyRequestManager = $objectManager->get(SurveyRequestManager::class);
-//            $surveyRequestManager->processPendingSurveyRequests($tolerance);
+//            $surveyRequestManager->processPendingSurveyRequests($surveyWaitingTime);
 //
 //        } catch (\Exception $e) {
 //
