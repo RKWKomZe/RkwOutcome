@@ -23,6 +23,8 @@ In the same time a notification to the corresponding frontenduser will be sent t
 
 ## Setup
 
+You should create a backend folder to store the outcome records. The uid of this folder should be set as constant ```newRecordStoragePid```.
+
 The extension relies on the extensions rkw_events and rkw_shop. Both extensions provide an additional constant ```targetGroupsPid```. This constant should be used to restrict the selection of targetgroups in the order or reservation form to the selected uid of the parent ```sys_category```.
 
 Furthermore you should set the constant ```surveyShowPid``` to the page uid containing your survey plugin. This will be used in rendering the link to the corresponding survey within the notification mail.
