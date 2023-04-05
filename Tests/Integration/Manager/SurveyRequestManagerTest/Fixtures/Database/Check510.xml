@@ -12,6 +12,7 @@
         <zip>10969</zip>
         <city>Hamburg</city>
     </fe_users>
+    <!-- events -->
     <tx_rkwevents_domain_model_event>
         <uid>1</uid>
         <pid>1</pid>
@@ -19,29 +20,48 @@
         <start>1000</start>
         <end>2000</end>
     </tx_rkwevents_domain_model_event>
+    <!-- eventReservations -->
     <tx_rkwevents_domain_model_eventreservation>
         <uid>1</uid>
         <pid>1</pid>
         <fe_user>1</fe_user>
         <event>1</event>
         <email>test@dummy.de</email>
-        <target_group>1</target_group>
     </tx_rkwevents_domain_model_eventreservation>
-    <tx_rkwbasics_domain_model_target_group>
-        <uid>1</uid>
-        <pid>1</pid>
-        <name>Unternehmen</name>
-    </tx_rkwbasics_domain_model_target_group>
+    <!-- surveyconfigurations -->
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
         <event>1</event>
         <survey>1</survey>
-        <target_group>1</target_group>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
         <name>Meine Umfrage</name>
     </tx_rkwsurvey_domain_model_survey>
+    <!-- sys_category -->
+    <sys_category>
+        <uid>1</uid>
+        <pid>1</pid>
+        <title>Unternehmen</title>
+    </sys_category>
+    <!-- sys_category_record_mm -->
+    <sys_category_record_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>1</uid_foreign>
+        <tablenames>tx_rkwevents_domain_model_eventreservation</tablenames>
+        <sorting>0</sorting>
+        <sorting_foreign>1</sorting_foreign>
+        <fieldname>target_group</fieldname>
+    </sys_category_record_mm>
+    <sys_category_record_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>1</uid_foreign>
+        <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
+        <sorting>0</sorting>
+        <sorting_foreign>1</sorting_foreign>
+        <fieldname>target_group</fieldname>
+    </sys_category_record_mm>
 </dataset>

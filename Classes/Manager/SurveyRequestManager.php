@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
  * SurveyRequestManager
@@ -111,7 +112,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     /**
      * Intermediate function for creating survey requests - used by SignalSlot
      *
-     * @param \RKW\RkwShop\Domain\Model\Order $process
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
      * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
@@ -120,7 +121,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      */
     public function createSurveyRequest
     (
-        \RKW\RkwShop\Domain\Model\Order $process
+        \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
     ): ?SurveyRequest
     {
         //  @todo: use a custom Signal in OrderManager->saveOrder to provide FE-User instead of BE-User
@@ -135,7 +136,15 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
             $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
-            $surveyRequest->setProcess($process);
+
+            if ($process instanceof \Rkw\RkwShop\Domain\Model\Order) {
+                $surveyRequest->setOrder($process);
+            }
+
+            if ($process instanceof \Rkw\RkwEvents\Domain\Model\EventReservation) {
+                $surveyRequest->setEventReservation($process);
+            }
+
             $surveyRequest->setProcessType(get_class($process));
             $surveyRequest->setFrontendUser($frontendUser);
 
@@ -207,12 +216,21 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                  /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
                  foreach ($surveyRequestsByUser as $surveyRequest) {
 
+
                      if ($this->containsProcessableSubject($surveyRequest, $processableSubject)) {
 
-                         $surveyRequest->setProcessSubject($processableSubject);
+                         if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
+                             $surveyRequest->setOrderSubject($processableSubject);
+                             /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
+                             $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
+                         }
 
-                         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
-                         $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
+                         if ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
+                             $surveyRequest->setEventReservationSubject($processableSubject);
+                             /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
+                             $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
+                         }
+
                          /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                          $surveyConfiguration = $surveyConfigurations->getFirst();
                          $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
@@ -301,11 +319,11 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
 
     /**
-     * @param \RKW\RkwShop\Domain\Model\Order $process
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
      *
      * @return bool
      */
-    protected function isSurveyable(\RKW\RkwShop\Domain\Model\Order $process): bool
+    protected function isSurveyable(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): bool
     {
 
         return count($this->getNotifiableObjects($process)) > 0;
@@ -314,12 +332,12 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
 
     /**
-     * @param \RKW\RkwShop\Domain\Model\Order $process
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
      *
      * @return array
      * @throws InvalidQueryException
      */
-    protected function getNotifiableObjects(\RKW\RkwShop\Domain\Model\Order $process): array
+    protected function getNotifiableObjects(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): array
     {
 
         $this->logInfo(
@@ -406,26 +424,21 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     /**
      * @param array $surveyRequestsByUser
      *
-     * @return \RKW\RkwShop\Domain\Model\Product|null
+     * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
      */
-    protected function getProcessable(array $surveyRequestsByUser): ?\RKW\RkwShop\Domain\Model\Product
+    protected function getProcessable(array $surveyRequestsByUser): ?\TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     {
 
         $notifiableObjects = [];
 
         foreach ($surveyRequestsByUser as $surveyRequest) {
 
-            //  @todo select product or event
-            $process = $surveyRequest->getProcess();
+            if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
+                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($surveyRequest->getOrder());
+            }
 
-            if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-
-                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($process);
-
-            } else {
-
-                $notifiableObjects[$surveyRequest->getUid()] = [$process->getEvent()];
-
+            if ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
+                $notifiableObjects[$surveyRequest->getUid()] = [$surveyRequest->getEventReservation()->getEvent()];
             }
 
         }
@@ -438,14 +451,20 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param SurveyRequest $surveyRequest
-     * @param Product       $processableSubject
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity       $processableSubject
      * @return bool
      */
-    protected function containsProcessableSubject(SurveyRequest $surveyRequest, Product $processableSubject): bool
+    protected function containsProcessableSubject(SurveyRequest $surveyRequest, \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $processableSubject): bool
     {
         $containsProcessableSubject = false;
 
-        foreach ($this->getNotifiableObjects($surveyRequest->getProcess()) as $notifiableObject) {
+        if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
+            $process = $surveyRequest->getOrder();
+        } else {
+            $process = $surveyRequest->getEventReservation();
+        }
+
+        foreach ($this->getNotifiableObjects($process) as $notifiableObject) {
             if ($notifiableObject->getUid() === $processableSubject->getUid()) {
                 $containsProcessableSubject = true;
             }

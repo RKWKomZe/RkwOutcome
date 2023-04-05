@@ -69,9 +69,6 @@ class SurveyRequestController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->surveyRequestRepository->findByUid(14);
-
-        DebuggerUtility::var_dump($surveyRequest);
-
         $this->view->assign('surveyRequest', $surveyRequest);
     }
 

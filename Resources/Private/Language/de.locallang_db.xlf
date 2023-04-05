@@ -35,6 +35,10 @@
                 <source>Survey</source>
                 <target>Umfrage</target>
             </trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.targetGroups">
+				<source>Targetgroups</source>
+				<target>Zielgruppen</target>
+			</trans-unit>
 
             <!-- ##################################################### -->
             <!-- tx_rkwoutcome_domain_model_surveyrequest              -->
@@ -43,6 +47,42 @@
                 <source>RKW Outcome: Request</source>
                 <target>RKW Outcome: Anfrage</target>
             </trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.notifiedTstamp">
+				<source>Notified at</source>
+				<target>Benachrichtigt am</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.survey">
+				<source>Survey</source>
+				<target>Umfrage</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.eventReservationSubject">
+				<source>Selected event</source>
+				<target>Ausgewählte Veranstaltung</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.orderSubject">
+				<source>Select product</source>
+				<target>Ausgewähltes Produkt</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.processType">
+				<source>Process type</source>
+				<target>Typ des Vorgangs</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.eventReservation">
+				<source>Event reservation</source>
+				<target>Veranstaltungsanmeldung</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.order">
+				<source>Order</source>
+				<target>Bestellung</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.frontendUser">
+				<source>Frontend user</source>
+				<target>Frontendnutzer</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.targetGroups">
+				<source>Targetgroups</source>
+				<target>Zielgruppen</target>
+			</trans-unit>
 
             <!-- ##################################################### -->
             <!-- pages                                                 -->
