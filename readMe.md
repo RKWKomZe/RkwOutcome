@@ -15,7 +15,7 @@ If these parameters do match the survey request is created immediately. A schedu
 
 * ```checkPeriod``` (range of time containing the potentially processable event reservations or orders - in seconds)
 * ```maxSurveysPerPeriodAndFrontendUser``` (max number of request notifications to be sent to a user within the ```checkPeriod```)
-* ```urveyWaitingTime``` (select only survey requests, which have been shipped at least this amount of time ago)
+* ```surveyWaitingTime``` (select only survey requests, which have been shipped at least this amount of time ago)
 
 If there are pending survey requests they will be processed. In case there are multiple requests pending, meaning there are at least two products or events associated with survey configuration, the process will randomly select one out of these and store it to the containing survey request. Each of the matching survey requests will get a timestamp to mark them as notified.
 
@@ -71,4 +71,4 @@ Some of the tests rely on setting the environment time to correspond to differen
 
 ``composer require nesbot/carbon --dev``
 
-Status of editing: 2023-04-05
+Status of editing: 2023-04-20
