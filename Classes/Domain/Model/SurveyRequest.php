@@ -1,4 +1,5 @@
 <?php
+
 namespace RKW\RkwOutcome\Domain\Model;
 
 /*
@@ -14,9 +15,18 @@ namespace RKW\RkwOutcome\Domain\Model;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwEvents\Domain\Model\Event;
+use RKW\RkwEvents\Domain\Model\EventReservation;
+use RKW\RkwRegistration\Domain\Model\FrontendUser;
+use RKW\RkwShop\Domain\Model\Order;
+use RKW\RkwShop\Domain\Model\Product;
+use RKW\RkwSurvey\Domain\Model\Survey;
+use TYPO3\CMS\Extbase\Domain\Model\Category;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
+
 
 /**
- * SurveyRequest
+ * Class SurveyRequest
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
@@ -25,82 +35,58 @@ namespace RKW\RkwOutcome\Domain\Model;
  */
 class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 {
-
     /**
-     * frontendUser
-     *
      * @var \RKW\RkwRegistration\Domain\Model\FrontendUser|null
      */
-    protected $frontendUser;
+    protected $frontendUser = null;
 
 
     /**
-     * order
-     *
      * @var \RKW\RkwShop\Domain\Model\Order|null
-     *
      */
-    protected $order;
+    protected $order = null;
 
 
     /**
-     * eventReservation
-     *
      * @var \RKW\RkwEvents\Domain\Model\EventReservation|null
-     *
      */
-    protected $eventReservation;
+    protected $eventReservation = null;
 
 
     /**
-     * processType
-     *
      * @var string
      */
-     protected $processType;
-
+     protected $processType = '';
 
 
     /**
-     * TargetGroup
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
+     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>|null
      */
-    protected $targetGroup;
+    protected $targetGroup = null;
 
 
     /**
-     * notifiedTstamp
-     *
      * @var int
      */
     protected $notifiedTstamp = 0;
 
 
     /**
-     * orderSubject
-     *
      * @var \RKW\RkwShop\Domain\Model\Product|null
-     *
      */
-    protected $orderSubject;
+    protected $orderSubject = null;
 
 
     /**
-     * eventReservationSubject
-     *
      * @var \RKW\RkwEvents\Domain\Model\Event|null
-     *
      */
-    protected $eventReservationSubject;
+    protected $eventReservationSubject = null;
 
 
     /**
-     * Returns the survey
-     *
      * @var \RKW\RkwSurvey\Domain\Model\Survey|null
      */
-    protected $survey;
+    protected $survey = null;
 
 
     /**
@@ -111,6 +97,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
         //Do not remove the next line: It would break the functionality
         $this->initStorageObjects();
     }
+
 
     /**
      * Initializes all ObjectStorage properties
@@ -129,9 +116,9 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the order
      *
-     * @return \RKW\RkwShop\Domain\Model\Order|null
+     * @return \RKW\RkwShop\Domain\Model\Order
      */
-    public function getOrder()
+    public function getOrder():? Order
     {
         return $this->order;
     }
@@ -143,29 +130,28 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwShop\Domain\Model\Order $order
      * @return void
      */
-    public function setOrder(\RKW\RkwShop\Domain\Model\Order $order): void
+    public function setOrder(Order $order): void
     {
         $this->order = $order;
     }
 
 
-
     /**
-     * @return \RKW\RkwEvents\Domain\Model\EventReservation|null
+     * @return \RKW\RkwEvents\Domain\Model\EventReservation
      */
-    public function getEventReservation(): ?\RKW\RkwEvents\Domain\Model\EventReservation
+    public function getEventReservation(): ? EventReservation
     {
         return $this->eventReservation;
     }
 
+
     /**
-     * @param \RKW\RkwEvents\Domain\Model\EventReservation|null $eventReservation
+     * @param \RKW\RkwEvents\Domain\Model\EventReservation $eventReservation
      */
-    public function setEventReservation(?\RKW\RkwEvents\Domain\Model\EventReservation $eventReservation): void
+    public function setEventReservation(EventReservation $eventReservation): void
     {
         $this->eventReservation = $eventReservation;
     }
-
 
 
     /**
@@ -196,7 +182,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @return \RKW\RkwRegistration\Domain\Model\FrontendUser
      */
-    public function getFrontendUser()
+    public function getFrontendUser():? FrontendUser
     {
         return $this->frontendUser;
     }
@@ -208,7 +194,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
      * @return void
      */
-    public function setFrontendUser(\RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser): void
+    public function setFrontendUser(FrontendUser $frontendUser): void
     {
         $this->frontendUser = $frontendUser;
     }
@@ -223,6 +209,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     {
         return $this->notifiedTstamp;
     }
+
 
     /**
      * Sets the notifiedTstamp
@@ -239,9 +226,9 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the orderSubject
      *
-     * @return \RKW\RkwShop\Domain\Model\Product|null $orderSubject
+     * @return \RKW\RkwShop\Domain\Model\Product
      */
-    public function getOrderSubject()
+    public function getOrderSubject():? Product
     {
         return $this->orderSubject;
     }
@@ -253,23 +240,29 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwShop\Domain\Model\Product $orderSubject
      * @return void
      */
-    public function setOrderSubject(\RKW\RkwShop\Domain\Model\Product $orderSubject): void
+    public function setOrderSubject(Product $orderSubject): void
     {
         $this->orderSubject = $orderSubject;
     }
 
+
     /**
-     * @return \RKW\RkwEvents\Domain\Model\Event|null
+     * Returns the eventReservationSubject
+     *
+     * @return \RKW\RkwEvents\Domain\Model\Event
      */
-    public function getEventReservationSubject(): ?\RKW\RkwEvents\Domain\Model\Event
+    public function getEventReservationSubject():? Event
     {
         return $this->eventReservationSubject;
     }
 
+
     /**
-     * @param \RKW\RkwEvents\Domain\Model\Event|null $eventReservationSubject
+     * Sets the eventReservationSubject
+     *
+     * @param \RKW\RkwEvents\Domain\Model\Event $eventReservationSubject
      */
-    public function setEventReservationSubject(?\RKW\RkwEvents\Domain\Model\Event $eventReservationSubject): void
+    public function setEventReservationSubject(Event $eventReservationSubject): void
     {
         $this->eventReservationSubject = $eventReservationSubject;
     }
@@ -278,9 +271,9 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the survey
      *
-     * @return \RKW\RkwSurvey\Domain\Model\Survey|null
+     * @return \RKW\RkwSurvey\Domain\Model\Survey
      */
-    public function getSurvey()
+    public function getSurvey():? Survey
     {
         return $this->survey;
     }
@@ -292,53 +285,56 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
      * @return void
      */
-    public function setSurvey(\RKW\RkwSurvey\Domain\Model\Survey $survey): void
+    public function setSurvey(Survey $survey): void
     {
         $this->survey = $survey;
     }
+
 
     /**
      * Returns the targetGroup
      *
      * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
      */
-    public function getTargetGroup()
+    public function getTargetGroup(): ObjectStorage
     {
         return $this->targetGroup;
     }
 
+
     /**
      * Sets the targetGroup
      *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroup
      * @return void
      */
-    public function setTargetGroup(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroup)
+    public function setTargetGroup(ObjectStorage $targetGroup): void
     {
         $this->targetGroup = $targetGroup;
     }
 
+
     /**
-     * Adds a Category
+     * Adds a targetGroup
      *
      * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroup
      * @return void
      */
-    public function addTargetGroup(\TYPO3\CMS\Extbase\Domain\Model\Category $targetGroup): void
+    public function addTargetGroup(Category $targetGroup): void
     {
         $this->targetGroup->attach($targetGroup);
     }
 
+
     /**
-     * Removes a Category
+     * Removes a targetGroup
      *
      * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroupToRemove
      * @return void
      */
-    public function removeTargetGroup(\TYPO3\CMS\Extbase\Domain\Model\Category $targetGroupToRemove)
+    public function removeTargetGroup(Category $targetGroupToRemove)
     {
         $this->targetGroup->detach($targetGroupToRemove);
     }
-
 
 }

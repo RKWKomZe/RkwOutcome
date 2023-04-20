@@ -69,6 +69,6 @@ Necessary enhancement of the real url configuration:
 
 Some of the tests rely on setting the environment time to correspond to different time-based scenarios. So please make sure to install the following package in your root folder by running:
 
-``composer require nesbot/carbon --dev``
+```composer require nesbot/carbon --dev```
 
 Status of editing: 2023-04-20

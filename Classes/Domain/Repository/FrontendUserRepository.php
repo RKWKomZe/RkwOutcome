@@ -26,5 +26,4 @@ namespace RKW\RkwOutcome\Domain\Repository;
 class FrontendUserRepository extends \RKW\RkwRegistration\Domain\Repository\FrontendUserRepository
 {
 
-
 }

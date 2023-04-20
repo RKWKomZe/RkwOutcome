@@ -1,4 +1,5 @@
 <?php
+
 namespace RKW\RkwOutcome\Manager;
 
 /*
@@ -16,15 +17,10 @@ namespace RKW\RkwOutcome\Manager;
 
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Service\LogTrait;
-use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
-use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
- * SurveyRequestManager
+ * Class SurveyRequestManager
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
@@ -43,20 +39,13 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      */
     const SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST = 'sendMailSurveyRequestToUser';
 
-    /**
-     * Signal name for use in ext_localconf.php
-     *
-     * @const string
-     */
-    const SIGNAL_AFTER_ORDER_CREATED_USER = 'afterOrderCreatedUser';
 
     /**
-     * Signal Slot Dispatcher
-     *
      * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
      * @inject
      */
     protected $signalSlotDispatcher;
+
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
@@ -71,8 +60,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     protected $surveyConfigurationRepository;
 
     /**
-     * PersistenceManager
-     *
      * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
      * @inject
      */
@@ -82,35 +69,26 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
     /**
      * Intermediate function for creating surveyRequests - used by SignalSlot
      *
-     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser|array $frontendUser
-     * @param \RKW\RkwShop\Domain\Model\Order $process
+     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
+     * @param \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\EventReservation $process
      * @return void
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      * @throws \TYPO3\CMS\Extbase\SignalSlot\Exception\InvalidSlotException
      * @throws \TYPO3\CMS\Extbase\SignalSlot\Exception\InvalidSlotReturnException
      */
-    public function createSurveyRequestSignalSlot
-    (
-//        \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser,
-        $frontendUser,
-        $process
-    ): void
+    public function createSurveyRequestSignalSlot(\RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser, $process): void
     {
-
-        //  @todo: Use exceptions
-        $this->createSurveyRequest($process);
-
-//        try {
-//            $this->createSurveyRequest($process);
-//        } catch (\RKW\RkwShop\Exception $exception) {
-//            // do nothing
-//        }
-
+        try {
+            $this->createSurveyRequest($process);
+        } catch (\RKW\RkwOutcome\Exception $exception) {
+            // do nothing
+        }
     }
 
+
     /**
-     * Intermediate function for creating survey requests - used by SignalSlot
+     * createSurveyRequest
      *
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
      * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest|null
@@ -119,19 +97,11 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
      */
-    public function createSurveyRequest
-    (
-        \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
-    ): ?SurveyRequest
+    public function createSurveyRequest (\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): ?SurveyRequest
     {
-        //  @todo: use a custom Signal in OrderManager->saveOrder to provide FE-User instead of BE-User
-        //  @todo: Alternativ: Wie kann ich $frontendUser und $backendUserForProductMap ignorieren?
-
-        //  @todo: Lässt sich das auch über einen Accessor o. ä. lösen?
         /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = (method_exists($process, 'getFrontendUser')) ? $process->getFrontendUser() : $process->getFeUser();
 
-        //  @todo: only surveyable, if same target group
         if ($this->isSurveyable($process)) {
 
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
@@ -148,7 +118,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             $surveyRequest->setProcessType(get_class($process));
             $surveyRequest->setFrontendUser($frontendUser);
 
-            //  @todo: targetGroup must be mandatory in order form, otherwise this next condition crashes:
             $process->getTargetGroup()->rewind();
             $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
 
@@ -189,9 +158,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return array
-     * @throws IllegalObjectTypeException
-     * @throws InvalidQueryException
-     * @throws UnknownObjectException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
      */
      public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $surveyWaitingTime = 0, int $currentTime = 0):array {
 
@@ -216,21 +186,23 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                  /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
                  foreach ($surveyRequestsByUser as $surveyRequest) {
 
-
                      if ($this->containsProcessableSubject($surveyRequest, $processableSubject)) {
 
                          if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
+                             // @todo: zusätzlich prüfen auf instanceOf Order
                              $surveyRequest->setOrderSubject($processableSubject);
-                             /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
+                             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
                              $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
                          }
 
                          if ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
+                             // @todo: zusätzlich prüfen auf instanceOf EventReservation
                              $surveyRequest->setEventReservationSubject($processableSubject);
-                             /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
+                             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
                              $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
                          }
 
+                         // @todo: Abfangen bei leerem Resultset $surveyConfigurations -> Test schreiben
                          /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                          $surveyConfiguration = $surveyConfigurations->getFirst();
                          $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
@@ -263,7 +235,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
          }
 
-
          $this->logInfo(
              sprintf(
                  '%s pending request have been processed.',
@@ -280,8 +251,9 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * Send notification to request a survey from frontend user
      *
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+     * @return bool
     */
-    public function sendNotification(\RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest)
+    public function sendNotification(\RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest): bool
     {
 
         if ($recipient = $surveyRequest->getFrontendUser()) {
@@ -320,7 +292,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
-     *
      * @return bool
      */
     protected function isSurveyable(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): bool
@@ -333,9 +304,8 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
-     *
      * @return array
-     * @throws InvalidQueryException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
     protected function getNotifiableObjects(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): array
     {
@@ -362,7 +332,8 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                     )
                 );
 
-                /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
+                //  @todo: Heads up! QueryResultInterface kann bei count() evtl. einen Fehler liefern. Fallback toArray().
+                /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
                 $result = $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup());
                 if (
                     $result->count() > 0
@@ -392,12 +363,12 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
 
     /**
-     * @param SurveyRequest $surveyRequest
-     * @param int           $currentTime
+     * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+     * @param int $currentTime
      * @return void
      *
-     * @throws IllegalObjectTypeException
-     * @throws UnknownObjectException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      */
     protected function markAsNotified(SurveyRequest $surveyRequest, int $currentTime = 0): void
     {
@@ -423,7 +394,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param array $surveyRequestsByUser
-     *
      * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
      */
     protected function getProcessable(array $surveyRequestsByUser): ?\TYPO3\CMS\Extbase\DomainObject\AbstractEntity
@@ -451,7 +421,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param SurveyRequest $surveyRequest
-     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity       $processableSubject
+     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $processableSubject
      * @return bool
      */
     protected function containsProcessableSubject(SurveyRequest $surveyRequest, \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $processableSubject): bool
@@ -479,11 +449,11 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * @param int $maxSurveysPerPeriodAndFrontendUser
      * @param int $currentTime
      * @return bool
-     * @throws InvalidQueryException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
     protected function isNotificationLimitReached(int $frontendUserUid, int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $currentTime): bool
     {
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $alreadyNotifiedRequests = $this->surveyRequestRepository->findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser($frontendUserUid, $checkPeriod, $currentTime);
 
         return count($alreadyNotifiedRequests) >= $maxSurveysPerPeriodAndFrontendUser;
