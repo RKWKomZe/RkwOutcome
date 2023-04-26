@@ -18,8 +18,10 @@ namespace RKW\RkwOutcome\Service;
 use RKW\RkwBasics\Utility\GeneralUtility;
 use RKW\RkwMailer\Service\MailService;
 use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
+use RKW\RkwOutcome\Manager\SurveyRequestManager;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class RkwMailService
@@ -89,15 +91,21 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                 && ($recipient->getEmail())
             ) {
 
+                /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+                $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+
+                /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $surveyRequestManager */
+                $surveyRequestManager = $objectManager->get(SurveyRequestManager::class);
+
                 $mailService->setTo($recipient, [
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
                         'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? (int) $settingsDefault['surveyShowPid'] : 0,
+                        'surveyRequestTags' => $surveyRequestManager->buildSurveyRequestTags($surveyRequest)
                     ]
                 ]);
 
-                //  @todo: set language to user language instead of de
                 $mailService->getQueueMail()->setSubject(
                     FrontendLocalizationUtility::translate(
                         'rkwMailService.subject.userSurveyRequestNotification',

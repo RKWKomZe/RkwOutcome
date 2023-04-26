@@ -25,7 +25,7 @@
     </p>
     <p>
         <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}">
-            <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: surveyRequest.survey}' />" target="_blank">
+            <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: surveyRequest.survey, surveyRequestTags: surveyRequestTags}' />" target="_blank">
                 <rkwMailer:frontend.translate key="templates_email_sendSurveyForPastEvent.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwEvents" />
             </a>
         </rkwMailer:email.replace.redirectLinks>
