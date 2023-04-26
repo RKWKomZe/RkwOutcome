@@ -799,7 +799,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      *
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestMarksAllConsideredSurveyRequestsAsNotifiedAndSetsProcessSubjectOnlyInSurveyRequestContainingTheSelectedProduct()
+    public function processPendingSurveyRequestSetsProcessSubjectAndNotifiedTstampOnlyInSurveyRequestContainingTheSelectedProduct()
     {
 
         /**
@@ -811,9 +811,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given a persisted order-object 2 that belongs to surveyRequest-object 2
          * When the method is called
          * Then the number of processed requests is 2
-         * Then the property notifiedTstamp of both surveyRequest-objects is greater than 1
-         * Then the property notifiedTstamp of both surveyRequest-objects is the same
-         * Then the property processedSubject of only one surveyRequest-object is set
+         * Then the number of further pending requests is 0
+         * Then the number of notified surveyRequest-objects is 1
+         * Then the property processedSubject and the property notifiedTstamp of the notified surveyRequest-object is set
+         * Then the property notifiedTstamp of that notified surveyRequest-object is greater than 1
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check110.xml');
@@ -832,31 +833,27 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 1);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+        $processedSurveyRequests = $this->subject->processPendingSurveyRequests(
             $checkPeriod = $this->checkPeriod,
             $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
             $surveyWaitingTime = (1 * 24 * 60 * 60)
         );
-        self::assertCount(2, $notifiedSurveyRequests);
+        self::assertCount(2, $processedSurveyRequests);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid1 */
-        $surveyRequestProcessedDbUid1 = $this->surveyRequestRepository->findByUid(1);
-        self::assertGreaterThan(0, $surveyRequestProcessedDbUid1->getNotifiedTstamp());
+        //  get all survey requests
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequestsDb */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAllPendingSurveyRequests();
+        self::assertCount(0, $surveyRequestsDb);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid2 */
-        $surveyRequestProcessedDbUid2 = $this->surveyRequestRepository->findByUid(2);
-        self::assertSame($surveyRequestProcessedDbUid1->getNotifiedTstamp(), $surveyRequestProcessedDbUid2->getNotifiedTstamp());
+        //  get all notified survey requests by user
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $notifiedSurveyRequestsDb */
+        $notifiedSurveyRequestsDb = $this->surveyRequestRepository->findAllNotifiedSurveyRequestsByFrontendUser(1);
+        self::assertCount(1, $notifiedSurveyRequestsDb);
 
-        self::assertNotSame($surveyRequestProcessedDbUid1->getOrderSubject(), $surveyRequestProcessedDbUid2->getOrderSubject());
-        self::assertNotSame($surveyRequestProcessedDbUid1->getSurvey(), $surveyRequestProcessedDbUid2->getSurvey());
-
-        foreach ($notifiedSurveyRequests as $surveyRequest) {
-            if ($surveyRequest->getOrderSubject()) {
-                self::assertSame($surveyRequest->getUid(), $surveyRequest->getOrderSubject()->getUid());
-            } else {
-                self::assertNull($surveyRequest->getOrderSubject());
-            }
-        }
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $notifiedSurveyRequestDb */
+        $notifiedSurveyRequestDb = $notifiedSurveyRequestsDb->getFirst();
+        self::assertGreaterThan(0, $notifiedSurveyRequestDb->getNotifiedTstamp());
+        self::assertNotNull($notifiedSurveyRequestDb->getOrderSubject());
 
     }
 
@@ -929,7 +926,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      *
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestsRespectsSurveyTimeSlotAndSurveryPerTimeSlotAndFrontendUser(): void
+    public function processPendingSurveyRequestsRespectsSurveyTimeSlotAndSurveyPerTimeSlotAndFrontendUser(): void
     {
 
         /**
@@ -937,12 +934,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          *
          * Given checkPeriod is set to 7 * 24 * 60 * 60 (last 7 days)
          * Given maxSurveysPerPeriodAndFrontendUser is set to 1
+         * Given surveyWaitingTime is set to 0
          * Given a persisted frontendUser 1
          * Given a persisted surveyRequest-object 1 that belongs to frontendUser-object 1
          * Given a persisted surveyRequest-object 2 that belongs to frontendUser-object 1
-         * When the method is called
+         * When the method is called 2 days after the order
          * Then the number of processed requests is 2
-         * Given a persisted surveyRequest-object 3 that belongs to frontendUser-object 1
+         * Given an additional persisted surveyRequest-within the checkPeriod that belongs to frontendUser-object 1
          * When the method is called
          * Then the number of processed requests is 0
          */
@@ -969,13 +967,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
         //  Processing pending survey requests on $initialDate + 1 day
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+        $processedSurveyRequests = $this->subject->processPendingSurveyRequests(
             $checkPeriod = $this->checkPeriod,
             $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
             $surveyWaitingTime = 0,
-            $currentTime = Carbon::now()->addDays(1)->timestamp
+            $currentTime = Carbon::now()->addDays(2)->timestamp
         );
-        self::assertCount(2, $notifiedSurveyRequests);
+        self::assertCount(2, $processedSurveyRequests);
 
         //  Third order on $initialDate + 2 days
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
@@ -987,17 +985,19 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 3);
 
         //  Processing pending survey requests on $initialDate + 3 days
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
+        $processedSurveyRequests = $this->subject->processPendingSurveyRequests(
             $checkPeriod = $this->checkPeriod,
             $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
             $surveyWaitingTime = 0,
             $currentTime = Carbon::now()->addDays(3)->timestamp
         );
-        self::assertCount(0, $notifiedSurveyRequests);
+        self::assertCount(0, $processedSurveyRequests);
 
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $pendingSurveyRequestsDb */
         $pendingSurveyRequestsDb = $this->surveyRequestRepository->findAllPendingSurveyRequests();
+
         self::assertCount(1, $pendingSurveyRequestsDb);
+
 
     }
 

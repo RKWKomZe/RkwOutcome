@@ -90,6 +90,12 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
+     * @var bool
+     */
+    protected $deleted = false;
+
+
+    /**
      * __construct
      */
     public function __construct()
@@ -110,6 +116,31 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     protected function initStorageObjects()
     {
         $this->targetGroup = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+    }
+
+
+    /**
+     * Returns the deleted value
+     *
+     * @return bool
+     * @api
+     */
+    public function getDeleted(): int
+    {
+        return $this->deleted;
+    }
+
+
+    /**
+     * Sets the deleted value
+     *
+     * @param bool $deleted
+     * @return void
+     * @api
+     */
+    public function setDeleted(bool $deleted): void
+    {
+        $this->deleted = $deleted;
     }
 
 
