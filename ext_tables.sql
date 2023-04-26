@@ -54,6 +54,8 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyconfiguration (
 	event int(11) unsigned DEFAULT '0',
 	survey int(11) unsigned DEFAULT '0',
 
+	mail_text text NOT NULL,
+
 	tstamp int(11) unsigned DEFAULT '0' NOT NULL,
 	crdate int(11) unsigned DEFAULT '0' NOT NULL,
 	cruser_id int(11) unsigned DEFAULT '0' NOT NULL,
