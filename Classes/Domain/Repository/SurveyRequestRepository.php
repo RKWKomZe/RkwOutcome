@@ -59,16 +59,18 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $constraints = [];
 
         $constraints[] =
-            $query->logicalOr(
-                $query->logicalAnd(
-                    $query->equals('notifiedTstamp', 0),
-                    $query->lessThan('order.shippedTstamp', $currentTime - $surveyWaitingTime),
-                    $query->greaterThan('order', 0)
-                ),
-                $query->logicalAnd(
-                    $query->equals('notifiedTstamp', 0),
-                    $query->lessThan('eventReservation.event.end', $currentTime - $surveyWaitingTime),
-                    $query->greaterThan('eventReservation', 0)
+            $query->logicalAnd(
+                $query->equals('notifiedTstamp', 0),
+                $query->equals('deleted', 0),
+                $query->logicalOr(
+                    $query->logicalAnd(
+                        $query->lessThan('order.shippedTstamp', $currentTime - $surveyWaitingTime),
+                        $query->greaterThan('order', 0)
+                    ),
+                    $query->logicalAnd(
+                        $query->lessThan('eventReservation.event.end', $currentTime - $surveyWaitingTime),
+                        $query->greaterThan('eventReservation', 0)
+                    )
                 )
             )
         ;
@@ -112,7 +114,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
 
     /**
-     * findAllPendingSurveyRequestsGroupedByFrontendUser
+     * findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser
      *
      * @param int $frontendUserUid
      * @param int $period
@@ -147,5 +149,37 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         return $query->execute();
 
     }
+
+    /**
+     * findAllNotifiedSurveyRequestsByFrontendUser
+     *
+     * @param int $frontendUserUid
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @comment implicitly tested
+     */
+    public function findAllNotifiedSurveyRequestsByFrontendUser(int $frontendUserUid): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    {
+
+        $query = $this->createQuery();
+
+        $constraints = [];
+
+        $constraints[] =
+            $query->logicalAnd(
+                $query->greaterThan('notifiedTstamp', 0),
+                $query->equals('frontend_user', $frontendUserUid)
+            )
+        ;
+
+        // NOW: construct final query!
+        if ($constraints) {
+            $query->matching($query->logicalAnd($constraints));
+        }
+
+        return $query->execute();
+
+    }
+
 
 }

@@ -165,6 +165,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      */
      public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $surveyWaitingTime = 0, int $currentTime = 0):array {
 
+         if (! $currentTime) {
+             $currentTime = time();
+         }
+
          $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findAllPendingSurveyRequestsGroupedByFrontendUser($surveyWaitingTime, $currentTime) ;
 
          $this->logInfo(
@@ -206,30 +210,25 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                          /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                          $surveyConfiguration = $surveyConfigurations->getFirst();
                          $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
-                         $this->surveyRequestRepository->update($surveyRequest);
+                         $surveyRequest->setNotifiedTstamp($currentTime);
 
-                         $this->logInfo(
-                             sprintf(
-                                 'Pending request %s with process_subject %s will be notified.',
-                                 $surveyRequest->getUid(),
-                                 $processableSubject->getUid()
-                             )
-                         );
+                         $this->markAsNotified($surveyRequest, $currentTime);
 
                          $this->sendNotification($surveyRequest);
 
+                     } else {
+
+                         $surveyRequest->setDeleted(true);
+
                      }
+
+                     $this->surveyRequestRepository->update($surveyRequest);
+                     $this->persistenceManager->persistAll();
 
                      $notifiableSurveyRequests[] = $surveyRequest;
 
                  }
 
-                 foreach ($notifiableSurveyRequests as $notifiedSurveyRequest) {
-                     if (! $currentTime) {
-                         $currentTime = time();
-                     }
-                     $this->markAsNotified($notifiedSurveyRequest, $currentTime);
-                 }
 
              }
 
@@ -237,7 +236,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
          $this->logInfo(
              sprintf(
-                 '%s pending request have been processed.',
+                 '%s pending requests have been processed.',
                  count($notifiableSurveyRequests)
              )
          );
