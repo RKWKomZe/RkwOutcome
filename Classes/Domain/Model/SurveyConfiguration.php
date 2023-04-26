@@ -1,4 +1,5 @@
 <?php
+
 namespace RKW\RkwOutcome\Domain\Model;
 
 /*
@@ -14,9 +15,13 @@ namespace RKW\RkwOutcome\Domain\Model;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwShop\Domain\Model\Product;
+use RKW\RkwSurvey\Domain\Model\Survey;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
+
 
 /**
- * SurveyConfiguration
+ * Class SurveyConfiguration
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
@@ -25,31 +30,22 @@ namespace RKW\RkwOutcome\Domain\Model;
  */
 class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 {
-
-
     /**
-     * product
-     *
      * @var \RKW\RkwShop\Domain\Model\Product|null
      */
     protected $product = null;
 
 
     /**
-     * survey
-     *
      * @var \RKW\RkwSurvey\Domain\Model\Survey|null
      */
     protected $survey = null;
 
 
     /**
-     * TargetGroup
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>
+     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>|null
      */
-    protected $targetGroup;
-
+    protected $targetGroup = null;
 
 
     /**
@@ -60,6 +56,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
         //Do not remove the next line: It would break the functionality
         $this->initStorageObjects();
     }
+
 
     /**
      * Initializes all ObjectStorage properties
@@ -78,9 +75,9 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the product
      *
-     * @return \RKW\RkwShop\Domain\Model\Product|null $product
+     * @return \RKW\RkwShop\Domain\Model\Product
      */
-    public function getProduct()
+    public function getProduct():? Product
     {
         return $this->product;
     }
@@ -92,7 +89,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwShop\Domain\Model\Product $product
      * @return void
      */
-    public function setProducts($product): void
+    public function setProducts(Product $product): void
     {
         $this->product = $product;
     }
@@ -101,9 +98,9 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the survey
      *
-     * @return \RKW\RkwSurvey\Domain\Model\Survey|null $survey
+     * @return \RKW\RkwSurvey\Domain\Model\Survey
      */
-    public function getSurvey()
+    public function getSurvey():? Survey
     {
         return $this->survey;
     }
@@ -115,7 +112,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
      * @return void
      */
-    public function setSurvey($survey): void
+    public function setSurvey(Survey $survey): void
     {
         $this->survey = $survey;
     }
@@ -126,18 +123,19 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
      */
-    public function getTargetGroup()
+    public function getTargetGroup(): ObjectStorage
     {
         return $this->targetGroup;
     }
 
+
     /**
      * Sets the targetGroup
      *
-     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category> $targetGroup
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroup
      * @return void
      */
-    public function setTargetGroup(\TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroup)
+    public function setTargetGroup(ObjectStorage $targetGroup): void
     {
         $this->targetGroup = $targetGroup;
     }

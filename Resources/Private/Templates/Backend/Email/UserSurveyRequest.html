@@ -9,7 +9,9 @@
     <rkwMailer:plaintextLineBreaks>
         <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
         \n\n
-        <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: surveyRequest.survey}' />
+        <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
+            <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: surveyRequest.survey}' />
+        </rkwMailer:email.replace.redirectLinks>
     </rkwMailer:plaintextLineBreaks>
 </f:section>
 
@@ -22,8 +24,10 @@
         {surveyRequest.survey.name}
     </p>
     <p>
-        <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: surveyRequest.survey}' />" target="_blank">
-            <rkwMailer:frontend.translate key="templates_email_sendSurveyForPastEvent.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwEvents" />
-        </a>
+        <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}">
+            <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: surveyRequest.survey}' />" target="_blank">
+                <rkwMailer:frontend.translate key="templates_email_sendSurveyForPastEvent.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwEvents" />
+            </a>
+        </rkwMailer:email.replace.redirectLinks>
     </p>
 </f:section>

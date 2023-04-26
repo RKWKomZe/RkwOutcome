@@ -1,6 +1,6 @@
 <?php
 
-namespace RKW\RkwOutcome\Domain\Model;
+namespace RKW\RkwOutcome;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -16,14 +16,14 @@ namespace RKW\RkwOutcome\Domain\Model;
  */
 
 /**
- * Class Process
+ * Class Exception
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class Process extends \RKW\RkwShop\Domain\Model\Order
+class Exception extends \Exception
 {
 
 }

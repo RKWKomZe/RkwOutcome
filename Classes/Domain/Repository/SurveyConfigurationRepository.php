@@ -1,6 +1,7 @@
 <?php
 
 namespace RKW\RkwOutcome\Domain\Repository;
+
 /*
  * This file is part of the TYPO3 CMS project.
  *
@@ -15,11 +16,13 @@ namespace RKW\RkwOutcome\Domain\Repository;
  */
 
 use RKW\RkwBasics\Helper\QueryTypo3;
-use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
+use RKW\RkwEvents\Domain\Model\Event;
+use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
+use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 /**
- * SurveyConfigurationRepository
+ * Class SurveyConfigurationRepository
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
@@ -30,22 +33,23 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 {
 
     /*
-    * initializeObject
+    * @return void
     */
-    public function initializeObject()
+    public function initializeObject(): void
     {
         $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
         $this->defaultQuerySettings->setRespectStoragePage(false);
     }
 
+
     /**
-     * Finds a survey configuration matching the given identifier.
+     * findByProduct
      *
      * @param \RKW\RkwShop\Domain\Model\Product $product
      *
-     * @return object|null The object for the identifier if it is known, or NULL
+     * @return \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
-    public function findByProduct(\RKW\RkwShop\Domain\Model\Product $product)
+    public function findByProduct(Product $product): ?\RKW\RkwOutcome\Domain\Model\SurveyConfiguration
     {
         $query = $this->createQuery();
 
@@ -55,21 +59,20 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
         $query->setLimit(1);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
         return $query->execute()->getFirst();
     }
 
 
     /**
-     * Finds a survey configuration matching the given identifier.
+     * findByProductAndTargetGroup
      *
-     * @param \RKW\RkwShop\Domain\Model\Product            $product
+     * @param \RKW\RkwShop\Domain\Model\Product $product
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
      *
-     * @return object|null The object for the identifier if it is known, or NULL
-     * @throws InvalidQueryException
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-    public function findByProductAndTargetGroup(\RKW\RkwShop\Domain\Model\Product $product, \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups)
+    public function findByProductAndTargetGroup(Product $product, ObjectStorage $targetGroups): ?\TYPO3\CMS\Extbase\Persistence\QueryResultInterface
     {
 
         // 1. build uid list
@@ -86,9 +89,9 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
             // 2. set leftJoin over categories
             $leftJoin = '
-                LEFT JOIN sys_category_record_mm AS sys_category_record_mm 
-                    ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign 
-                    AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\' 
+                LEFT JOIN sys_category_record_mm AS sys_category_record_mm
+                    ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign
+                    AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\'
                     AND sys_category_record_mm.fieldname = \'target_group\'
                 LEFT JOIN sys_category AS sys_category
                     ON sys_category_record_mm.uid_local=sys_category.uid
@@ -104,9 +107,9 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             // 5. Final statement
             $finalStatement = '
                 SELECT tx_rkwoutcome_domain_model_surveyconfiguration.*
-                FROM tx_rkwoutcome_domain_model_surveyconfiguration 
+                FROM tx_rkwoutcome_domain_model_surveyconfiguration
                 ' . $leftJoin . '
-                WHERE 
+                WHERE
                     sys_category.uid IN(' . implode(',', $targetGroupsList) . ')
                     AND ' . implode(' AND ', $constraints) .
                 QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
@@ -120,7 +123,6 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                 $finalStatement
             );
 
-            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
             return $query->execute();
 
         }
@@ -131,13 +133,13 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
 
     /**
-     * Finds a survey configuration matching the given identifier.
+     * findByEvent
      *
      * @param \RKW\RkwEvents\Domain\Model\Event $event
      *
-     * @return object|null The object for the identifier if it is known, or NULL
+     * @return \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
-    public function findByEvent(\RKW\RkwEvents\Domain\Model\Event $event)
+    public function findByEvent(Event $event): ?\RKW\RkwOutcome\Domain\Model\SurveyConfiguration
     {
         $query = $this->createQuery();
 
@@ -150,16 +152,17 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
         return $query->execute()->getFirst();
     }
 
+
     /**
-     * Finds a survey configuration matching the given identifier.
+     * findByEventAndTargetGroup
      *
-     * @param \RKW\RkwEvents\Domain\Model\Event            $event
+     * @param \RKW\RkwEvents\Domain\Model\Event $event
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
      *
-     * @return object|null The object for the identifier if it is known, or NULL
-     * @throws InvalidQueryException
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-    public function findByEventAndTargetGroup(\RKW\RkwEvents\Domain\Model\Event $event, \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups)
+    public function findByEventAndTargetGroup(Event $event, ObjectStorage $targetGroups): ?\TYPO3\CMS\Extbase\Persistence\QueryResultInterface
     {
 
         // 1. build uid list
@@ -176,9 +179,9 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
             // 2. set leftJoin over categories
             $leftJoin = '
-                LEFT JOIN sys_category_record_mm AS sys_category_record_mm 
-                    ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign 
-                    AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\' 
+                LEFT JOIN sys_category_record_mm AS sys_category_record_mm
+                    ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign
+                    AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\'
                     AND sys_category_record_mm.fieldname = \'target_group\'
                 LEFT JOIN sys_category AS sys_category
                     ON sys_category_record_mm.uid_local=sys_category.uid
@@ -194,9 +197,9 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             // 5. Final statement
             $finalStatement = '
                 SELECT tx_rkwoutcome_domain_model_surveyconfiguration.*
-                FROM tx_rkwoutcome_domain_model_surveyconfiguration 
+                FROM tx_rkwoutcome_domain_model_surveyconfiguration
                 ' . $leftJoin . '
-                WHERE 
+                WHERE
                     sys_category.uid IN(' . implode(',', $targetGroupsList) . ')
                     AND ' . implode(' AND ', $constraints) .
                 QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
@@ -210,7 +213,6 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                 $finalStatement
             );
 
-            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
             return $query->execute();
 
         }
