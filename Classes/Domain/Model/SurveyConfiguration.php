@@ -49,6 +49,12 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
+     * @var string
+     */
+    protected $mailText = '';
+
+
+    /**
      * __construct
      */
     public function __construct()
@@ -139,5 +145,29 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     {
         $this->targetGroup = $targetGroup;
     }
+
+
+    /**
+     * Returns the mailText
+     *
+     * @return string $mailText
+     */
+    public function getMailText(): string
+    {
+        return $this->mailText;
+    }
+
+
+    /**
+     * Sets the $mailText
+     *
+     * @param string $mailText
+     * @return void
+     */
+    public function setMailText(string $mailText): void
+    {
+        $this->mailText = $mailText;
+    }
+
 
 }

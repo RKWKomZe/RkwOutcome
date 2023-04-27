@@ -18,14 +18,14 @@ return [
         ],
         // do only make requestUpdate, if token-list should be shown on check
         // 'requestUpdate' => 'access_restricted',
-        'searchFields' => 'product, event, survey, taregt_category',
+        'searchFields' => 'product, event, survey, target_group, mail_text',
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyconfiguration.gif'
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group',
+        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, mail_text',
     ],
     'types' => [
-        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group'],
+        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, mail_text'],
     ],
     'columns' => [
 
@@ -166,6 +166,17 @@ return [
                 'size' => 1,
                 'minitems' => 0,
                 'maxitems' => 1,
+            ],
+        ],
+
+        'mail_text' => [
+            'exclude' => false,
+            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.mailText',
+            'config' => [
+                'type' => 'text',
+                'cols' => '40',
+                'rows' => '15',
+                'eval' => 'trim',
             ],
         ],
 

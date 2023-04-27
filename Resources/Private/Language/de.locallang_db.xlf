@@ -8,8 +8,8 @@
             <!-- tx_rkwoutcome_domain_model_surveyconfiguration              -->
             <!-- ##################################################### -->
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration">
-				<source>RKW Outcome: Questionnaire</source>
-				<target>RKW Outcome: Fragebogen</target>
+				<source>RKW Outcome: Configurations</source>
+				<target>RKW Outcome: Konfigurationen</target>
 			</trans-unit>
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.processType">
                 <source>Process-Type</source>
@@ -38,6 +38,10 @@
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.targetGroups">
 				<source>Targetgroups</source>
 				<target>Zielgruppen</target>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.mailText">
+				<source>Text for notification email</source>
+				<target>Text für Benachrichtigungs-E-Mail</target>
 			</trans-unit>
 
             <!-- ##################################################### -->
@@ -83,6 +87,7 @@
 				<source>Targetgroups</source>
 				<target>Zielgruppen</target>
 			</trans-unit>
+
 
             <!-- ##################################################### -->
             <!-- pages                                                 -->
