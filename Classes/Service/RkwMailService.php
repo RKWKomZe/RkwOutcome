@@ -99,7 +99,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
-                        'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? (int) $settingsDefault['surveyShowPid'] : 0,
+                        'surveyPid' => (int) $settingsDefault['surveyShowPid'],
                     ]
                 ]);
 

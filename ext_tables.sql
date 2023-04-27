@@ -52,7 +52,7 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyconfiguration (
   process_type varchar(255) DEFAULT '\RKW\RkwShop\Domain\Model\Product' NOT NULL,
 	product int(11) unsigned DEFAULT '0',
 	event int(11) unsigned DEFAULT '0',
-	survey int(11) unsigned DEFAULT '0',
+	survey varchar(255) DEFAULT '' NOT NULL,
 
 	mail_text text NOT NULL,
 
