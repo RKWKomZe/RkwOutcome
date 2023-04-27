@@ -18,14 +18,14 @@ return [
         ],
         // do only make requestUpdate, if token-list should be shown on check
         // 'requestUpdate' => 'access_restricted',
-        'searchFields' => 'order, event_reservation, process_type, survey, notified_tstamp',
+        'searchFields' => 'order, event_reservation, process_type, survey_configuration, notified_tstamp',
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyrequest.gif'
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, process_type, order, event_reservation, order_subject, event_reservation_subject, survey, target_group, notified_tstamp',
+        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, process_type, order, event_reservation, order_subject, event_reservation_subject, survey_configuration, target_group, notified_tstamp',
     ],
     'types' => [
-        '1' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, process_type, order, event_reservation, order_subject, event_reservation_subject, survey, target_group, notified_tstamp, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
+        '1' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, process_type, order, event_reservation, order_subject, event_reservation_subject, survey_configuration, target_group, notified_tstamp, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
     ],
     'columns' => [
 
@@ -196,14 +196,14 @@ return [
             'displayCond' => 'FIELD:process_type:=:RKW\RkwEvents\Domain\Model\EventReservation',
         ],
 
-        'survey' => [
+        'survey_configuration' => [
             'exclude' => 0,
-            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest.survey',
+            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyrequest.surveyConfiguration',
             'config' => [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
-                'foreign_table' => 'tx_rkwsurvey_domain_model_survey',
-                'foreign_table_where' => ' AND ((\'###PAGE_TSCONFIG_IDLIST###\' <> \'0\' AND FIND_IN_SET(tx_rkwsurvey_domain_model_survey.pid,\'###PAGE_TSCONFIG_IDLIST###\')) OR (\'###PAGE_TSCONFIG_IDLIST###\' = \'0\')) AND tx_rkwsurvey_domain_model_survey.hidden = 0 AND tx_rkwsurvey_domain_model_survey.deleted = 0',
+                'foreign_table' => 'tx_rkwoutcome_domain_model_surveyconfiguration',
+                'foreign_table_where' => ' AND ((\'###PAGE_TSCONFIG_IDLIST###\' <> \'0\' AND FIND_IN_SET(tx_rkwoutcome_domain_model_surveyconfiguration.pid,\'###PAGE_TSCONFIG_IDLIST###\')) OR (\'###PAGE_TSCONFIG_IDLIST###\' = \'0\')) AND tx_rkwoutcome_domain_model_surveyconfiguration.hidden = 0 AND tx_rkwoutcome_domain_model_surveyconfiguration.deleted = 0',
                 'size' => 1,
                 'minitems' => 0,
                 'maxitems' => 1,

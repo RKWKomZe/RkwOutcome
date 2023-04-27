@@ -84,9 +84,15 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * @var \RKW\RkwSurvey\Domain\Model\Survey|null
+     * @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
-    protected $survey = null;
+    protected $surveyConfiguration = null;
+
+
+    /**
+     * @var bool
+     */
+    protected $deleted = false;
 
 
     /**
@@ -110,6 +116,31 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     protected function initStorageObjects()
     {
         $this->targetGroup = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+    }
+
+
+    /**
+     * Returns the deleted value
+     *
+     * @return bool
+     * @api
+     */
+    public function getDeleted(): int
+    {
+        return $this->deleted;
+    }
+
+
+    /**
+     * Sets the deleted value
+     *
+     * @param bool $deleted
+     * @return void
+     * @api
+     */
+    public function setDeleted(bool $deleted): void
+    {
+        $this->deleted = $deleted;
     }
 
 
@@ -269,25 +300,25 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the survey
+     * Returns the surveyConfiguration
      *
-     * @return \RKW\RkwSurvey\Domain\Model\Survey
+     * @return \RKW\RkwOutcome\Domain\Model\SurveyConfiguration
      */
-    public function getSurvey():? Survey
+    public function getSurveyConfiguration():? SurveyConfiguration
     {
-        return $this->survey;
+        return $this->surveyConfiguration;
     }
 
 
     /**
-     * Sets the survey
+     * Sets the surveyConfiguration
      *
-     * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
+     * @param \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration
      * @return void
      */
-    public function setSurvey(Survey $survey): void
+    public function setSurveyConfiguration(SurveyConfiguration $surveyConfiguration): void
     {
-        $this->survey = $survey;
+        $this->surveyConfiguration = $surveyConfiguration;
     }
 
 

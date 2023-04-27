@@ -19,7 +19,6 @@ use RKW\RkwBasics\Utility\GeneralUtility;
 use RKW\RkwMailer\Service\MailService;
 use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
 use RKW\RkwOutcome\Manager\SurveyRequestManager;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 
@@ -101,8 +100,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
-                        'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? (int) $settingsDefault['surveyShowPid'] : 0,
-                        'surveyRequestTags' => $surveyRequestManager->buildSurveyRequestTags($surveyRequest)
+                        'surveyRequestTags' => $surveyRequestManager->buildSurveyRequestTags($surveyRequest),
+                        'surveyPid' => (int) $settingsDefault['surveyShowPid']
                     ]
                 ]);
 

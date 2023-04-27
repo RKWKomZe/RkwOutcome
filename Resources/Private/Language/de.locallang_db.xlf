@@ -8,8 +8,8 @@
             <!-- tx_rkwoutcome_domain_model_surveyconfiguration              -->
             <!-- ##################################################### -->
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration">
-				<source>RKW Outcome: Questionnaire</source>
-				<target>RKW Outcome: Fragebogen</target>
+				<source>RKW Outcome: Configurations</source>
+				<target>RKW Outcome: Konfigurationen</target>
 			</trans-unit>
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.processType">
                 <source>Process-Type</source>
@@ -39,6 +39,10 @@
 				<source>Targetgroups</source>
 				<target>Zielgruppen</target>
 			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.mailText">
+				<source>Text for notification email</source>
+				<target>Text für Benachrichtigungs-E-Mail</target>
+			</trans-unit>
 
             <!-- ##################################################### -->
             <!-- tx_rkwoutcome_domain_model_surveyrequest              -->
@@ -51,9 +55,9 @@
 				<source>Notified at</source>
 				<target>Benachrichtigt am</target>
 			</trans-unit>
-			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.survey">
-				<source>Survey</source>
-				<target>Umfrage</target>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.surveyConfiguration">
+				<source>Used survey configuration</source>
+				<target>Verwendete Konfiguration</target>
 			</trans-unit>
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.eventReservationSubject">
 				<source>Selected event</source>
@@ -83,6 +87,7 @@
 				<source>Targetgroups</source>
 				<target>Zielgruppen</target>
 			</trans-unit>
+
 
             <!-- ##################################################### -->
             <!-- pages                                                 -->

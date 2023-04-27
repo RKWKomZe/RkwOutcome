@@ -23,6 +23,13 @@ config.tx_extbase.persistence {
       # very important to set the storagePid explicitly - otherwise it will add to the pid of related objects
       newRecordStoragePid = {$plugin.tx_rkwoutcome.persistence.storagePid}
 
+      mapping {
+          tableName = tx_rkwoutcome_domain_model_surveyrequest
+          columns {
+            deleted.mapOnProperty = deleted
+          }
+      }
+
     }
 
   }
