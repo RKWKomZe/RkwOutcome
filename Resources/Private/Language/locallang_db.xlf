@@ -42,8 +42,8 @@
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.notifiedTstamp">
 				<source>Notified at</source>
 			</trans-unit>
-			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.survey">
-				<source>Survey</source>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.surveyConfiguration">
+				<source>Used survey configuration</source>
 			</trans-unit>
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.eventReservationSubject">
 				<source>Selected event</source>

@@ -17,7 +17,7 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyrequest (
 	event_reservation_subject int(11) unsigned DEFAULT '0',
 	process_type varchar(255) DEFAULT '' NOT NULL,
 
-	survey int(11) unsigned DEFAULT '0',
+	survey_configuration int(11) unsigned DEFAULT '0',
 
 	notified_tstamp int(11) unsigned DEFAULT '0' NOT NULL,
 

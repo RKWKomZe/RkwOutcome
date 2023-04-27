@@ -159,7 +159,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Sets the $mailText
+     * Sets the mailText
      *
      * @param string $mailText
      * @return void

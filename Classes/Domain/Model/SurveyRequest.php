@@ -84,9 +84,9 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * @var \RKW\RkwSurvey\Domain\Model\Survey|null
+     * @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
-    protected $survey = null;
+    protected $surveyConfiguration = null;
 
 
     /**
@@ -300,25 +300,25 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the survey
+     * Returns the surveyConfiguration
      *
-     * @return \RKW\RkwSurvey\Domain\Model\Survey
+     * @return \RKW\RkwOutcome\Domain\Model\SurveyConfiguration
      */
-    public function getSurvey():? Survey
+    public function getSurveyConfiguration():? SurveyConfiguration
     {
-        return $this->survey;
+        return $this->surveyConfiguration;
     }
 
 
     /**
-     * Sets the survey
+     * Sets the surveyConfiguration
      *
-     * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
+     * @param \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration
      * @return void
      */
-    public function setSurvey(Survey $survey): void
+    public function setSurveyConfiguration(SurveyConfiguration $surveyConfiguration): void
     {
-        $this->survey = $survey;
+        $this->surveyConfiguration = $surveyConfiguration;
     }
 
 

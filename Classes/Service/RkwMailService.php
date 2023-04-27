@@ -95,15 +95,9 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                 && ($recipient->getEmail())
             ) {
 
-                /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
-                $surveyConfigurations = ($surveyRequest->getProcessType() === 'RKW\RkwShop\Domain\Model\Order')
-                    ? $this->surveyConfigurationRepository->findByProductAndTargetGroup($surveyRequest->getOrderSubject(), $surveyRequest->getTargetGroup())
-                    : $this->surveyConfigurationRepository->findByEventAndTargetGroup($surveyRequest->getEventReservationSubject(), $surveyRequest->getTargetGroup());
-
                 $mailService->setTo($recipient, [
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
-                        'surveyConfiguration' => $surveyConfigurations->getFirst(),
                         'frontendUser' => $recipient,
                         'surveyPid' => (ExtensionManagementUtility::isLoaded('rkw_survey')) ? (int) $settingsDefault['surveyShowPid'] : 0,
                     ]
