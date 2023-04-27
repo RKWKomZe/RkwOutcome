@@ -266,6 +266,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the order-property of this persisted surveyRequest-object is set to the order-object
          * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
          * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
+         * Then the surveyConfiguration-property of this persisted surveyRequest-object is set to the persisted surveyConfiguration-object
          */
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
@@ -274,6 +275,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+        $surveyConfiguration = $this->surveyConfigurationRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($order);
@@ -292,6 +296,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
         self::assertSame($frontendUser, $surveyRequest->getFrontendUser());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
+        self::assertSame($surveyConfiguration, $surveyRequestDb->getSurveyConfiguration());
 
         $order->getTargetGroup()->rewind();
         $surveyRequest->getTargetGroup()->rewind();
@@ -468,7 +473,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
          * Then the surveyRequest-property processSubject is set to that product-object
-         * Then the surveyRequest-property survey is set to that survey-object
+         * Then the surveyRequest-property surveyConfiguration is set to the persisted surveyConfiguration-object
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check50.xml');
@@ -489,8 +494,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         self::assertCount(1, $notifiedSurveyRequests);
 
-        /** @var \RKW\RkwSurvey\Domain\Model\Survey $surveyDb */
-        $surveyDb = $this->surveyRepository->findByUid(1);
+        /** @var \RKW\RkwSurvey\Domain\Model\SurveyConfiguration $surveyConfigurationDb */
+        $surveyConfigurationDb = $this->surveyConfigurationRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
@@ -498,7 +503,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
         $order->getOrderItem()->rewind();
         self::assertSame($order->getOrderItem()->current()->getProduct(), $surveyRequestDb->getOrderSubject());
-        self::assertSame($surveyDb, $surveyRequestDb->getSurvey());
+        self::assertSame($surveyConfigurationDb, $surveyRequestDb->getSurveyConfiguration());
     }
 
 
@@ -553,7 +558,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertSame(0, $surveyRequestDb->getNotifiedTstamp());
         self::assertSame(null, $surveyRequestDb->getOrderSubject());
-        self::assertSame(null, $surveyRequestDb->getSurvey());
 
     }
 
@@ -610,7 +614,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
-        self::assertSame(2, $surveyRequestDb->getSurvey()->getUid());
 
     }
 
@@ -672,7 +675,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         self::assertNotEquals(3, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertContains($surveyRequestDb->getOrderSubject()->getUid(), [1,2]);
-        self::assertContains($surveyRequestDb->getSurvey()->getUid(), [1,2]);
 
     }
 
@@ -735,7 +737,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
-        self::assertSame(2, $surveyRequestDb->getSurvey()->getUid());
 
     }
 
@@ -911,13 +912,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequestProcessedDbUid1 = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestProcessedDbUid1->getNotifiedTstamp());
         self::assertSame(1, $surveyRequestProcessedDbUid1->getOrderSubject()->getUid());
-        self::assertSame(1, $surveyRequestProcessedDbUid1->getSurvey()->getUid());
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid2 */
         $surveyRequestProcessedDbUid2 = $this->surveyRequestRepository->findByUid(2);
         self::assertGreaterThan(0, $surveyRequestProcessedDbUid2->getNotifiedTstamp());
         self::assertSame(2, $surveyRequestProcessedDbUid2->getOrderSubject()->getUid());
-        self::assertSame(2, $surveyRequestProcessedDbUid2->getSurvey()->getUid());
 
     }
 
@@ -1087,7 +1086,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
          * Then the surveyRequest-property processSubject is set to that event-object
-         * Then the surveyRequest-property survey is set to that survey-object
          */
 
 
@@ -1119,8 +1117,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
         self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\EventReservation::class, $surveyRequestDb->getEventReservation());
-        self::assertSame($surveyDb, $surveyRequestDb->getSurvey());
-
         self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\Event::class, $surveyRequestDb->getEventReservationSubject());
         self::assertSame($event, $surveyRequestDb->getEventReservationSubject());
 

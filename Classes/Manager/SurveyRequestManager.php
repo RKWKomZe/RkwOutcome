@@ -15,6 +15,7 @@ namespace RKW\RkwOutcome\Manager;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwOutcome\Domain\Model\SurveyConfiguration;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Service\LogTrait;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -102,7 +103,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = (method_exists($process, 'getFrontendUser')) ? $process->getFrontendUser() : $process->getFeUser();
 
-        if ($this->isSurveyable($process)) {
+        if ($surveyConfiguration = $this->getSurveyConfiguration($process)) {
 
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
             $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
@@ -117,6 +118,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
             $surveyRequest->setProcessType(get_class($process));
             $surveyRequest->setFrontendUser($frontendUser);
+            $surveyRequest->setSurveyConfiguration($surveyConfiguration);
 
             $process->getTargetGroup()->rewind();
             $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
@@ -209,7 +211,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                          // @todo: Abfangen bei leerem Resultset $surveyConfigurations -> Test schreiben
                          /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                          $surveyConfiguration = $surveyConfigurations->getFirst();
-                         $surveyRequest->setSurvey($surveyConfiguration->getSurvey());
+                         $surveyRequest->setSurveyConfiguration($surveyConfiguration);
                          $surveyRequest->setNotifiedTstamp($currentTime);
 
                          $this->markAsNotified($surveyRequest, $currentTime);
@@ -291,13 +293,17 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
-     * @return bool
+     * @return \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null $surveyConfiguration
      */
-    protected function isSurveyable(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): bool
+    protected function getSurveyConfiguration(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): ?SurveyConfiguration
     {
+        $notifiables = $this->getNotifiableObjects($process);
 
-        return count($this->getNotifiableObjects($process)) > 0;
+        if (isset($notifiables['notifiableObjects'])) {
+            return $notifiables['surveyConfiguration'];
+        }
 
+        return null;
     }
 
 
@@ -317,6 +323,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             )
         );
 
+        $surveyConfiguration = null;
         $notifiableObjects = [];
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
@@ -333,10 +340,11 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
                 //  @todo: Heads up! QueryResultInterface kann bei count() evtl. einen Fehler liefern. Fallback toArray().
                 /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
-                $result = $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup());
+                $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup());
                 if (
-                    $result->count() > 0
+                    $surveyConfigurations->count() > 0
                 ) {
+                    $surveyConfiguration = $surveyConfigurations->getFirst();
                     $notifiableObjects[] = $orderItem->getProduct();
                 }
             }
@@ -348,16 +356,22 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
             $event = $process->getEvent();
 
-            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+            //  @todo: Heads up! QueryResultInterface kann bei count() evtl. einen Fehler liefern. Fallback toArray().
+            /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface */
+            $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($event, $process->getTargetGroup());
             if (
-                $this->surveyConfigurationRepository->findByEventAndTargetGroup($event, $process->getTargetGroup())
+                $surveyConfigurations->count() > 0
             ) {
+                $surveyConfiguration = $surveyConfigurations->getFirst();
                 $notifiableObjects[] = $event;
             }
 
         }
 
-        return $notifiableObjects;
+        return [
+            'surveyConfiguration' => $surveyConfiguration,
+            'notifiableObjects' => $notifiableObjects
+        ];
     }
 
 
@@ -403,7 +417,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         foreach ($surveyRequestsByUser as $surveyRequest) {
 
             if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
-                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($surveyRequest->getOrder());
+                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($surveyRequest->getOrder())['notifiableObjects'];
             }
 
             if ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
@@ -433,7 +447,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             $process = $surveyRequest->getEventReservation();
         }
 
-        foreach ($this->getNotifiableObjects($process) as $notifiableObject) {
+        foreach ($this->getNotifiableObjects($process)['notifiableObjects'] as $notifiableObject) {
             if ($notifiableObject->getUid() === $processableSubject->getUid()) {
                 $containsProcessableSubject = true;
             }

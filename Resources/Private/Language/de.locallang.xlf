@@ -11,7 +11,7 @@
 
 
 			<!-- ##################### -->
-			<!-- Email- Subjects       -->
+			<!-- Email-Subjects        -->
 			<!-- ##################### -->
             <trans-unit id="rkwMailService.subject.userSurveyRequestNotification">
                 <source>Notification: Survey request</source>
@@ -56,6 +56,10 @@
                 <source>Hello</source>
                 <target>Hallo</target>
             </trans-unit>
+			<trans-unit id="templates_email_userSurveyRequest.goToSurvey">
+				<source>Go to survey %s</source>
+				<target>Zur Umfrage %s</target>
+			</trans-unit>
 
 			<!-- ##################### -->
 			<!-- Frontend Templates -->

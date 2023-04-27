@@ -17,7 +17,7 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyrequest (
 	event_reservation_subject int(11) unsigned DEFAULT '0',
 	process_type varchar(255) DEFAULT '' NOT NULL,
 
-	survey int(11) unsigned DEFAULT '0',
+	survey_configuration int(11) unsigned DEFAULT '0',
 
 	notified_tstamp int(11) unsigned DEFAULT '0' NOT NULL,
 
@@ -52,7 +52,7 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyconfiguration (
   process_type varchar(255) DEFAULT '\RKW\RkwShop\Domain\Model\Product' NOT NULL,
 	product int(11) unsigned DEFAULT '0',
 	event int(11) unsigned DEFAULT '0',
-	survey int(11) unsigned DEFAULT '0',
+	survey varchar(255) DEFAULT '' NOT NULL,
 
 	mail_text text NOT NULL,
 

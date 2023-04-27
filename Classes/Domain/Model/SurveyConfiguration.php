@@ -37,7 +37,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * @var \RKW\RkwSurvey\Domain\Model\Survey|null
+     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\RKW\RkwSurvey\Domain\Model\Survey>
      */
     protected $survey = null;
 
@@ -104,9 +104,9 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the survey
      *
-     * @return \RKW\RkwSurvey\Domain\Model\Survey
+     * @return \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\RKW\RkwSurvey\Domain\Model\Survey> $survey
      */
-    public function getSurvey():? Survey
+    public function getSurvey():? ObjectStorage
     {
         return $this->survey;
     }
@@ -115,10 +115,10 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Sets the survey
      *
-     * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
+     * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $survey
      * @return void
      */
-    public function setSurvey(Survey $survey): void
+    public function setSurvey(ObjectStorage $survey): void
     {
         $this->survey = $survey;
     }
@@ -159,7 +159,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Sets the $mailText
+     * Sets the mailText
      *
      * @param string $mailText
      * @return void

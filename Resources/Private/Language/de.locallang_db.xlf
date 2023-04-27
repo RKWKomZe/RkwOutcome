@@ -55,9 +55,9 @@
 				<source>Notified at</source>
 				<target>Benachrichtigt am</target>
 			</trans-unit>
-			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.survey">
-				<source>Survey</source>
-				<target>Umfrage</target>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.surveyConfiguration">
+				<source>Used survey configuration</source>
+				<target>Verwendete Konfiguration</target>
 			</trans-unit>
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.eventReservationSubject">
 				<source>Selected event</source>
