@@ -26,6 +26,7 @@ use RKW\RkwOutcome\Manager\SurveyRequestManager;
 use RKW\RkwShop\Domain\Repository\OrderRepository;
 use RKW\RkwShop\Domain\Repository\ProductRepository;
 use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
+use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
@@ -127,6 +128,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     private $surveyRepository;
 
+
+    /**
+     * @var \RKW\RkwSurvey\Domain\Repository\TokenRepository|null
+     */
+    private $tokenRepository;
+
+
     /**
      * PersistenceManager
      *
@@ -187,6 +195,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->surveyConfigurationRepository = $this->objectManager->get(SurveyConfigurationRepository::class);
         $this->surveyRepository = $this->objectManager->get(SurveyRepository::class);
         $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
+        $this->tokenRepository = $this->objectManager->get(TokenRepository::class);
 
         $this->subject = $this->objectManager->get(SurveyRequestManager::class);
 
@@ -998,6 +1007,47 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
     }
 
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws IllegalObjectTypeException
+     */
+    public function generateTokensAddsTokenToAccessRestrictedSurvey(): void
+    {
+
+        /**
+         * Scenario:
+         *
+         * Given a persisted survey-object 1
+         * Given the property accessRestricted of survey-object 1 is set to true
+         * Given a persisted survey-object 2
+         * Given the property accessRestricted of survey-object 1 is set to false
+         * Given a persisted product-object
+         * Given a persisted surveyConfiguration-object containing both survey-objects and that product-object
+         * When the method is called
+         * Then a new token is added to survey-object 1
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check140.xml');
+
+        /* @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfigurationDb */
+        $surveyConfigurationDb = $this->surveyConfigurationRepository->findByUid(1);
+
+        $generatedTokens = $this->subject->generateTokens($surveyConfigurationDb);
+        self::assertCount(1, $generatedTokens);
+        self::assertTrue(isset($generatedTokens[1]));
+
+        /* @var \RKW\RkwSurvey\Domain\Model\Survey $surveyDb1 */
+        $surveyDb1 = $this->surveyRepository->findByUid(1);
+
+        /* @var \RKW\RkwSurvey\Domain\Model\Survey $surveyDb2 */
+        $surveyDb2 = $this->surveyRepository->findByUid(2);
+
+        self::assertCount(1, $surveyDb1->getToken());
+        self::assertCount(0, $surveyDb2->getToken());
+
+    }
 
 
     /**

@@ -13,7 +13,15 @@
         \n\n
         <f:for each="{surveyRequest.surveyConfiguration.survey}" as="survey">
             <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
-                <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags}' />
+                <f:if condition="generatedTokens.{survey.uid}">
+                    <f:then>
+                        <f:variable name="generatedToken" value="{generatedTokens.{survey.uid}}"></f:variable>
+                        <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags, token: generatedToken}' />
+                    </f:then>
+                    <f:else>
+                        <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags}' />
+                    </f:else>
+                </f:if>
             </rkwMailer:email.replace.redirectLinks>
             \n\n
         </f:for>
@@ -29,12 +37,23 @@
         <f:format.nl2br>{surveyRequest.surveyConfiguration.mailText}</f:format.nl2br>
     </p>
 
+
     <f:for each="{surveyRequest.surveyConfiguration.survey}" as="survey">
         <p>
             <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}">
-                <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags}' />" target="_blank">
-                    <rkwMailer:frontend.translate key="templates_email_userSurveyRequest.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwOutcome" arguments="{0 : survey.name}"/>
-                </a>
+                <f:if condition="generatedTokens.{survey.uid}">
+                    <f:then>
+                        <f:variable name="generatedToken" value="{generatedTokens.{survey.uid}}"></f:variable>
+                        <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags, token: generatedToken }' />" target="_blank">
+                            <rkwMailer:frontend.translate key="templates_email_userSurveyRequest.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwOutcome" arguments="{0 : survey.name}"/>
+                        </a>
+                    </f:then>
+                    <f:else>
+                        <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags}' />" target="_blank">
+                            <rkwMailer:frontend.translate key="templates_email_userSurveyRequest.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwOutcome" arguments="{0 : survey.name}"/>
+                        </a>
+                    </f:else>
+                </f:if>
             </rkwMailer:email.replace.redirectLinks>
         </p>
     </f:for>

@@ -40,6 +40,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
      *
      * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $recipient
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+     * @param array $generatedTokens
      * @return void
      * @throws \Exception
      * @throws \RKW\RkwMailer\Exception
@@ -50,7 +51,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
      */
     public function sendMailSurveyRequestToUser(
         \RKW\RkwRegistration\Domain\Model\FrontendUser $recipient,
-        \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+        \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest,
+        array $generatedTokens
     ): void {
 
         $this->logInfo(
@@ -100,6 +102,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
+                        'generatedTokens' => $generatedTokens,
                         'surveyRequestTags' => $surveyRequestManager->buildSurveyRequestTags($surveyRequest),
                         'surveyPid' => (int) $settingsDefault['surveyShowPid']
                     ]
