@@ -266,7 +266,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the order-property of this persisted surveyRequest-object is set to the order-object
          * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
          * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
-         * Then the surveyConfiguration-property of this persisted surveyRequest-object is set to the persisted surveyConfiguration-object
          */
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
@@ -275,9 +274,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-        $surveyConfiguration = $this->surveyConfigurationRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->subject->createSurveyRequest($order);
@@ -294,14 +290,14 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
         self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertSame($frontendUser, $surveyRequest->getFrontendUser());
-        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequest->getFrontendUser());
-        self::assertSame($surveyConfiguration, $surveyRequestDb->getSurveyConfiguration());
+        self::assertSame($frontendUser, $surveyRequestDb->getFrontendUser());
+        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
+        self::assertNull($surveyRequestDb->getSurveyConfiguration());
 
         $order->getTargetGroup()->rewind();
-        $surveyRequest->getTargetGroup()->rewind();
+        $surveyRequestDb->getTargetGroup()->rewind();
 
-        self::assertSame($order->getTargetGroup()->current(), $surveyRequest->getTargetGroup()->current());
+        self::assertSame($order->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
 
     }
 
@@ -710,6 +706,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the surveyRequest-property notifiedTstamp is set to > 0
          * Then the surveyRequest-property processSubject is set to the product-object 1
          * Then the surveyRequest-property processSubject is not set to the product-object 2
+         * Then the surveyRequest-property surveyConfiguration is set to the surveyConfiguration-object 1
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check90.xml');
@@ -738,6 +735,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
 
+        self::assertSame(1, $surveyRequestDb->getSurveyConfiguration()->getUid());
     }
 
 
@@ -999,6 +997,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     }
+
+
 
     /**
      * @test

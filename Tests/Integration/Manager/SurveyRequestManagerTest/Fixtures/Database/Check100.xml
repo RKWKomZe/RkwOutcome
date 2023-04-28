@@ -68,24 +68,19 @@
         <uid>1</uid>
         <pid>1</pid>
         <product>1</product>
-        <survey>2</survey>
+        <survey>1</survey>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>2</uid>
         <pid>1</pid>
         <product>2</product>
-        <survey>2</survey>
+        <survey>1</survey>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
-        <name>Nicht benutzte Umfrage</name>
-    </tx_rkwsurvey_domain_model_survey>
-    <tx_rkwsurvey_domain_model_survey>
-        <uid>2</uid>
-        <pid>1</pid>
-        <name>Benutzte Umfrage</name>
+        <name>Umfrage</name>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>
