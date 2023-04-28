@@ -103,7 +103,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = (method_exists($process, 'getFrontendUser')) ? $process->getFrontendUser() : $process->getFeUser();
 
-        if ($surveyConfiguration = $this->getSurveyConfiguration($process)) {
+        if ($this->isSurveyable($process)) {
 
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
             $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
@@ -118,7 +118,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
             $surveyRequest->setProcessType(get_class($process));
             $surveyRequest->setFrontendUser($frontendUser);
-            $surveyRequest->setSurveyConfiguration($surveyConfiguration);
 
             $process->getTargetGroup()->rewind();
             $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
@@ -293,17 +292,13 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     /**
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
-     * @return \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null $surveyConfiguration
+     * @return bool
      */
-    protected function getSurveyConfiguration(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): ?SurveyConfiguration
+    protected function isSurveyable(\TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process): bool
     {
         $notifiables = $this->getNotifiableObjects($process);
 
-        if (isset($notifiables['notifiableObjects'])) {
-            return $notifiables['surveyConfiguration'];
-        }
-
-        return null;
+        return count($notifiables) > 0;
     }
 
 
@@ -323,7 +318,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             )
         );
 
-        $surveyConfiguration = null;
         $notifiableObjects = [];
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
@@ -344,7 +338,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                 if (
                     $surveyConfigurations->count() > 0
                 ) {
-                    $surveyConfiguration = $surveyConfigurations->getFirst();
                     $notifiableObjects[] = $orderItem->getProduct();
                 }
             }
@@ -362,16 +355,13 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             if (
                 $surveyConfigurations->count() > 0
             ) {
-                $surveyConfiguration = $surveyConfigurations->getFirst();
+//                $surveyConfiguration = $surveyConfigurations->getFirst();
                 $notifiableObjects[] = $event;
             }
 
         }
 
-        return [
-            'surveyConfiguration' => $surveyConfiguration,
-            'notifiableObjects' => $notifiableObjects
-        ];
+        return $notifiableObjects;
     }
 
 
@@ -417,7 +407,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         foreach ($surveyRequestsByUser as $surveyRequest) {
 
             if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
-                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($surveyRequest->getOrder())['notifiableObjects'];
+                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($surveyRequest->getOrder());
             }
 
             if ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
@@ -447,7 +437,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             $process = $surveyRequest->getEventReservation();
         }
 
-        foreach ($this->getNotifiableObjects($process)['notifiableObjects'] as $notifiableObject) {
+        foreach ($this->getNotifiableObjects($process) as $notifiableObject) {
             if ($notifiableObject->getUid() === $processableSubject->getUid()) {
                 $containsProcessableSubject = true;
             }
