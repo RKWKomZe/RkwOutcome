@@ -18,8 +18,9 @@ namespace RKW\RkwOutcome\Service;
 use RKW\RkwBasics\Utility\GeneralUtility;
 use RKW\RkwMailer\Service\MailService;
 use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
-use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
+use RKW\RkwOutcome\Manager\SurveyRequestManager;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class RkwMailService
@@ -33,12 +34,6 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 {
 
     use LogTrait;
-
-    /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
-     * @inject
-     */
-    protected $surveyConfigurationRepository;
 
     /**
      * Send mail to frontend user to submit survey request
@@ -95,15 +90,21 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                 && ($recipient->getEmail())
             ) {
 
+                /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+                $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+
+                /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $surveyRequestManager */
+                $surveyRequestManager = $objectManager->get(SurveyRequestManager::class);
+
                 $mailService->setTo($recipient, [
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
-                        'surveyPid' => (int) $settingsDefault['surveyShowPid'],
+                        'surveyRequestTags' => $surveyRequestManager->buildSurveyRequestTags($surveyRequest),
+                        'surveyPid' => (int) $settingsDefault['surveyShowPid']
                     ]
                 ]);
 
-                //  @todo: set language to user language instead of de
                 $mailService->getQueueMail()->setSubject(
                     FrontendLocalizationUtility::translate(
                         'rkwMailService.subject.userSurveyRequestNotification',

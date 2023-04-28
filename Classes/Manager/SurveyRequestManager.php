@@ -462,4 +462,30 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         return count($alreadyNotifiedRequests) >= $maxSurveysPerPeriodAndFrontendUser;
     }
 
+
+    /**
+     * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+     * @return string
+     */
+    public function buildSurveyRequestTags(\RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest): string
+    {
+        $surveyRequest->getTargetGroup()->rewind();
+        $targetGroupUid = $surveyRequest->getTargetGroup()->current()->getUid();
+
+        $processSubject = ($surveyRequest->getProcessType() === 'RKW\RkwShop\Domain\Model\Order') ? $surveyRequest->getOrderSubject() : $surveyRequest->getEventReservationSubject();
+        $processSubject = explode(':', $processSubject);
+        $processSubject[0] = explode('\\', $processSubject[0]);
+        $processSubjectType = array_pop($processSubject[0]);
+        $processSubjectUid = $processSubject[1];
+
+        $surveyRequestTags = [
+            $targetGroupUid, // targetGroupUid
+            $processSubjectType, // processSubjectType
+            $processSubjectUid  // processSubjectUid
+        ];
+
+        return implode(',', $surveyRequestTags);
+    }
+
+
 }
