@@ -13,7 +13,7 @@
         \n\n
         <f:for each="{surveyRequest.surveyConfiguration.survey}" as="survey">
             <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
-                <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, surveyRequestTags: surveyRequestTags}' />
+                <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags}' />
             </rkwMailer:email.replace.redirectLinks>
             \n\n
         </f:for>
@@ -32,7 +32,7 @@
     <f:for each="{surveyRequest.surveyConfiguration.survey}" as="survey">
         <p>
             <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}">
-                <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, surveyRequestTags: surveyRequestTags}' />" target="_blank">
+                <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags}' />" target="_blank">
                     <rkwMailer:frontend.translate key="templates_email_userSurveyRequest.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwOutcome" arguments="{0 : survey.name}"/>
                 </a>
             </rkwMailer:email.replace.redirectLinks>
