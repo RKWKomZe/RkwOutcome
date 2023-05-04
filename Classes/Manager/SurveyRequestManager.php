@@ -18,6 +18,7 @@ namespace RKW\RkwOutcome\Manager;
 use RKW\RkwOutcome\Domain\Model\SurveyConfiguration;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Service\LogTrait;
+use RKW\RkwSurvey\Domain\Model\Token;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
@@ -59,6 +60,21 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * @inject
      */
     protected $surveyConfigurationRepository;
+
+
+    /**
+     * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository
+     * @inject
+     */
+    protected $surveyRepository;
+
+
+    /**
+     * @var \RKW\RkwSurvey\Domain\Repository\TokenRepository
+     * @inject
+     */
+    protected $tokenRepository;
+
 
     /**
      * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
@@ -213,9 +229,12 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
                          $surveyRequest->setSurveyConfiguration($surveyConfiguration);
                          $surveyRequest->setNotifiedTstamp($currentTime);
 
+                         // check, if tokens are necessary on contained surveys
+                         $generatedTokens = $this->generateTokens($surveyConfiguration);
+
                          $this->markAsNotified($surveyRequest, $currentTime);
 
-                         $this->sendNotification($surveyRequest);
+                         $this->sendNotification($surveyRequest, $generatedTokens);
 
                      } else {
 
@@ -251,9 +270,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      * Send notification to request a survey from frontend user
      *
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+     * @param array $generatedTokens
      * @return bool
     */
-    public function sendNotification(\RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest): bool
+    public function sendNotification(\RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest, array $generatedTokens): bool
     {
 
         if ($recipient = $surveyRequest->getFrontendUser()) {
@@ -269,7 +289,7 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
             $this->signalSlotDispatcher->dispatch(
                 __CLASS__,
                 self::SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST,
-                [$recipient, $surveyRequest]
+                [$recipient, $surveyRequest, $generatedTokens]
             );
 
             $this->logInfo(
@@ -485,6 +505,48 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         ];
 
         return implode(',', $surveyRequestTags);
+    }
+
+    /**
+     * @param \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration
+     * @return array $generatedTokens
+     *
+     * @todo: Prevent making it public due to testability only
+     */
+    public function generateTokens(SurveyConfiguration $surveyConfiguration): array
+    {
+
+        $generatedTokens = [];
+
+        /* @var \RKW\RkwSurvey\Domain\Model\Survey $survey */
+        foreach ($surveyConfiguration->getSurvey() as $survey) {
+            if ($survey->isAccessRestricted()) {
+                $characters = 'abcdefghjkmnopqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';
+                $newTokenName = substr(str_shuffle($characters), 0, 10);
+
+                while($this->tokenRepository->findOneBySurveyAndName($survey, $newTokenName)) {
+                    $newTokenName = substr(str_shuffle($characters), 0, 10);
+                }
+
+                /** @var \RKW\RkwSurvey\Domain\Model\Token $token */
+                $token = GeneralUtility::makeInstance(Token::class);
+                $token->setName($newTokenName);
+                //  @todo: Set to which backend user? Same as the backend user creating corresponding survey?
+                $token->setCruserId(1);
+                //  @todo: Set pid for token like attached survey?
+                $token->setPid($survey->getPid());
+                $token->setUsed(true);
+                $survey->addToken($token);
+
+                $this->surveyRepository->update($survey);
+                $this->persistenceManager->persistAll();
+
+                $generatedTokens[$survey->getUid()] = $token->getName();
+            }
+        }
+
+        return $generatedTokens;
+
     }
 
 
