@@ -1,4 +1,7 @@
 <?php
+
+use RKW\RkwOutcome\Controller\SurveyRequestCommandController;
+
 defined('TYPO3_MODE') || die('Access denied.');
 
 call_user_func(
@@ -24,7 +27,7 @@ call_user_func(
         //=================================================================
         // Register CommandController
         //=================================================================
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['extbase']['commandControllers'][] = 'RKW\RkwOutcome\Controller\SurveyRequestCommandController';
+        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['extbase']['commandControllers'][] = SurveyRequestCommandController::class;
 
         //=================================================================
         // Register TCA evaluation to be available in 'eval' of TCA

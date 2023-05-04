@@ -1,4 +1,5 @@
 <?php
+
 return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration',
@@ -117,10 +118,10 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'items' => [
-                    ['LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.processType.product', '\RKW\RkwShop\Domain\Model\Product'],
-                    ['LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.processType.event', '\RKW\RkwEvents\Domain\Model\Event'],
+                    ['LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.processType.product', \RKW\RkwShop\Domain\Model\Product::class],
+                    ['LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.processType.event', \RKW\RkwEvents\Domain\Model\Event::class],
                 ],
-                'default' => '\RKW\RkwShop\Domain\Model\Product'
+                'default' =>  \RKW\RkwShop\Domain\Model\Product::class
             ],
             'onChange' => 'reload',
         ],

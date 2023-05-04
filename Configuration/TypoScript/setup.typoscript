@@ -6,18 +6,6 @@ config.tx_extbase.persistence {
   // enableAutomaticCacheClearing = 1
   classes {
 
-    #        RKW\RkwRegistration\Domain\Model\FrontendUser {
-    #            subclasses {
-    #                Tx_RkwOutcome_FrontendUser = RKW\RkwOutcome\Domain\Model\FrontendUser
-    #            }
-    #        }
-    #
-    #        RKW\RkwOutcome\Domain\Model\Process {
-    #            mapping {
-    #                tableName = tx_rkwshop_domain_model_order
-    #            }
-    #        }
-
     RKW\RkwOutcome\Domain\Model\SurveyRequest {
 
       # very important to set the storagePid explicitly - otherwise it will add to the pid of related objects

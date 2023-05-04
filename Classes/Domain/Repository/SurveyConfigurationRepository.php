@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\Domain\Repository;
 
 /*
@@ -17,9 +16,11 @@ namespace RKW\RkwOutcome\Domain\Repository;
 
 use RKW\RkwBasics\Helper\QueryTypo3;
 use RKW\RkwEvents\Domain\Model\Event;
+use RKW\RkwOutcome\Domain\Model\SurveyConfiguration;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
+use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * Class SurveyConfigurationRepository
@@ -43,38 +44,17 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
 
     /**
-     * findByProduct
-     *
-     * @param \RKW\RkwShop\Domain\Model\Product $product
-     *
-     * @return \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
-     */
-    public function findByProduct(Product $product): ?\RKW\RkwOutcome\Domain\Model\SurveyConfiguration
-    {
-        $query = $this->createQuery();
-
-        $query->matching(
-            $query->equals('product', $product)
-        );
-
-        $query->setLimit(1);
-
-        return $query->execute()->getFirst();
-    }
-
-
-    /**
-     * findByProductAndTargetGroup
+     * Finds survey configurations matching product and target group
      *
      * @param \RKW\RkwShop\Domain\Model\Product $product
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
      *
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * implicitly tested
      */
-    public function findByProductAndTargetGroup(Product $product, ObjectStorage $targetGroups): ?\TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findByProductAndTargetGroup(Product $product, ObjectStorage $targetGroups): ?QueryResultInterface
     {
-
         // 1. build uid list
         $targetGroupsList = [];
 
@@ -118,7 +98,6 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
             // build final query
             $query = $this->createQuery();
-            $query->getQuerySettings()->setRespectStoragePage(false);
             $query->statement(
                 $finalStatement
             );
@@ -128,43 +107,21 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
         }
 
         return null;
-
     }
 
 
     /**
-     * findByEvent
-     *
-     * @param \RKW\RkwEvents\Domain\Model\Event $event
-     *
-     * @return \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
-     */
-    public function findByEvent(Event $event): ?\RKW\RkwOutcome\Domain\Model\SurveyConfiguration
-    {
-        $query = $this->createQuery();
-
-        $query->matching(
-            $query->equals('event', $event)
-        );
-
-        $query->setLimit(1);
-
-        return $query->execute()->getFirst();
-    }
-
-
-    /**
-     * findByEventAndTargetGroup
+     * Finds survey configurations matching event and target group
      *
      * @param \RKW\RkwEvents\Domain\Model\Event $event
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
      *
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * implicitly tested
      */
-    public function findByEventAndTargetGroup(Event $event, ObjectStorage $targetGroups): ?\TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findByEventAndTargetGroup(Event $event, ObjectStorage $targetGroups): ?QueryResultInterface
     {
-
         // 1. build uid list
         $targetGroupsList = [];
 
@@ -208,7 +165,6 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
             // build final query
             $query = $this->createQuery();
-            $query->getQuerySettings()->setRespectStoragePage(false);
             $query->statement(
                 $finalStatement
             );
@@ -218,7 +174,6 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
         }
 
         return null;
-
     }
 
 }

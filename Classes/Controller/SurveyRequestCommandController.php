@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\Controller;
 
 /*
@@ -34,12 +33,6 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
 
     use LogTrait;
 
-    /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
-     * @inject
-     */
-    protected $surveyRequestRepository;
-
 
     /**
      * process all pending survey requests
@@ -51,7 +44,6 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
      */
     public function processSurveyRequestsCommand(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $surveyWaitingTime = 0): void
     {
-
         try {
 
             /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
@@ -71,7 +63,6 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
             );
 
         }
-
     }
 
 

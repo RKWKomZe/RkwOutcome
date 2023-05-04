@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\Service;
 
 /*
@@ -35,6 +34,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 
     use LogTrait;
 
+
     /**
      * Send mail to frontend user to submit survey request
      *
@@ -53,8 +53,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
         \RKW\RkwRegistration\Domain\Model\FrontendUser $recipient,
         \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest,
         array $generatedTokens
-    ): void {
-
+    ): void
+    {
         $this->logInfo(
             sprintf(
                 'Mailer: Sending survey request %s to frontend user with %s.',
@@ -87,10 +87,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
             /** @var \RKW\RkwMailer\Service\MailService $mailService */
             $mailService = GeneralUtility::makeInstance(MailService::class);
 
-            if (
-                ($recipient instanceof \RKW\RkwRegistration\Domain\Model\FrontendUser)
-                && ($recipient->getEmail())
-            ) {
+            if ($recipient->getEmail()) {
 
                 /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
                 $objectManager = GeneralUtility::makeInstance(ObjectManager::class);

@@ -11,7 +11,7 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyrequest (
 	frontend_user int(11) unsigned DEFAULT '0',
 	target_group int(11) unsigned DEFAULT '0',
 
-	order int(11) unsigned DEFAULT '0',
+	`order` int(11) unsigned DEFAULT '0',
 	order_subject int(11) unsigned DEFAULT '0',
 	event_reservation int(11) unsigned DEFAULT '0',
 	event_reservation_subject int(11) unsigned DEFAULT '0',

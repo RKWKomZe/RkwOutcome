@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\Domain\Repository;
 
 /*
@@ -16,6 +15,7 @@ namespace RKW\RkwOutcome\Domain\Repository;
  */
 
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
+use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * Class SurveyRequestRepository
@@ -31,7 +31,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
     /*
     * initializeObject
     */
-    public function initializeObject()
+    public function initializeObject(): void
     {
         $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
         $this->defaultQuerySettings->setRespectStoragePage(false);
@@ -39,17 +39,16 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
 
     /**
-     * findAllPendingSurveyRequests
+     * Finds all pending survey requests due to be processed
      *
      * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     * @comment implicitly tested
+     * implicitly tested
      */
-    public function findAllPendingSurveyRequests(int $surveyWaitingTime = 0, int $currentTime = 0): ?\TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findPendingSurveyRequests(int $surveyWaitingTime = 0, int $currentTime = 0): ?QueryResultInterface
     {
-
         if (! $currentTime) {
             $currentTime = time();
         }
@@ -86,19 +85,19 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
 
     /**
-     * findAllPendingSurveyRequestsGroupedByFrontendUser
+     * Finds all pending survey requests due to be processed
+     * and groups them by attached frontend user
      *
      * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return array
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     * @comment implicitly tested
+     * implicitly tested
      */
-    public function findAllPendingSurveyRequestsGroupedByFrontendUser(int $surveyWaitingTime, int $currentTime): array
+    public function findPendingSurveyRequestsGroupedByFrontendUser(int $surveyWaitingTime, int $currentTime): array
     {
-
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequests = $this->findAllPendingSurveyRequests($surveyWaitingTime, $currentTime);
+        $surveyRequests = $this->findPendingSurveyRequests($surveyWaitingTime, $currentTime);
 
         $surveyRequestsGroupedByFrontendUser = [];
 
@@ -114,18 +113,18 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
 
     /**
-     * findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser
+     * Finds all notified survey requests within a given period
+     * matching a given frontend user.
      *
      * @param int $frontendUserUid
      * @param int $period
      * @param int $currentTime
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     * @comment implicitly tested
+     * implicitly tested
      */
-    public function findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser(int $frontendUserUid, int $period, int $currentTime = 0): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findNotifiedSurveyRequestsWithinPeriodByFrontendUser(int $frontendUserUid, int $period, int $currentTime = 0): QueryResultInterface
     {
-
         if (! $currentTime) {
             $currentTime = time();
         }
@@ -151,16 +150,16 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
     }
 
     /**
-     * findAllNotifiedSurveyRequestsByFrontendUser
+     * Finds all notified survey requests
+     * matching a given frontend user
      *
      * @param int $frontendUserUid
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     * @comment implicitly tested
+     * implicitly tested
      */
-    public function findAllNotifiedSurveyRequestsByFrontendUser(int $frontendUserUid): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findNotifiedSurveyRequestsByFrontendUser(int $frontendUserUid): QueryResultInterface
     {
-
         $query = $this->createQuery();
 
         $constraints = [];
@@ -178,8 +177,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         }
 
         return $query->execute();
-
     }
-
 
 }

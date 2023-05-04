@@ -27,7 +27,9 @@
             <!-- ##################### -->
 			<!-- Validation -->
 			<!-- ##################### -->
-
+			<trans-unit id="surveyRequestManager.error.noFrontendUser">
+				<source>No frontend user found.</source>
+			</trans-unit>
 
 
 			<!-- ##################### -->

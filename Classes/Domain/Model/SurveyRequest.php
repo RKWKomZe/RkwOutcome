@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\Domain\Model;
 
 /*
@@ -20,7 +19,6 @@ use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwRegistration\Domain\Model\FrontendUser;
 use RKW\RkwShop\Domain\Model\Order;
 use RKW\RkwShop\Domain\Model\Product;
-use RKW\RkwSurvey\Domain\Model\Survey;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -113,7 +111,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @return void
      */
-    protected function initStorageObjects()
+    protected function initStorageObjects(): void
     {
         $this->targetGroup = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
     }
@@ -125,7 +123,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @return bool
      * @api
      */
-    public function getDeleted(): int
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }
@@ -363,7 +361,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroupToRemove
      * @return void
      */
-    public function removeTargetGroup(Category $targetGroupToRemove)
+    public function removeTargetGroup(Category $targetGroupToRemove): void
     {
         $this->targetGroup->detach($targetGroupToRemove);
     }

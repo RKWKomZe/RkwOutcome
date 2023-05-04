@@ -23,8 +23,8 @@ use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Manager\SurveyRequestManager;
+use RKW\RkwRegistration\Domain\Repository\FrontendUserRepository;
 use RKW\RkwShop\Domain\Repository\OrderRepository;
-use RKW\RkwShop\Domain\Repository\ProductRepository;
 use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
 use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -42,7 +42,6 @@ use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
  */
 class SurveyRequestManagerTest extends FunctionalTestCase
 {
-
     /**
      * @const
      */
@@ -71,19 +70,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwOutcome\Manager\SurveyRequestManager
-     */
-    private $subject;
-
-
-    /**
-     * @var \TYPO3\CMS\Extbase\Object\ObjectManager
-     */
-    private $objectManager;
-
-
-    /**
-     * @var \RKW\RkwShop\Domain\Repository\FrontendUserRepository|\RKW\RkwEvents\Domain\Repository\FrontendUserRepository
+     * @var \RKW\RkwRegistration\Domain\Repository\FrontendUserRepository
      */
     private $frontendUserRepository;
 
@@ -107,12 +94,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwShop\Domain\Repository\ProductRepository
-     */
-    private $productRepository;
-
-
-    /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      */
     private $surveyRequestRepository;
@@ -122,6 +103,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository|null
      */
     private $surveyConfigurationRepository;
+
 
     /**
      * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository|null
@@ -142,10 +124,24 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     protected $persistenceManager;
 
+
+    /**
+     * @var \TYPO3\CMS\Extbase\Object\ObjectManager|null
+     */
+    private $objectManager;
+
+
+    /**
+     * @var \RKW\RkwOutcome\Manager\SurveyRequestManager|null
+     */
+    private $fixture;
+
+
     /**
      * @var int
      */
     protected $checkPeriod;
+
 
     /**
      * @var int
@@ -161,7 +157,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     protected function setUp():void
     {
-
         parent::setUp();
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Global.xml');
@@ -182,24 +177,39 @@ class SurveyRequestManagerTest extends FunctionalTestCase
             ]
         );
 
-        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $this->objectManager */
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
-        $this->eventRepository = $this->objectManager->get(EventRepository::class);
-        $this->eventReservationRepository = $this->objectManager->get(EventReservationRepository::class);
-        $this->frontendUserRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\FrontendUserRepository::class);
-        $this->orderRepository = $this->objectManager->get(OrderRepository::class);
+        /** @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager $persistenceManager */
         $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
-        $this->processRepository = $this->objectManager->get(\RKW\RkwShop\Domain\Repository\OrderRepository::class);
-        $this->productRepository = $this->objectManager->get(ProductRepository::class);
+
+        /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $fixture */
+        $this->fixture = $this->objectManager->get(SurveyRequestManager::class);
+
+        /** @var \RKW\RkwEvents\Domain\Repository\EventRepository $eventRepository */
+        $this->eventRepository = $this->objectManager->get(EventRepository::class);
+
+        /** @var \RKW\RkwEvents\Domain\Repository\EventReservationRepository $eventReservationRepository */
+        $this->eventReservationRepository = $this->objectManager->get(EventReservationRepository::class);
+
+        /** @var \RKW\RkwRegistration\Domain\Repository\FrontendUserRepository $frontendUserRepository */
+        $this->frontendUserRepository = $this->objectManager->get(FrontendUserRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Repository\OrderRepository $orderRepository */
+        $this->orderRepository = $this->objectManager->get(OrderRepository::class);
+
+        /** @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository $surveyConfigurationRepository */
         $this->surveyConfigurationRepository = $this->objectManager->get(SurveyConfigurationRepository::class);
+
+        /** @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository $surveyRepository */
         $this->surveyRepository = $this->objectManager->get(SurveyRepository::class);
+
+        /** @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository */
         $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
+
+        /** @var \RKW\RkwSurvey\Domain\Repository\TokenRepository $tokenRepository */
         $this->tokenRepository = $this->objectManager->get(TokenRepository::class);
 
-        $this->subject = $this->objectManager->get(SurveyRequestManager::class);
-
-        // For Mail-Interface
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromName'] = 'RKW';
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'] = 'service@mein.rkw.de';
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailReplyName'] = 'RKW';
@@ -208,10 +218,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         $this->checkPeriod = 7 * 24 * 60 * 60;
         $this->maxSurveysPerPeriodAndFrontendUser = 1;
-
     }
 
 
+    #==============================================================================
     /**
      *
      * @param string $model
@@ -247,7 +257,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         $this->surveyRequestRepository->add($surveyRequest);
         $this->persistenceManager->persistAll();
-
     }
 
 
@@ -255,9 +264,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestCreatesSurveyRequestIfOrderContainsAProductAssociatedWithSurveyConfigurationWithSameTargetGroup()
+    public function createSurveyRequestCreatesSurveyRequestIfOrderContainsAProductAssociatedWithSurveyConfigurationWithSameTargetGroup(): void
     {
-
         /**
          * Scenario:
          *
@@ -276,16 +284,17 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
          * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
          */
+
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
         /** @var \RKW\RkwShop\Domain\Model\Order $process */
         $order = $this->orderRepository->findByUid(1);
 
-        /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
+        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($order);
+        $surveyRequest = $this->fixture->createSurveyRequest($order);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -299,7 +308,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
         self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertSame($frontendUser, $surveyRequestDb->getFrontendUser());
+        self::assertEquals($frontendUser->getUid(), $surveyRequestDb->getFrontendUser()->getUid());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
         self::assertNull($surveyRequestDb->getSurveyConfiguration());
 
@@ -307,7 +316,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequestDb->getTargetGroup()->rewind();
 
         self::assertSame($order->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
-
     }
 
 
@@ -317,7 +325,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     public function createSurveyRequestCreatesSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductAssociatedWithSurveyConfiguration(): void
     {
-
         /**
          * Scenario:
          *
@@ -344,11 +351,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\Order $process */
         $order = $this->orderRepository->findByUid(1);
 
-        /** @var \RKW\RkwShop\Domain\Model\FrontendUser $frontendUser */
+        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($order);
+        $surveyRequest = $this->fixture->createSurveyRequest($order);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -362,23 +369,21 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
         self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertSame($frontendUser, $surveyRequestDb->getFrontendUser());
+        self::assertEquals($frontendUser->getUid(), $surveyRequestDb->getFrontendUser()->getUid());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
 
         $order->getTargetGroup()->rewind();
         $surveyRequestDb->getTargetGroup()->rewind();
 
         self::assertSame($order->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
-
     }
 
     /**
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedProducts()
+    public function createSurveyRequestDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedProducts(): void
     {
-
         /**
          * Scenario:
          *
@@ -403,14 +408,14 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $order = $this->orderRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($order);
+        $surveyRequest = $this->fixture->createSurveyRequest($order);
         self::assertNull($surveyRequest);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(0, $surveyRequestsDb);
-
     }
+
 
     /**
      * @test
@@ -418,7 +423,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     public function createSurveyRequestDoesNotCreateSurveyRequestIfAssociatedSurveyConfigurationIsNotSetToSameTargetGroupAsOrder(): void
     {
-
         /**
          * Scenario:
          *
@@ -442,14 +446,14 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $order = $this->orderRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($order);
+        $surveyRequest = $this->fixture->createSurveyRequest($order);
         self::assertNull($surveyRequest);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(0, $surveyRequestsDb);
-
     }
+
 
     /**
      * @test
@@ -458,7 +462,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime(): void
     {
-
         /**
          * Scenario:
          *
@@ -491,15 +494,15 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (1 * 24 * 60 * 60)
         );
 
         self::assertCount(1, $notifiedSurveyRequests);
 
-        /** @var \RKW\RkwSurvey\Domain\Model\SurveyConfiguration $surveyConfigurationDb */
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfigurationDb */
         $surveyConfigurationDb = $this->surveyConfigurationRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
@@ -516,9 +519,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime()
+    public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime(): void
     {
-
         /**
          * Scenario:
          *
@@ -552,18 +554,17 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (2 * 24 * 60 * 60)
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (2 * 24 * 60 * 60)
         );
         self::assertCount(0, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertSame(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertSame(null, $surveyRequestDb->getOrderSubject());
-
+        self::assertNull($surveyRequestDb->getOrderSubject());
     }
 
 
@@ -572,9 +573,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @throws \Nimut\TestingFramework\Exception\Exception
      * @throws IllegalObjectTypeException
      */
-    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationIfOtherProductsExist()
+    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationIfOtherProductsExist(): void
     {
-
         /**
          * Scenario:
          *
@@ -605,10 +605,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (1 * 24 * 60 * 60)
         );
         self::assertCount(1, $notifiedSurveyRequests);
 
@@ -619,7 +619,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
-
     }
 
 
@@ -627,9 +626,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestSetsSurveyRequestPropertyProcessSubjectToRandomProductAssociatedWithSurveyConfiguration()
+    public function processPendingSurveyRequestSetsSurveyRequestPropertyProcessSubjectToRandomProductAssociatedWithSurveyConfiguration(): void
     {
-
         /**
          * Scenario:
          *
@@ -666,10 +664,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (1 * 24 * 60 * 60)
         );
         self::assertCount(1, $notifiedSurveyRequests);
 
@@ -680,7 +678,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         self::assertNotEquals(3, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertContains($surveyRequestDb->getOrderSubject()->getUid(), [1,2]);
-
     }
 
 
@@ -688,9 +685,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationEvenIfASecondProductWithNotMatchingSurveyConfigurationExists()
+    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationEvenIfASecondProductWithNotMatchingSurveyConfigurationExists(): void
     {
-
         /**
          * Scenario:
          *
@@ -729,10 +725,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (1 * 24 * 60 * 60)
         );
         self::assertCount(1, $notifiedSurveyRequests);
 
@@ -754,7 +750,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     public function processPendingSurveyRequestIgnoresAlreadyProcessedSurveyRequest(): void
     {
-
         /**
          * Scenario:
          *
@@ -780,7 +775,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->orderRepository->update($order);
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
-        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 1);
+        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestAlreadyNotifiedDb */
@@ -789,17 +784,16 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->surveyRequestRepository->update($surveyRequestAlreadyNotifiedDb);
         $this->persistenceManager->persistAll();
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (1 * 24 * 60 * 60)
         );
         self::assertCount(1, $notifiedSurveyRequests);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb */
         $surveyRequestProcessedDb = $this->surveyRequestRepository->findByUid(2);
         self::assertGreaterThan(1, $surveyRequestProcessedDb->getNotifiedTstamp());
-
     }
 
     /**
@@ -807,9 +801,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      *
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestSetsProcessSubjectAndNotifiedTstampOnlyInSurveyRequestContainingTheSelectedProduct()
+    public function processPendingSurveyRequestSetsProcessSubjectAndNotifiedTstampOnlyInSurveyRequestContainingTheSelectedProduct(): void
     {
-
         /**
          * Scenario:
          *
@@ -827,7 +820,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check110.xml');
 
-        //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
         $order->setShippedTstamp(strtotime('-2 days'));
@@ -838,31 +830,28 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->orderRepository->update($order);
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
-        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 1);
+        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
-        $processedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        $processedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (1 * 24 * 60 * 60)
         );
         self::assertCount(2, $processedSurveyRequests);
 
-        //  get all survey requests
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequestsDb */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAllPendingSurveyRequests();
+        $surveyRequestsDb = $this->surveyRequestRepository->findPendingSurveyRequests();
         self::assertCount(0, $surveyRequestsDb);
 
-        //  get all notified survey requests by user
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $notifiedSurveyRequestsDb */
-        $notifiedSurveyRequestsDb = $this->surveyRequestRepository->findAllNotifiedSurveyRequestsByFrontendUser(1);
+        $notifiedSurveyRequestsDb = $this->surveyRequestRepository->findNotifiedSurveyRequestsByFrontendUser(1);
         self::assertCount(1, $notifiedSurveyRequestsDb);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $notifiedSurveyRequestDb */
         $notifiedSurveyRequestDb = $notifiedSurveyRequestsDb->getFirst();
         self::assertGreaterThan(0, $notifiedSurveyRequestDb->getNotifiedTstamp());
         self::assertNotNull($notifiedSurveyRequestDb->getOrderSubject());
-
     }
 
     /**
@@ -870,9 +859,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      *
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestsRespectsSeparateFrontendUsers()
+    public function processPendingSurveyRequestsRespectsSeparateFrontendUsers(): void
     {
-
         /**
          * Scenario:
          *
@@ -905,13 +893,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->orderRepository->update($order);
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
-        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 1);
+        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (1 * 24 * 60 * 60)
         );
         self::assertCount(2, $notifiedSurveyRequests);
 
@@ -924,8 +912,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequestProcessedDbUid2 = $this->surveyRequestRepository->findByUid(2);
         self::assertGreaterThan(0, $surveyRequestProcessedDbUid2->getNotifiedTstamp());
         self::assertSame(2, $surveyRequestProcessedDbUid2->getOrderSubject()->getUid());
-
     }
+
 
     /**
      * @test
@@ -934,7 +922,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     public function processPendingSurveyRequestsRespectsSurveyTimeSlotAndSurveyPerTimeSlotAndFrontendUser(): void
     {
-
         /**
          * Scenario:
          *
@@ -954,7 +941,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check130.xml');
 
         //  set now to initial shipping date = first workday of the year
-        $initialDate = Carbon::create(2023, 1, 2, 0, 0);
+        $initialDate = Carbon::create(2023, 1, 2);
         Carbon::setTestNow($initialDate);
 
         //  First two orders shipped on $initialDate
@@ -969,15 +956,15 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->orderRepository->update($order);
 
         //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
-        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 1);
+        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
         //  Processing pending survey requests on $initialDate + 1 day
-        $processedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = 0,
-            $currentTime = Carbon::now()->addDays(2)->timestamp
+        $processedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            0,
+            Carbon::now()->addDays(2)->timestamp
         );
         self::assertCount(2, $processedSurveyRequests);
 
@@ -991,20 +978,18 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 3);
 
         //  Processing pending survey requests on $initialDate + 3 days
-        $processedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = 0,
-            $currentTime = Carbon::now()->addDays(3)->timestamp
+        $processedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            0,
+            Carbon::now()->addDays(3)->timestamp
         );
         self::assertCount(0, $processedSurveyRequests);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $pendingSurveyRequestsDb */
-        $pendingSurveyRequestsDb = $this->surveyRequestRepository->findAllPendingSurveyRequests();
+        $pendingSurveyRequestsDb = $this->surveyRequestRepository->findPendingSurveyRequests();
 
         self::assertCount(1, $pendingSurveyRequestsDb);
-
-
     }
 
 
@@ -1015,7 +1000,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      */
     public function generateTokensAddsTokenToAccessRestrictedSurvey(): void
     {
-
         /**
          * Scenario:
          *
@@ -1034,7 +1018,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /* @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfigurationDb */
         $surveyConfigurationDb = $this->surveyConfigurationRepository->findByUid(1);
 
-        $generatedTokens = $this->subject->generateTokens($surveyConfigurationDb);
+        $generatedTokens = $this->fixture->generateTokens($surveyConfigurationDb);
         self::assertCount(1, $generatedTokens);
         self::assertTrue(isset($generatedTokens[1]));
 
@@ -1047,6 +1031,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertCount(1, $surveyDb1->getToken());
         self::assertCount(0, $surveyDb2->getToken());
 
+        $tokenList = $this->tokenRepository->findBySurvey($surveyDb1);
+        self::assertCount(1, $tokenList->toArray());
+        $surveyDb1->getToken()->rewind();
+        self::assertSame($tokenList->getFirst()->getName(), $surveyDb1->getToken()->current()->getName());
     }
 
 
@@ -1055,9 +1043,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      *
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnEventReservation()
+    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnEventReservation(): void
     {
-
         /**
          * Scenario:
          *
@@ -1081,11 +1068,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwEvents\Domain\Model\EventReservation $eventReservation */
         $eventReservation = $this->eventReservationRepository->findByUid(1);
 
-        /** @var \RKW\RkwEvents\Domain\Model\FrontendUser $frontendUser */
+        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->subject->createSurveyRequest($eventReservation);
+        $surveyRequest = $this->fixture->createSurveyRequest($eventReservation);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -1105,7 +1092,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequest->getTargetGroup()->rewind();
 
         self::assertSame($eventReservation->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
-
     }
 
 
@@ -1114,9 +1100,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      *
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfSurveyRequestContainsAnEventAndEndTstampIsLessThanNowMinusSurveyWaitingTime()
+    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfSurveyRequestContainsAnEventAndEndTstampIsLessThanNowMinusSurveyWaitingTime(): void
     {
-
         /**
          * Scenario:
          *
@@ -1138,7 +1123,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the surveyRequest-property processSubject is set to that event-object
          */
 
-
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check510.xml');
 
         /** @var \RKW\RkwEvents\Domain\Model\Event $event */
@@ -1149,19 +1133,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         $this->setUpSurveyRequest(\RKW\RkwEvents\Domain\Model\EventReservation::class);
 
-        /** @var \RKW\RkwSurvey\Domain\Model\SurveyRequest $surveyRequestDb */
-        $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
-
-        $notifiedSurveyRequests = $this->subject->processPendingSurveyRequests(
-            $checkPeriod = $this->checkPeriod,
-            $maxSurveysPerPeriodAndFrontendUser = $this->maxSurveysPerPeriodAndFrontendUser,
-            $surveyWaitingTime = (1 * 24 * 60 * 60)
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            (1 * 24 * 60 * 60)
         );
 
         self::assertCount(1, $notifiedSurveyRequests);
-
-        /** @var \RKW\RkwSurvey\Domain\Model\Survey $surveyDb */
-        $surveyDb = $this->surveyRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
@@ -1169,7 +1147,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\EventReservation::class, $surveyRequestDb->getEventReservation());
         self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\Event::class, $surveyRequestDb->getEventReservationSubject());
         self::assertSame($event, $surveyRequestDb->getEventReservationSubject());
-
     }
 
 
@@ -1180,7 +1157,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     {
         parent::tearDown();
     }
-
 
 }
 

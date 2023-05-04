@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\Domain\Model;
 
 /*
@@ -16,7 +15,6 @@ namespace RKW\RkwOutcome\Domain\Model;
  */
 
 use RKW\RkwShop\Domain\Model\Product;
-use RKW\RkwSurvey\Domain\Model\Survey;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
 
@@ -37,7 +35,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\RKW\RkwSurvey\Domain\Model\Survey>
+     * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\RKW\RkwSurvey\Domain\Model\Survey>|null
      */
     protected $survey = null;
 
@@ -72,7 +70,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @return void
      */
-    protected function initStorageObjects()
+    protected function initStorageObjects(): void
     {
         $this->targetGroup = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
     }
@@ -81,7 +79,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the product
      *
-     * @return \RKW\RkwShop\Domain\Model\Product
+     * @return \RKW\RkwShop\Domain\Model\Product $product
      */
     public function getProduct():? Product
     {

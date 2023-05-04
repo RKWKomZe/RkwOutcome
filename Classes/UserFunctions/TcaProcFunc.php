@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\UserFunctions;
 
 /*
@@ -37,12 +36,10 @@ class TcaProcFunc
      */
     public function getSelectedCategories(array $params): void
     {
-
         if (
-            $params['table'] == 'tx_rkwoutcome_domain_model_surveyconfiguration'
+            $params['table'] === 'tx_rkwoutcome_domain_model_surveyconfiguration'
             && $params['row']['uid']
         ) {
-
             $categoryUidList = [];
 
             // FIRST: Get all sys_category entries
@@ -66,15 +63,10 @@ class TcaProcFunc
                 ->execute();
 
             while ($category = $result->fetch()) {
-
-                if ($category) {
-                    // put it into the result set
-                    $params['items'][] = [$category['title'], $category['uid']];
-                }
+                // put it into the result set
+                $params['items'][] = [$category['title'], $category['uid']];
             }
-
         }
-
     }
 
 }

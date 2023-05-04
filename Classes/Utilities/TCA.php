@@ -19,6 +19,7 @@ use RKW\RkwShop\Domain\Model\Order;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * TCA
@@ -31,11 +32,12 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class TCA
 {
 
-    public function surveyConfigurationTitle(&$parameters)
+    public function surveyConfigurationTitle(&$parameters): void
     {
 
         $record = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid']);
-        $objectManager = GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
         //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
         if ($record['process_type'] === '\\' . Product::class) {
@@ -64,12 +66,13 @@ class TCA
     }
 
 
-    public function surveyRequestTitle(&$parameters)
+    public function surveyRequestTitle(&$parameters): void
     {
 
         $record = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid']);
 
-        $objectManager = GeneralUtility::makeInstance('TYPO3\\CMS\\Extbase\\Object\\ObjectManager');
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
         //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
         if ($record['process_type'] ===  Order::class) {

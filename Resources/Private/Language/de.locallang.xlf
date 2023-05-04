@@ -25,10 +25,13 @@
 
 
 
-            <!-- ##################### -->
+			<!-- ##################### -->
 			<!-- Validation -->
 			<!-- ##################### -->
-
+			<trans-unit id="surveyRequestManager.error.noFrontendUser">
+				<source>No frontend user found.</source>
+				<target>Dem Vorgang ist keine Person zugeordnet.</target>
+			</trans-unit>
 
 
 			<!-- ##################### -->
