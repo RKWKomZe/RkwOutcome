@@ -17,9 +17,8 @@ namespace RKW\RkwOutcome\Service;
 use RKW\RkwBasics\Utility\GeneralUtility;
 use RKW\RkwMailer\Service\MailService;
 use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
-use RKW\RkwOutcome\Manager\SurveyRequestManager;
+use RKW\RkwOutcome\Utility\SurveyRequestUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class RkwMailService
@@ -89,18 +88,12 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 
             if ($recipient->getEmail()) {
 
-                /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
-                $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-
-                /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $surveyRequestManager */
-                $surveyRequestManager = $objectManager->get(SurveyRequestManager::class);
-
                 $mailService->setTo($recipient, [
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
                         'frontendUser' => $recipient,
                         'generatedTokens' => $generatedTokens,
-                        'surveyRequestTags' => $surveyRequestManager->buildSurveyRequestTags($surveyRequest),
+                        'surveyRequestTags' => SurveyRequestUtility::buildSurveyRequestTags($surveyRequest),
                         'surveyPid' => (int) $settingsDefault['surveyShowPid']
                     ]
                 ]);

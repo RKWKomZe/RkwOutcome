@@ -4,7 +4,7 @@ return [
     'ctrl' => [
         'title'	=> 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration',
         'label' => '',
-        'label_userFunc' => \RKW\RkwOutcome\Utilities\TCA::class . '->surveyConfigurationTitle',
+        'label_userFunc' => \RKW\RkwOutcome\Utility\TCA::class . '->surveyConfigurationTitle',
         'tstamp' => 'tstamp',
         'crdate' => 'crdate',
         'cruser_id' => 'cruser_id',

@@ -1,5 +1,5 @@
 <?php
-namespace RKW\RkwOutcome\Utilities;
+namespace RKW\RkwOutcome\Utility;
 /*
  * This file is part of the TYPO3 CMS project.
  *

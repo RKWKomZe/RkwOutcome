@@ -15,8 +15,8 @@ namespace RKW\RkwOutcome\Controller;
  */
 
 use RKW\RkwBasics\Utility\GeneralUtility;
-use RKW\RkwOutcome\Manager\SurveyRequestManager;
 use RKW\RkwOutcome\Service\LogTrait;
+use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 
@@ -49,9 +49,9 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
             /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
             $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
-            /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $surveyRequestManager */
-            $surveyRequestManager = $objectManager->get(SurveyRequestManager::class);
-            $surveyRequestManager->processPendingSurveyRequests($checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $surveyWaitingTime);
+            /** @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor $surveyRequestProcessor */
+            $surveyRequestProcessor = $objectManager->get(SurveyRequestProcessor::class);
+            $surveyRequestProcessor->processPendingSurveyRequests($checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $surveyWaitingTime);
 
         } catch (\Exception $e) {
 

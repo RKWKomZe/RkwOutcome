@@ -1,5 +1,5 @@
 <?php
-namespace RKW\RkwOutcome\Manager;
+namespace RKW\RkwOutcome\SurveyRequest;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -16,28 +16,22 @@ namespace RKW\RkwOutcome\Manager;
 
 use RKW\RkwOutcome\Domain\Model\SurveyConfiguration;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
-use RKW\RkwOutcome\Exception;
-use RKW\RkwOutcome\Service\LogTrait;
-use RKW\RkwRegistration\Domain\Model\FrontendUser;
 use RKW\RkwSurvey\Domain\Model\Survey;
 use RKW\RkwSurvey\Domain\Model\Token;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
- * Class SurveyRequestManager
+ * Class SurveyRequestProcessor
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
+class SurveyRequestProcessor extends AbstractSurveyRequest
 {
-
-    use LogTrait;
 
     /**
      * Signal name for use in ext_localconf.php
@@ -48,141 +42,10 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
 
     /**
-     * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
-     * @inject
-     */
-    protected $signalSlotDispatcher;
-
-
-    /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
-     * @inject
-     */
-    protected $surveyRequestRepository;
-
-    /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
-     * @inject
-     */
-    protected $surveyConfigurationRepository;
-
-
-    /**
-     * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository
-     * @inject
-     */
-    protected $surveyRepository;
-
-
-    /**
      * @var \RKW\RkwSurvey\Domain\Repository\TokenRepository
      * @inject
      */
     protected $tokenRepository;
-
-
-    /**
-     * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
-     * @inject
-     */
-    protected $persistenceManager;
-
-
-    /**
-     * Intermediate function for creating surveyRequests - used by SignalSlot
-     *
-     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
-     * @param \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\EventReservation $process
-     * @return void
-     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     */
-    public function createSurveyRequestSignalSlot(FrontendUser $frontendUser, $process): void
-    {
-        try {
-            $this->createSurveyRequest($process);
-        } catch (\RKW\RkwOutcome\Exception $exception) {
-            // do nothing
-        }
-    }
-
-
-    /**
-     * Creates a survey request
-     *
-     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
-     * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest|null
-     * @throws \RKW\RkwOutcome\Exception
-     * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
-     * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     */
-    public function createSurveyRequest (AbstractEntity $process): ?SurveyRequest
-    {
-        $frontendUser = null;
-
-        try {
-            if ($this->isSurveyable($process)) {
-
-                /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-                $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
-
-                if ($process instanceof \Rkw\RkwShop\Domain\Model\Order) {
-                    /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
-                    $frontendUser = $process->getFrontendUser();
-                    $surveyRequest->setOrder($process);
-                }
-
-                if ($process instanceof \Rkw\RkwEvents\Domain\Model\EventReservation) {
-                    /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
-                    $frontendUser = $process->getFeUser();
-                    $surveyRequest->setEventReservation($process);
-                }
-
-                if (!$frontendUser) {
-                    throw new Exception('surveyRequestManager.error.noFrontendUser');
-                }
-
-                $surveyRequest->setProcessType(get_class($process));
-                $surveyRequest->setFrontendUser($frontendUser);
-
-                $process->getTargetGroup()->rewind();
-                $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
-
-                $this->surveyRequestRepository->add($surveyRequest);
-                $this->persistenceManager->persistAll();
-
-                $this->logDebug(
-                    sprintf(
-                        'Created surveyRequest for process with uid=%s of type=%s by frontenduser with uid=%s',
-                        $process->getUid(),
-                        get_class($process),
-                        $frontendUser->getUid()
-                    )
-                );
-
-                return $surveyRequest;
-
-            }
-        } catch (Exception $e) {
-        } catch (IllegalObjectTypeException $e) {
-        } catch (InvalidQueryException $e) {
-        }
-
-        $this->logInfo(
-            sprintf(
-                'No surveyRequest has been created for process with uid=%s.',
-                $process->getUid()
-            )
-        );
-
-        return null;
-    }
 
 
     /**
@@ -323,80 +186,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
 
     /**
-     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
-     * @return bool
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     */
-    protected function isSurveyable(AbstractEntity $process): bool
-    {
-        $notifiables = $this->getNotifiableObjects($process);
-
-        return count($notifiables) > 0;
-    }
-
-
-    /**
-     * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
-     * @return array
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     */
-    protected function getNotifiableObjects(AbstractEntity $process): array
-    {
-        $this->logInfo(
-            sprintf(
-                'Looking for configurations matching process with uid %s and targetGroup %s',
-                $process->getUid(),
-                json_encode($process->getTargetGroup())
-            )
-        );
-
-        $notifiableObjects = [];
-
-        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-
-            /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
-            foreach ($process->getOrderItem() as $orderItem) {
-
-                $this->logInfo(
-                    sprintf(
-                        'Looking for configurations matching orderItem with uid %s.',
-                        $orderItem->getUid()
-                    )
-                );
-
-                /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
-                $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup());
-                if (
-                    $surveyConfigurations
-                    && count($surveyConfigurations->toArray()) > 0
-                ) {
-                    $notifiableObjects[] = $orderItem->getProduct();
-                }
-            }
-
-        }
-
-        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
-
-            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
-            $event = $process->getEvent();
-
-            /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
-            $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($event, $process->getTargetGroup());
-            if (
-                $surveyConfigurations
-                && count($surveyConfigurations->toArray()) > 0
-            ) {
-                $notifiableObjects[] = $event;
-            }
-
-        }
-
-        return $notifiableObjects;
-    }
-
-
-    /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
      * @param int $currentTime
      * @return void
@@ -497,30 +286,6 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
         return count($alreadyNotifiedRequests) >= $maxSurveysPerPeriodAndFrontendUser;
     }
 
-
-    /**
-     * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
-     * @return string
-     */
-    public function buildSurveyRequestTags(SurveyRequest $surveyRequest): string
-    {
-        $surveyRequest->getTargetGroup()->rewind();
-        $targetGroupUid = $surveyRequest->getTargetGroup()->current()->getUid();
-
-        $processSubject = ($surveyRequest->getProcessType() === 'RKW\RkwShop\Domain\Model\Order') ? $surveyRequest->getOrderSubject() : $surveyRequest->getEventReservationSubject();
-        $processSubject = explode(':', $processSubject);
-        $processSubject[0] = explode('\\', $processSubject[0]);
-        $processSubjectType = array_pop($processSubject[0]);
-        $processSubjectUid = $processSubject[1];
-
-        $surveyRequestTags = [
-            $targetGroupUid, // targetGroupUid
-            $processSubjectType, // processSubjectType
-            $processSubjectUid  // processSubjectUid
-        ];
-
-        return implode(',', $surveyRequestTags);
-    }
 
     /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration
