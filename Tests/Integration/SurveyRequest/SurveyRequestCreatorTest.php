@@ -14,7 +14,6 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
  * The TYPO3 project - inspiring people to share!
  */
 
-use Carbon\Carbon;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
@@ -29,7 +28,6 @@ use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
 use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 /**
@@ -218,45 +216,6 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
 
         $this->checkPeriod = 7 * 24 * 60 * 60;
         $this->maxSurveysPerPeriodAndFrontendUser = 1;
-    }
-
-
-    #==============================================================================
-    /**
-     *
-     * @param string $model
-     * @param int $modelUid
-     *
-     * @return void
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
-     */
-    protected function setUpSurveyRequest(string $model, int $modelUid = 1): void
-    {
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
-
-        $frontendUser = null;
-
-        if ($model === \RKW\RkwShop\Domain\Model\Order::class) {
-            $process = $this->orderRepository->findByUid($modelUid);
-            $frontendUser = $process->getFrontendUser();
-            $surveyRequest->setOrder($process);
-        }
-
-        if ($model === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
-            $process = $this->eventReservationRepository->findByUid($modelUid);
-            $frontendUser = $process->getFeUser();
-            $surveyRequest->setEventReservation($process);
-        }
-
-        $surveyRequest->setProcessType(get_class($process));
-        $surveyRequest->setFrontendUser($frontendUser);
-
-        $process->getTargetGroup()->rewind();
-        $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
-
-        $this->surveyRequestRepository->add($surveyRequest);
-        $this->persistenceManager->persistAll();
     }
 
 
