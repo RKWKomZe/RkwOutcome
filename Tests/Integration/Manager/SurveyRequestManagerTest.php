@@ -264,37 +264,32 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestCreatesSurveyRequestIfOrderContainsAProductAssociatedWithSurveyConfigurationWithSameTargetGroup(): void
+    public function createSurveyRequestPersistsNewSurveyRequestIfOrderMatchesSurveyConfiguration(): void
     {
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
-         * Given the order-property frontendUser is set to that frontendUser-object
-         * Given a frontendUser-object that is persisted and belongs to that order-object
          * Given a targetGroup-object 1 that is attached to that order-object
-         * Given an orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and belongs to that orderItem-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object that belongs to that orderItem-object
          * Given a surveyConfiguration-object that is persisted
          * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
          * Given the targetGroup-object 1 attached to the surveyConfiguration
          * When the method is called
-         * Then a single surveyRequest-object is persisted
-         * Then the order-property of this persisted surveyRequest-object is set to the order-object
-         * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
-         * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
+         * Then a new surveyRequest-object is persisted
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
-        /** @var \RKW\RkwShop\Domain\Model\Order $process */
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
 
-        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
-        $frontendUser = $this->frontendUserRepository->findByUid(1);
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -302,15 +297,237 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertSame($surveyRequest, $surveyRequestDb);
         self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
+    }
 
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     */
+    public function createSurveyRequestDoesNotPersistNewSurveyRequestIfOrderDoesNotMatchSurveyConfigurationProduct(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object 1 that belongs to that orderItem-object
+         * Given a product-object 2
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to product-object 2
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
+         * When the method is called
+         * Then no new surveyRequest-object is persisted
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check11.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+
+        $this->fixture->createSurveyRequest($order);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+    }
+
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     */
+    public function createSurveyRequestDoesNotPersistNewSurveyRequestIfOrderDoesNotMatchSurveyConfigurationTargetGroup(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object 1 that belongs to that orderItem-object
+         * Given a targetGroup-object 2
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to product-object 1
+         * Given the targetGroup-object 2 attached to the surveyConfiguration
+         * When the method is called
+         * Then no new surveyRequest-object is persisted
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check12.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        $this->fixture->createSurveyRequest($order);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+    }
+
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     */
+    public function createSurveyRequestSetsOrderOnPersistedNewSurveyRequest(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object that belongs to that orderItem-object
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
+         * When the method is called
+         * Then a new surveyRequest-object is persisted
+         * Then the surveyRequest-property order is set to that order-object
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check13.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        $this->fixture->createSurveyRequest($order);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(1, $surveyRequestsDb);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestDb = $surveyRequestsDb->getFirst();
+        self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
         self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
+    }
+
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     */
+    public function createSurveyRequestSetsProcessTypeOnPersistedNewSurveyRequest(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object that belongs to that orderItem-object
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
+         * When the method is called
+         * Then a new surveyRequest-object is persisted
+         * Then the surveyRequest-property processType is set to the order-class
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check14.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        $this->fixture->createSurveyRequest($order);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(1, $surveyRequestsDb);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestDb = $surveyRequestsDb->getFirst();
         self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertEquals($frontendUser->getUid(), $surveyRequestDb->getFrontendUser()->getUid());
+    }
+
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     */
+    public function createSurveyRequestSetsFrontendUserOnPersistedNewSurveyRequest(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given a frontendUser-object that is persisted
+         * Given the order-property frontendUser is set to that frontendUser-object
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object that belongs to that orderItem-object
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
+         * When the method is called
+         * Then a new surveyRequest-object is persisted
+         * Then the surveyRequest-property frontendUser is set to the frontendUser-object attached to the order
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check15.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
+        $frontendUser = $this->frontendUserRepository->findByUid(1);
+
+        $this->fixture->createSurveyRequest($order);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestDb = $surveyRequestsDb->getFirst();
+        self::assertSame($frontendUser->getUid(), $surveyRequestDb->getFrontendUser()->getUid());
         self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
-        self::assertNull($surveyRequestDb->getSurveyConfiguration());
+    }
+
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     */
+    public function createSurveyRequestSetsTargetGroupOnPersistedNewSurveyRequest(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given the order-property frontendUser is set to that frontendUser-object
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object that belongs to that orderItem-object
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
+         * When the method is called
+         * Then a new surveyRequest-object is persisted
+         * Then the surveyRequest-property targetGroup is set to the targetGroup-bject 1
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check16.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        $this->fixture->createSurveyRequest($order);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestDb = $surveyRequestsDb->getFirst();
 
         $order->getTargetGroup()->rewind();
         $surveyRequestDb->getTargetGroup()->rewind();
@@ -323,14 +540,50 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestCreatesSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductAssociatedWithSurveyConfiguration(): void
+    public function createSurveyRequestDoesNotSetSurveyConfigurationOnPersistedNewSurveyRequest(): void
     {
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
          * Given the order-property frontendUser is set to that frontendUser-object
-         * Given a frontendUser-object that is persisted and belongs to that order-object
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object that belongs to that orderItem-object
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
+         * When the method is called
+         * Then a new surveyRequest-object is persisted
+         * Then the surveyRequest-property surveyConfiguration is not set
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check17.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        $this->fixture->createSurveyRequest($order);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestDb = $surveyRequestsDb->getFirst();
+        self::assertNull($surveyRequestDb->getSurveyConfiguration());
+    }
+
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     */
+    public function createSurveyRequestPersistsNewSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductMatchingSurveyConfiguration(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object 1 that is persisted and belongs to that order-object
          * Given a product-object 1 that is persisted and belongs to that orderItem-object 1
@@ -340,10 +593,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Given the surveyConfiguration-property product is set to product-object 1
          * Given the targetGroup-object 1 attached to the surveyConfiguration
          * When the method is called
-         * Then a single surveyRequest-object is persisted
-         * Then the order-property of this persisted surveyRequest-object is set to the order-object
-         * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
-         * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
+         * Then a new surveyRequest-object is persisted
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check20.xml');
@@ -351,31 +601,11 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\Order $process */
         $order = $this->orderRepository->findByUid(1);
 
-        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
-        $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(1, $surveyRequestsDb);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertSame($surveyRequest, $surveyRequestDb);
-        self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
-
-        self::assertSame($order, $surveyRequestDb->getOrder());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-        self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertEquals($frontendUser->getUid(), $surveyRequestDb->getFrontendUser()->getUid());
-        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
-
-        $order->getTargetGroup()->rewind();
-        $surveyRequestDb->getTargetGroup()->rewind();
-
-        self::assertSame($order->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
     }
 
     /**
