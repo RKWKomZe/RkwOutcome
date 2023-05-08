@@ -16,7 +16,6 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
 
 use Carbon\Carbon;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
-use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
 use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
@@ -265,7 +264,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @throws \Nimut\TestingFramework\Exception\Exception
      * @throws IllegalObjectTypeException
      */
-    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime(): void
+    public function processPendingSurveyRequestMarksSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime(): void
     {
         /**
          * Scenario:
@@ -313,7 +312,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
+        self::assertSame($order, $surveyRequestDb->getOrder());
         $order->getOrderItem()->rewind();
         self::assertSame($order->getOrderItem()->current()->getProduct(), $surveyRequestDb->getOrderSubject());
         self::assertSame($surveyConfigurationDb, $surveyRequestDb->getSurveyConfiguration());
@@ -324,7 +323,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime(): void
+    public function processPendingSurveyRequestDoesNotMarkSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime(): void
     {
         /**
          * Scenario:
@@ -345,7 +344,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp remains 0
          * Then the surveyRequest-property processSubject remains null
-         * Then the surveyRequest-property survey remains null
+         * Then the surveyRequest-property surveyConfiguration remains null
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check20.xml');
@@ -370,6 +369,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertSame(0, $surveyRequestDb->getNotifiedTstamp());
         self::assertNull($surveyRequestDb->getOrderSubject());
+        self::assertNull($surveyRequestDb->getSurveyConfiguration());
     }
 
 
@@ -378,7 +378,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @throws \Nimut\TestingFramework\Exception\Exception
      * @throws IllegalObjectTypeException
      */
-    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationIfOtherProductsExist(): void
+    public function processPendingSurveyRequestSetsProcessedSubjectToCorrectProduct(): void
     {
         /**
          * Scenario:
@@ -420,10 +420,8 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-
+        self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
-        self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
     }
 
 
@@ -479,8 +477,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-
+        self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertNotEquals(3, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertContains($surveyRequestDb->getOrderSubject()->getUid(), [1,2]);
     }
@@ -540,11 +537,9 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-
+        self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
-
         self::assertSame(1, $surveyRequestDb->getSurveyConfiguration()->getUid());
     }
 
@@ -596,9 +591,13 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         );
         self::assertCount(1, $notifiedSurveyRequests);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb */
-        $surveyRequestProcessedDb = $this->surveyRequestRepository->findByUid(2);
-        self::assertGreaterThan(1, $surveyRequestProcessedDb->getNotifiedTstamp());
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb1 */
+        $surveyRequestProcessedDb1 = $this->surveyRequestRepository->findByUid(1);
+        self::assertEquals(1, $surveyRequestProcessedDb1->getNotifiedTstamp());
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb2 */
+        $surveyRequestProcessedDb2 = $this->surveyRequestRepository->findByUid(2);
+        self::assertGreaterThan(1, $surveyRequestProcessedDb2->getNotifiedTstamp());
     }
 
     /**
@@ -606,7 +605,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      *
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestSetsProcessSubjectAndNotifiedTstampOnlyInSurveyRequestContainingTheSelectedProduct(): void
+    public function processPendingSurveyRequestSetsProcessSubjectAndNotifiedTstampOnlyInSurveyRequestContainsTheSelectedProduct(): void
     {
         /**
          * Scenario:

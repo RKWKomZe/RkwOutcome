@@ -15,19 +15,11 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
  */
 
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
-use RKW\RkwEvents\Domain\Model\EventReservation;
-use RKW\RkwEvents\Domain\Repository\EventRepository;
-use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
-use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
-use RKW\RkwOutcome\SurveyRequest\SurveyRequestCreator;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
 use RKW\RkwOutcome\Utility\SurveyRequestUtility;
-use RKW\RkwRegistration\Domain\Repository\FrontendUserRepository;
 use RKW\RkwShop\Domain\Repository\OrderRepository;
-use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
-use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
@@ -70,12 +62,6 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwRegistration\Domain\Repository\FrontendUserRepository
-     */
-    private $frontendUserRepository;
-
-
-    /**
      * @var \RKW\RkwEvents\Domain\Repository\EventReservationRepository
      */
     private $eventReservationRepository;
@@ -88,33 +74,9 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwEvents\Domain\Repository\EventRepository
-     */
-    private $eventRepository;
-
-
-    /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      */
     private $surveyRequestRepository;
-
-
-    /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository|null
-     */
-    private $surveyConfigurationRepository;
-
-
-    /**
-     * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository|null
-     */
-    private $surveyRepository;
-
-
-    /**
-     * @var \RKW\RkwSurvey\Domain\Repository\TokenRepository|null
-     */
-    private $tokenRepository;
 
 
     /**
@@ -252,7 +214,7 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
          *
          * Given persisted surveyRequest-object
          * When the method is called
-         * Then is should return a comma separated string contain targegGroupUid, class of product and productUid
+         * Then ii should return a comma separated string contain targegGroupUid, class of product and productUid
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
