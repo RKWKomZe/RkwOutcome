@@ -12,7 +12,7 @@
         <zip>10969</zip>
         <city>Hamburg</city>
     </fe_users>
-    <!-- orders -->
+    <!-- order -->
     <tx_rkwshop_domain_model_order>
         <uid>1</uid>
         <pid>1</pid>
@@ -25,13 +25,13 @@
     <tx_rkwshop_domain_model_orderitem>
         <uid>1</uid>
         <pid>1</pid>
-        <amount>4</amount>
-        <product>1</product>
+        <amount>1</amount>
+        <product>2</product>
         <ext_order>1</ext_order>
     </tx_rkwshop_domain_model_orderitem>
     <!-- products -->
     <tx_rkwshop_domain_model_product>
-        <uid>1</uid>
+        <uid>2</uid>
         <pid>1</pid>
         <title>Produkt mit Fragebogen</title>
         <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
@@ -43,7 +43,7 @@
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
-        <product>1</product>
+        <product>2</product>
         <survey>1</survey>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
@@ -54,18 +54,13 @@
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>
-        <uid>1</uid>
+        <uid>10</uid>
         <pid>1</pid>
         <title>Unternehmen</title>
     </sys_category>
-    <sys_category>
-        <uid>2</uid>
-        <pid>1</pid>
-        <title>Kunden</title>
-    </sys_category>
     <!-- sys_category_record_mm -->
     <sys_category_record_mm>
-        <uid_local>1</uid_local>
+        <uid_local>10</uid_local>
         <uid_foreign>1</uid_foreign>
         <tablenames>tx_rkwshop_domain_model_order</tablenames>
         <sorting>0</sorting>
@@ -73,7 +68,7 @@
         <fieldname>target_group</fieldname>
     </sys_category_record_mm>
     <sys_category_record_mm>
-        <uid_local>2</uid_local>
+        <uid_local>10</uid_local>
         <uid_foreign>1</uid_foreign>
         <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
         <sorting>0</sorting>

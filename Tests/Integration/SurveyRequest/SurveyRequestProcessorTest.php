@@ -1,5 +1,5 @@
 <?php
-namespace RKW\RkwOutcome\Tests\Integration\Manager;
+namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -16,13 +16,12 @@ namespace RKW\RkwOutcome\Tests\Integration\Manager;
 
 use Carbon\Carbon;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
-use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
 use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
-use RKW\RkwOutcome\Manager\SurveyRequestManager;
+use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
 use RKW\RkwRegistration\Domain\Repository\FrontendUserRepository;
 use RKW\RkwShop\Domain\Repository\OrderRepository;
 use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
@@ -33,19 +32,19 @@ use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 /**
- * SurveyRequestManagerTest
+ * SurveyRequestProcessorTest
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyRequestManagerTest extends FunctionalTestCase
+class SurveyRequestProcessorTest extends FunctionalTestCase
 {
     /**
      * @const
      */
-    const FIXTURE_PATH = __DIR__ . '/SurveyRequestManagerTest/Fixtures';
+    const FIXTURE_PATH = __DIR__ . '/SurveyRequestProcessorTest/Fixtures';
 
 
     /**
@@ -132,7 +131,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwOutcome\Manager\SurveyRequestManager|null
+     * @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor|null
      */
     private $fixture;
 
@@ -183,8 +182,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager $persistenceManager */
         $this->persistenceManager = GeneralUtility::makeInstance(PersistenceManager::class);
 
-        /** @var \RKW\RkwOutcome\Manager\SurveyRequestManager $fixture */
-        $this->fixture = $this->objectManager->get(SurveyRequestManager::class);
+        /** @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor $fixture */
+        $this->fixture = $this->objectManager->get(SurveyRequestProcessor::class);
 
         /** @var \RKW\RkwEvents\Domain\Repository\EventRepository $eventRepository */
         $this->eventRepository = $this->objectManager->get(EventRepository::class);
@@ -263,204 +262,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
     /**
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
-     */
-    public function createSurveyRequestCreatesSurveyRequestIfOrderContainsAProductAssociatedWithSurveyConfigurationWithSameTargetGroup(): void
-    {
-        /**
-         * Scenario:
-         *
-         * Given an order-object that is persisted
-         * Given the order-property frontendUser is set to that frontendUser-object
-         * Given a frontendUser-object that is persisted and belongs to that order-object
-         * Given a targetGroup-object 1 that is attached to that order-object
-         * Given an orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and belongs to that orderItem-object
-         * Given a surveyConfiguration-object that is persisted
-         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
-         * Given the targetGroup-object 1 attached to the surveyConfiguration
-         * When the method is called
-         * Then a single surveyRequest-object is persisted
-         * Then the order-property of this persisted surveyRequest-object is set to the order-object
-         * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
-         * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
-
-        /** @var \RKW\RkwShop\Domain\Model\Order $process */
-        $order = $this->orderRepository->findByUid(1);
-
-        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
-        $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->fixture->createSurveyRequest($order);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-        self::assertCount(1, $surveyRequestsDb);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertSame($surveyRequest, $surveyRequestDb);
-        self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
-
-        self::assertSame($order, $surveyRequestDb->getOrder());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-        self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertEquals($frontendUser->getUid(), $surveyRequestDb->getFrontendUser()->getUid());
-        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
-        self::assertNull($surveyRequestDb->getSurveyConfiguration());
-
-        $order->getTargetGroup()->rewind();
-        $surveyRequestDb->getTargetGroup()->rewind();
-
-        self::assertSame($order->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
-    }
-
-
-    /**
-     * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
-     */
-    public function createSurveyRequestCreatesSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductAssociatedWithSurveyConfiguration(): void
-    {
-        /**
-         * Scenario:
-         *
-         * Given an order-object that is persisted
-         * Given the order-property frontendUser is set to that frontendUser-object
-         * Given a frontendUser-object that is persisted and belongs to that order-object
-         * Given a targetGroup-object 1 that is attached to that order-object
-         * Given an orderItem-object 1 that is persisted and belongs to that order-object
-         * Given a product-object 1 that is persisted and belongs to that orderItem-object 1
-         * Given an orderItem-object 2 that is persisted and belongs to that order-object
-         * Given a product-object 2 that is persisted and belongs to that orderItem-object 2
-         * Given a surveyConfiguration-object that is persisted
-         * Given the surveyConfiguration-property product is set to product-object 1
-         * Given the targetGroup-object 1 attached to the surveyConfiguration
-         * When the method is called
-         * Then a single surveyRequest-object is persisted
-         * Then the order-property of this persisted surveyRequest-object is set to the order-object
-         * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
-         * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check20.xml');
-
-        /** @var \RKW\RkwShop\Domain\Model\Order $process */
-        $order = $this->orderRepository->findByUid(1);
-
-        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
-        $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->fixture->createSurveyRequest($order);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-        self::assertCount(1, $surveyRequestsDb);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertSame($surveyRequest, $surveyRequestDb);
-        self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
-
-        self::assertSame($order, $surveyRequestDb->getOrder());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-        self::assertSame(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getProcessType());
-        self::assertEquals($frontendUser->getUid(), $surveyRequestDb->getFrontendUser()->getUid());
-        self::assertInstanceOf(\RKW\RkwRegistration\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
-
-        $order->getTargetGroup()->rewind();
-        $surveyRequestDb->getTargetGroup()->rewind();
-
-        self::assertSame($order->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
-    }
-
-    /**
-     * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
-     */
-    public function createSurveyRequestDoesNotCreateSurveyRequestIfNoSurveyIsAssociatedWithContainedProducts(): void
-    {
-        /**
-         * Scenario:
-         *
-         * Given an order-object that is persisted
-         * Given the order-property frontendUser is set to that frontendUser-object
-         * Given a frontendUser-object that is persisted and belongs to that order-object
-         * Given a targetGroup-object 1 that is attached to that order-object
-         * Given an orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object 1 that is persisted and belongs to that orderItem-object
-         * Given a product-object 2 that is persisted and does not belong to that order
-         * Given a surveyConfiguration-object that is persisted
-         * Given the surveyConfiguration-property product is set to product-object 2
-         * Given the targetGroup-object 1 attached to the surveyConfiguration
-         * When the method is called
-         * Then the method returns null
-         * Then no surveyRequest-object is persisted
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check30.xml');
-
-        /** @var \RKW\RkwShop\Domain\Model\Order $process */
-        $order = $this->orderRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->fixture->createSurveyRequest($order);
-        self::assertNull($surveyRequest);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-        self::assertCount(0, $surveyRequestsDb);
-    }
-
-
-    /**
-     * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
-     */
-    public function createSurveyRequestDoesNotCreateSurveyRequestIfAssociatedSurveyConfigurationIsNotSetToSameTargetGroupAsOrder(): void
-    {
-        /**
-         * Scenario:
-         *
-         * Given a targetGroup-object 1 is persisted
-         * Given a targetGroup-object 2 is persisted
-         * Given an order-object that is persisted
-         * Given the targetGroup-object 1 is attached to that order-object
-         * Given an orderItem-object that is persisted and belongs to that order-object
-         * Given a product-object is persisted and belongs to that orderItem-object
-         * Given a surveyConfiguration-object is persisted
-         * Given the product-property of that surveyConfiguration-object is that product-object
-         * Given the targetGroup-object 2 is attached to that surveyConfiguration-object
-         * When the method is called
-         * Then the method returns null
-         * Then no surveyRequest-object is persisted
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check40.xml');
-
-        /** @var \RKW\RkwShop\Domain\Model\Order $process */
-        $order = $this->orderRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->fixture->createSurveyRequest($order);
-        self::assertNull($surveyRequest);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-        self::assertCount(0, $surveyRequestsDb);
-    }
-
-
-    /**
-     * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
      * @throws IllegalObjectTypeException
      */
-    public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime(): void
+    public function processPendingSurveyRequestMarksSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime(): void
     {
         /**
          * Scenario:
@@ -484,7 +288,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the surveyRequest-property surveyConfiguration is set to the persisted surveyConfiguration-object
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check50.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
@@ -508,7 +312,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
+        self::assertSame($order, $surveyRequestDb->getOrder());
         $order->getOrderItem()->rewind();
         self::assertSame($order->getOrderItem()->current()->getProduct(), $surveyRequestDb->getOrderSubject());
         self::assertSame($surveyConfigurationDb, $surveyRequestDb->getSurveyConfiguration());
@@ -519,7 +323,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestDoesNotMarkProcessedSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime(): void
+    public function processPendingSurveyRequestDoesNotMarkSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime(): void
     {
         /**
          * Scenario:
@@ -540,10 +344,10 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp remains 0
          * Then the surveyRequest-property processSubject remains null
-         * Then the surveyRequest-property survey remains null
+         * Then the surveyRequest-property surveyConfiguration remains null
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check60.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check20.xml');
 
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
@@ -565,6 +369,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertSame(0, $surveyRequestDb->getNotifiedTstamp());
         self::assertNull($surveyRequestDb->getOrderSubject());
+        self::assertNull($surveyRequestDb->getSurveyConfiguration());
     }
 
 
@@ -573,7 +378,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      * @throws \Nimut\TestingFramework\Exception\Exception
      * @throws IllegalObjectTypeException
      */
-    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationIfOtherProductsExist(): void
+    public function processPendingSurveyRequestSetsProcessedSubjectToCorrectProduct(): void
     {
         /**
          * Scenario:
@@ -594,7 +399,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the surveyRequest-property processSubject is not set to the second product-object set in second orderItem-object
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check70.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check30.xml');
 
         //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
@@ -615,10 +420,8 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-
+        self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
-        self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
     }
 
 
@@ -653,7 +456,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Or to the second product-object set second orderItem-object
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check80.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check40.xml');
 
         //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
@@ -674,8 +477,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-
+        self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertNotEquals(3, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertContains($surveyRequestDb->getOrderSubject()->getUid(), [1,2]);
     }
@@ -714,7 +516,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the surveyRequest-property surveyConfiguration is set to the surveyConfiguration-object 1
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check90.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check50.xml');
 
         //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
@@ -735,11 +537,9 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwShop\Domain\Model\Order::class, $surveyRequestDb->getOrder());
-
+        self::assertSame($order, $surveyRequestDb->getOrder());
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
-
         self::assertSame(1, $surveyRequestDb->getSurveyConfiguration()->getUid());
     }
 
@@ -762,7 +562,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the property notifiedTstamp of surveyRequest-object 2 is greater than 1
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check100.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check60.xml');
 
         //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
@@ -791,9 +591,13 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         );
         self::assertCount(1, $notifiedSurveyRequests);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb */
-        $surveyRequestProcessedDb = $this->surveyRequestRepository->findByUid(2);
-        self::assertGreaterThan(1, $surveyRequestProcessedDb->getNotifiedTstamp());
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb1 */
+        $surveyRequestProcessedDb1 = $this->surveyRequestRepository->findByUid(1);
+        self::assertEquals(1, $surveyRequestProcessedDb1->getNotifiedTstamp());
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDb2 */
+        $surveyRequestProcessedDb2 = $this->surveyRequestRepository->findByUid(2);
+        self::assertGreaterThan(1, $surveyRequestProcessedDb2->getNotifiedTstamp());
     }
 
     /**
@@ -801,7 +605,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
      *
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function processPendingSurveyRequestSetsProcessSubjectAndNotifiedTstampOnlyInSurveyRequestContainingTheSelectedProduct(): void
+    public function processPendingSurveyRequestSetsProcessSubjectAndNotifiedTstampOnlyInSurveyRequestContainsTheSelectedProduct(): void
     {
         /**
          * Scenario:
@@ -818,7 +622,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the property notifiedTstamp of that notified surveyRequest-object is greater than 1
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check110.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check70.xml');
 
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
@@ -880,7 +684,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the property processSubject of surveyRequest-object 2 is set to product-object 2
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check120.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check80.xml');
 
         //  dynamically set shippedTstamp to be less than time() - $surveyWaitingTime
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
@@ -938,7 +742,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the number of processed requests is 0
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check130.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check90.xml');
 
         //  set now to initial shipping date = first workday of the year
         $initialDate = Carbon::create(2023, 1, 2);
@@ -1013,7 +817,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then a new token is added to survey-object 1
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check140.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check100.xml');
 
         /* @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfigurationDb */
         $surveyConfigurationDb = $this->surveyConfigurationRepository->findByUid(1);
@@ -1035,63 +839,6 @@ class SurveyRequestManagerTest extends FunctionalTestCase
         self::assertCount(1, $tokenList->toArray());
         $surveyDb1->getToken()->rewind();
         self::assertSame($tokenList->getFirst()->getName(), $surveyDb1->getToken()->current()->getName());
-    }
-
-
-    /**
-     * @test
-     *
-     * @throws \Nimut\TestingFramework\Exception\Exception
-     */
-    public function createSurveyRequestCreatesSurveyRequestTriggeredByAnEventReservation(): void
-    {
-        /**
-         * Scenario:
-         *
-         * Given a frontendUser-object that is persisted
-         * Given an event-object that is persisted
-         * Given an eventReservation-object that is persisted and belongs to that event-object
-         * Given a frontendUser-object that is persisted and belongs to that eventReservation-object
-         * Given a targetGroup-object 1 that is attached to that eventReservation-object
-         * Given a surveyConfiguration-object that is persisted
-         * Given the surveyConfiguration-property event is set to the same event-object as the eventReservation-property event
-         * Given the targetGroup-object 1 attached to the surveyConfiguration
-         * When the method is called
-         * Then a single surveyRequest-object is persisted
-         * Then the process-property of this persisted surveyRequest-object is set to the order-object
-         * Then the frontendUser-property of this persisted surveyRequest-object is set to the frontendUser-object
-         * Then the targetGroup-object 1 is attached to this persisted surveyRequest-object
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check500.xml');
-
-        /** @var \RKW\RkwEvents\Domain\Model\EventReservation $eventReservation */
-        $eventReservation = $this->eventReservationRepository->findByUid(1);
-
-        /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
-        $frontendUser = $this->frontendUserRepository->findByUid(1);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->fixture->createSurveyRequest($eventReservation);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-        self::assertCount(1, $surveyRequestsDb);
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertSame($surveyRequest, $surveyRequestDb);
-        self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
-        self::assertSame(get_class($eventReservation), $surveyRequestDb->getProcessType());
-        self::assertSame($eventReservation, $surveyRequestDb->getEventReservation());
-        self::assertInstanceOf(EventReservation::class, $surveyRequestDb->getEventReservation());
-        self::assertSame($frontendUser->getEmail(), $surveyRequestDb->getFrontendUser()->getEmail());
-        self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\FrontendUser::class, $surveyRequestDb->getFrontendUser());
-
-        $eventReservation->getTargetGroup()->rewind();
-        $surveyRequest->getTargetGroup()->rewind();
-
-        self::assertSame($eventReservation->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
     }
 
 
@@ -1123,7 +870,7 @@ class SurveyRequestManagerTest extends FunctionalTestCase
          * Then the surveyRequest-property processSubject is set to that event-object
          */
 
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check510.xml');
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check110.xml');
 
         /** @var \RKW\RkwEvents\Domain\Model\Event $event */
         $event = $this->eventRepository->findByUid(1);

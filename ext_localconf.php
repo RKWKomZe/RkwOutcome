@@ -48,20 +48,20 @@ call_user_func(
         $signalSlotDispatcher->connect(
             \RKW\RkwShop\Orders\OrderManager::class,
             \RKW\RkwShop\Orders\OrderManager::SIGNAL_AFTER_ORDER_CREATED_USER,
-            \RKW\RkwOutcome\Manager\SurveyRequestManager::class,
+            \RKW\RkwOutcome\SurveyRequest\SurveyRequestCreator::class,
             'createSurveyRequestSignalSlot'
         );
 
         $signalSlotDispatcher->connect(
             \RKW\RkwEvents\Controller\EventReservationController::class,
             \RKW\RkwEvents\Controller\EventReservationController::SIGNAL_AFTER_RESERVATION_CREATED_USER,
-            \RKW\RkwOutcome\Manager\SurveyRequestManager::class,
+            \RKW\RkwOutcome\SurveyRequest\SurveyRequestCreator::class,
             'createSurveyRequestSignalSlot'
         );
 
         $signalSlotDispatcher->connect(
-            \RKW\RkwOutcome\Manager\SurveyRequestManager::class,
-            \RKW\RkwOutcome\Manager\SurveyRequestManager::SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST,
+            \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor::class,
+            \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor::SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST,
             \RKW\RkwOutcome\Service\RkwMailService::class,
             'sendMailSurveyRequestToUser'
         );
