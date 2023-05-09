@@ -37,8 +37,6 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
     use LogTrait;
 
     /**
-     * surveyRequestsRepository
-     *
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      * @inject
      */
