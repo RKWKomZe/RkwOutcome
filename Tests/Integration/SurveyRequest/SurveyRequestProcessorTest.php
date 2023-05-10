@@ -15,6 +15,7 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
  */
 
 use Carbon\Carbon;
+use Madj2k\FeRegister\Domain\Repository\FrontendUserRepository;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
 use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
@@ -22,13 +23,11 @@ use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
-use RKW\RkwRegistration\Domain\Repository\FrontendUserRepository;
 use RKW\RkwShop\Domain\Repository\OrderRepository;
 use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
 use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 /**
@@ -51,11 +50,11 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @var string[]
      */
     protected $testExtensionsToLoad = [
-        'typo3conf/ext/rkw_basics',
+        'typo3conf/ext/core_extended',
+        'typo3conf/ext/postmaster',
+        'typo3conf/ext/fe_register',
         'typo3conf/ext/rkw_events',
-        'typo3conf/ext/rkw_mailer',
         'typo3conf/ext/rkw_outcome',
-        'typo3conf/ext/rkw_registration',
         'typo3conf/ext/rkw_shop',
         'typo3conf/ext/rkw_survey',
         'typo3conf/ext/static_info_tables',
@@ -69,83 +68,81 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwRegistration\Domain\Repository\FrontendUserRepository
+     * @var \Madj2k\FeRegister\Domain\Repository\FrontendUserRepository|null
      */
-    private $frontendUserRepository;
+    private ?FrontendUserRepository $frontendUserRepository = null;
 
 
     /**
-     * @var \RKW\RkwEvents\Domain\Repository\EventReservationRepository
+     * @var \RKW\RkwEvents\Domain\Repository\EventReservationRepository|null
      */
-    private $eventReservationRepository;
+    private ?EventReservationRepository $eventReservationRepository = null;
 
 
     /**
-     * @var \RKW\RkwShop\Domain\Repository\OrderRepository
+     * @var \RKW\RkwShop\Domain\Repository\OrderRepository|null
      */
-    private $orderRepository;
+    private ?OrderRepository $orderRepository = null;
 
 
     /**
-     * @var \RKW\RkwEvents\Domain\Repository\EventRepository
+     * @var \RKW\RkwEvents\Domain\Repository\EventRepository|null
      */
-    private $eventRepository;
+    private ?EventRepository $eventRepository = null;
 
 
     /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository|null
      */
-    private $surveyRequestRepository;
+    private ?SurveyRequestRepository $surveyRequestRepository = null;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository|null
      */
-    private $surveyConfigurationRepository;
+    private ?SurveyConfigurationRepository $surveyConfigurationRepository = null;
 
 
     /**
      * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository|null
      */
-    private $surveyRepository;
+    private ?SurveyRepository $surveyRepository = null;
 
 
     /**
      * @var \RKW\RkwSurvey\Domain\Repository\TokenRepository|null
      */
-    private $tokenRepository;
+    private ?TokenRepository $tokenRepository = null;
 
 
     /**
-     * PersistenceManager
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
+     * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager|null
      */
-    protected $persistenceManager;
+    private ?PersistenceManager $persistenceManager = null;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Object\ObjectManager|null
      */
-    private $objectManager;
+    private ?ObjectManager $objectManager = null;
 
 
     /**
      * @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor|null
      */
-    private $fixture;
+    private ?SurveyRequestProcessor $fixture = null;
 
 
     /**
      * @var int
      */
-    protected $checkPeriod;
+    protected int $checkPeriod = 0;
 
 
     /**
      * @var int
      */
-    protected $maxSurveysPerPeriodAndFrontendUser;
+    protected int $maxSurveysPerPeriodAndFrontendUser = 0;
 
 
     /**
@@ -162,12 +159,12 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $this->setUpFrontendRootPage(
             1,
             [
-                'EXT:rkw_basics/Configuration/TypoScript/constants.typoscript',
-                'EXT:rkw_basics/Configuration/TypoScript/setup.typoscript',
+                'EXT:core_extended/Configuration/TypoScript/constants.typoscript',
+                'EXT:core_extended/Configuration/TypoScript/setup.typoscript',
+                'EXT:fe_register/Configuration/TypoScript/constants.typoscript',
+                'EXT:fe_register/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_outcome/Configuration/TypoScript/constants.typoscript',
                 'EXT:rkw_outcome/Configuration/TypoScript/setup.typoscript',
-                'EXT:rkw_registration/Configuration/TypoScript/constants.typoscript',
-                'EXT:rkw_registration/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_shop/Configuration/TypoScript/constants.typoscript',
                 'EXT:rkw_shop/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_survey/Configuration/TypoScript/constants.typoscript',
@@ -191,7 +188,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwEvents\Domain\Repository\EventReservationRepository $eventReservationRepository */
         $this->eventReservationRepository = $this->objectManager->get(EventReservationRepository::class);
 
-        /** @var \RKW\RkwRegistration\Domain\Repository\FrontendUserRepository $frontendUserRepository */
+        /** @var \Madj2k\FeRegister\Domain\Repository\FrontendUserRepository $frontendUserRepository */
         $this->frontendUserRepository = $this->objectManager->get(FrontendUserRepository::class);
 
         /** @var \RKW\RkwShop\Domain\Repository\OrderRepository $orderRepository */
@@ -219,15 +216,15 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $this->maxSurveysPerPeriodAndFrontendUser = 1;
     }
 
+    //==============================================================================
 
-    #==============================================================================
     /**
      *
      * @param string $model
      * @param int $modelUid
      *
      * @return void
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     * @throws \Exception
      */
     protected function setUpSurveyRequest(string $model, int $modelUid = 1): void
     {
@@ -235,6 +232,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
 
         $frontendUser = null;
+        $process = null;
 
         if ($model === \RKW\RkwShop\Domain\Model\Order::class) {
             $process = $this->orderRepository->findByUid($modelUid);
@@ -261,8 +259,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
-     * @throws IllegalObjectTypeException
+     * @throws \Exception
      */
     public function processPendingSurveyRequestMarksSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime(): void
     {
@@ -321,7 +318,8 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
+     * @todo very long-john-method-names :)
      */
     public function processPendingSurveyRequestDoesNotMarkSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime(): void
     {
@@ -375,8 +373,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
-     * @throws IllegalObjectTypeException
+     * @throws \Exception
      */
     public function processPendingSurveyRequestSetsProcessedSubjectToCorrectProduct(): void
     {
@@ -427,7 +424,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
      */
     public function processPendingSurveyRequestSetsSurveyRequestPropertyProcessSubjectToRandomProductAssociatedWithSurveyConfiguration(): void
     {
@@ -485,7 +482,8 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
+     * @todo maybe you forgot to add more words to the method name ;-)
      */
     public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationEvenIfASecondProductWithNotMatchingSurveyConfigurationExists(): void
     {
@@ -546,7 +544,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
      */
     public function processPendingSurveyRequestIgnoresAlreadyProcessedSurveyRequest(): void
     {
@@ -600,10 +598,10 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         self::assertGreaterThan(1, $surveyRequestProcessedDb2->getNotifiedTstamp());
     }
 
+
     /**
      * @test
-     *
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
      */
     public function processPendingSurveyRequestSetsProcessSubjectAndNotifiedTstampOnlyInSurveyRequestContainsTheSelectedProduct(): void
     {
@@ -658,10 +656,10 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         self::assertNotNull($notifiedSurveyRequestDb->getOrderSubject());
     }
 
+
     /**
      * @test
-     *
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
      */
     public function processPendingSurveyRequestsRespectsSeparateFrontendUsers(): void
     {
@@ -721,8 +719,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
     /**
      * @test
-     *
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
      */
     public function processPendingSurveyRequestsRespectsSurveyTimeSlotAndSurveyPerTimeSlotAndFrontendUser(): void
     {
@@ -799,8 +796,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
     /**
      * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
-     * @throws IllegalObjectTypeException
+     * @throws \Exception
      */
     public function generateTokensAddsTokenToAccessRestrictedSurvey(): void
     {
@@ -845,7 +841,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
     /**
      * @test
      *
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
      */
     public function processPendingSurveyRequestMarksProcessedSurveyRequestAsNotifiedIfSurveyRequestContainsAnEventAndEndTstampIsLessThanNowMinusSurveyWaitingTime(): void
     {
@@ -896,6 +892,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         self::assertSame($event, $surveyRequestDb->getEventReservationSubject());
     }
 
+    //==============================================================================
 
     /**
      * TearDown

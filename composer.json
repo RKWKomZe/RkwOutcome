@@ -32,6 +32,9 @@
 		"rkw/rkw-shop": "~9.5.0",
 		"rkw/rkw-survey": "~9.5.0"
 	},
+	"require-dev": {
+		"nesbot/carbon": "~2.66.0"
+	},
 	"autoload": {
 		"psr-4": {
 			"RKW\\RkwOutcome\\": "Classes/"

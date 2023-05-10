@@ -1,5 +1,4 @@
 <?php
-
 use RKW\RkwOutcome\Controller\SurveyRequestCommandController;
 
 defined('TYPO3_MODE') || die('Access denied.');
@@ -24,18 +23,12 @@ call_user_func(
             )
         );
 
+
         //=================================================================
         // Register CommandController
         //=================================================================
         $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['extbase']['commandControllers'][] = SurveyRequestCommandController::class;
 
-        //=================================================================
-        // Register TCA evaluation to be available in 'eval' of TCA
-        //=================================================================
-
-        //=================================================================
-        // Register Hooks
-        //=================================================================
 
         //=================================================================
         // Register SignalSlots
@@ -44,7 +37,6 @@ call_user_func(
          * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher
          */
         $signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class);
-
         $signalSlotDispatcher->connect(
             \RKW\RkwShop\Orders\OrderManager::class,
             \RKW\RkwShop\Orders\OrderManager::SIGNAL_AFTER_ORDER_CREATED_USER,

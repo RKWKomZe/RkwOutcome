@@ -6,17 +6,11 @@ call_user_func(
     {
 
         //=================================================================
-        // Register BackendModule
-        //=================================================================
-
-        //=================================================================
         // Add tables
         //=================================================================
         \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::allowTableOnStandardPages(
             'tx_rkwoutcome_domain_model_surveyconfiguration'
         );
-
-
     },
     $_EXTKEY
 );
