@@ -28,9 +28,11 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
 
-    /*
-    * initializeObject
-    */
+    /**
+     * initializeObject
+     *
+     * @return void
+     */
     public function initializeObject(): void
     {
         $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
@@ -56,7 +58,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $query = $this->createQuery();
 
         $constraints = [];
-
         $constraints[] =
             $query->logicalAnd(
                 $query->equals('notifiedTstamp', 0),
@@ -75,6 +76,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         ;
 
         // NOW: construct final query!
+        /** @todo constraints kann - rein logisch - nie leer sein. Auf Variable ganz verzichten? */
         if ($constraints) {
             $query->matching($query->logicalAnd($constraints));
         }
@@ -100,15 +102,11 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $surveyRequests = $this->findPendingSurveyRequests($surveyWaitingTime, $currentTime);
 
         $surveyRequestsGroupedByFrontendUser = [];
-
         foreach ($surveyRequests as $surveyRequest) {
-
             $surveyRequestsGroupedByFrontendUser[$surveyRequest->getFrontendUser()->getUid()][] = $surveyRequest;
-
         }
 
         return $surveyRequestsGroupedByFrontendUser;
-
     }
 
 
@@ -132,7 +130,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $query = $this->createQuery();
 
         $constraints = [];
-
         $constraints[] =
             $query->logicalAnd(
                 $query->greaterThan('notifiedTstamp', $currentTime - $period),
@@ -141,13 +138,14 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         ;
 
         // NOW: construct final query!
+        /** @todo constraints kann - rein logisch - nie leer sein. Auf Variable ganz verzichten? */
         if ($constraints) {
             $query->matching($query->logicalAnd($constraints));
         }
 
         return $query->execute();
-
     }
+
 
     /**
      * Finds all notified survey requests
@@ -163,7 +161,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $query = $this->createQuery();
 
         $constraints = [];
-
         $constraints[] =
             $query->logicalAnd(
                 $query->greaterThan('notifiedTstamp', 0),
@@ -172,6 +169,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         ;
 
         // NOW: construct final query!
+        /** @todo constraints kann - rein logisch - nie leer sein. Auf Variable ganz verzichten? */
         if ($constraints) {
             $query->matching($query->logicalAnd($constraints));
         }

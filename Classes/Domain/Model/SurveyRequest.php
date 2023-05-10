@@ -13,15 +13,13 @@ namespace RKW\RkwOutcome\Domain\Model;
  *
  * The TYPO3 project - inspiring people to share!
  */
-
+use Madj2k\FeRegister\Domain\Model\FrontendUser;
 use RKW\RkwEvents\Domain\Model\Event;
 use RKW\RkwEvents\Domain\Model\EventReservation;
-use RKW\RkwRegistration\Domain\Model\FrontendUser;
 use RKW\RkwShop\Domain\Model\Order;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
-
 
 /**
  * Class SurveyRequest
@@ -34,63 +32,64 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 {
     /**
-     * @var \RKW\RkwRegistration\Domain\Model\FrontendUser|null
+     * @var \Madj2k\FeRegister\Domain\Model\FrontendUser|null
      */
-    protected $frontendUser = null;
+    protected ?\Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser = null;
 
 
     /**
      * @var \RKW\RkwShop\Domain\Model\Order|null
      */
-    protected $order = null;
+    protected ?Order $order = null;
 
 
     /**
      * @var \RKW\RkwEvents\Domain\Model\EventReservation|null
      */
-    protected $eventReservation = null;
+    protected ?EventReservation $eventReservation = null;
 
 
     /**
      * @var string
      */
-     protected $processType = '';
+     protected string $processType = '';
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>|null
      */
-    protected $targetGroup = null;
+    protected ?ObjectStorage $targetGroup = null;
 
 
     /**
      * @var int
      */
-    protected $notifiedTstamp = 0;
+    protected int $notifiedTstamp = 0;
 
 
     /**
      * @var \RKW\RkwShop\Domain\Model\Product|null
      */
-    protected $orderSubject = null;
+    protected ?Product $orderSubject = null;
 
 
     /**
      * @var \RKW\RkwEvents\Domain\Model\Event|null
+     * @todo etwas irritierend, dass du $eventRESERVATIONSubject für Event benutzt
      */
-    protected $eventReservationSubject = null;
+    protected ?Event $eventReservationSubject = null;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
-    protected $surveyConfiguration = null;
+    protected ?SurveyConfiguration $surveyConfiguration = null;
 
 
     /**
      * @var bool
      */
-    protected $deleted = false;
+    protected bool $deleted = false;
 
 
     /**
@@ -147,7 +146,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @return \RKW\RkwShop\Domain\Model\Order
      */
-    public function getOrder():? Order
+    public function getOrder(): ?Order
     {
         return $this->order;
     }
@@ -168,7 +167,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * @return \RKW\RkwEvents\Domain\Model\EventReservation
      */
-    public function getEventReservation(): ? EventReservation
+    public function getEventReservation(): ?EventReservation
     {
         return $this->eventReservation;
     }
@@ -209,7 +208,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the frontendUser
      *
-     * @return \RKW\RkwRegistration\Domain\Model\FrontendUser
+     * @return \Madj2k\FeRegister\Domain\Model\FrontendUser
      */
     public function getFrontendUser():? FrontendUser
     {
@@ -220,7 +219,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Sets the frontendUser
      *
-     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
+     * @param \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser
      * @return void
      */
     public function setFrontendUser(FrontendUser $frontendUser): void

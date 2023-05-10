@@ -14,9 +14,8 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwBasics\Helper\QueryTypo3;
+use Madj2k\CoreExtended\Utility\QueryUtility;
 use RKW\RkwEvents\Domain\Model\Event;
-use RKW\RkwOutcome\Domain\Model\SurveyConfiguration;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -33,9 +32,9 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
 
-    /*
-    * @return void
-    */
+    /**
+     * @return void
+     */
     public function initializeObject(): void
     {
         $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
@@ -48,9 +47,8 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
      *
      * @param \RKW\RkwShop\Domain\Model\Product $product
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
-     *
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws \TYPO3\CMS\Core\Context\Exception\AspectNotFoundException
      * implicitly tested
      */
     public function findByProductAndTargetGroup(Product $product, ObjectStorage $targetGroups): ?QueryResultInterface
@@ -68,6 +66,7 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
         if (count($targetGroupsList)) {
 
             // 2. set leftJoin over categories
+            /** @todo Das geht theoretisch auch mit Bordmitteln: https://docs.typo3.org/m/typo3/reference-coreapi/8.7/en-us/ApiOverview/Database/QueryBuilder/Index.html#join-innerjoin-rightjoin-and-leftjoin */
             $leftJoin = '
                 LEFT JOIN sys_category_record_mm AS sys_category_record_mm
                     ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign
@@ -85,6 +84,7 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             ];
 
             // 5. Final statement
+            /** @todo Wenn der leftJoin mit Bordmitteln gemacht ist, kann man das hier auch umbauen **/
             $finalStatement = '
                 SELECT tx_rkwoutcome_domain_model_surveyconfiguration.*
                 FROM tx_rkwoutcome_domain_model_surveyconfiguration
@@ -92,9 +92,8 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                 WHERE
                     sys_category.uid IN(' . implode(',', $targetGroupsList) . ')
                     AND ' . implode(' AND ', $constraints) .
-                QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
-                QueryTypo3::getWhereClauseForDeleteFields('tx_rkwoutcome_domain_model_surveyconfiguration')
-                ;
+                QueryUtility::getWhereClauseEnabled('tx_rkwoutcome_domain_model_surveyconfiguration') .
+                QueryUtility::getWhereClauseDeleted('tx_rkwoutcome_domain_model_surveyconfiguration');
 
             // build final query
             $query = $this->createQuery();
@@ -115,9 +114,8 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
      *
      * @param \RKW\RkwEvents\Domain\Model\Event $event
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
-     *
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws \TYPO3\CMS\Core\Context\Exception\AspectNotFoundException
      * implicitly tested
      */
     public function findByEventAndTargetGroup(Event $event, ObjectStorage $targetGroups): ?QueryResultInterface
@@ -135,6 +133,7 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
         if (count($targetGroupsList)) {
 
             // 2. set leftJoin over categories
+            /** @todo Das geht theoretisch auch mit Bordmitteln: https://docs.typo3.org/m/typo3/reference-coreapi/8.7/en-us/ApiOverview/Database/QueryBuilder/Index.html#join-innerjoin-rightjoin-and-leftjoin */
             $leftJoin = '
                 LEFT JOIN sys_category_record_mm AS sys_category_record_mm
                     ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign
@@ -152,6 +151,7 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             ];
 
             // 5. Final statement
+            /** @todo Wenn der leftJoin mit Bordmitteln gemacht ist, kann man das hier auch umbauen **/
             $finalStatement = '
                 SELECT tx_rkwoutcome_domain_model_surveyconfiguration.*
                 FROM tx_rkwoutcome_domain_model_surveyconfiguration
@@ -159,9 +159,8 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                 WHERE
                     sys_category.uid IN(' . implode(',', $targetGroupsList) . ')
                     AND ' . implode(' AND ', $constraints) .
-                QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
-                QueryTypo3::getWhereClauseForDeleteFields('tx_rkwoutcome_domain_model_surveyconfiguration')
-            ;
+                QueryUtility::getWhereClauseEnabled('tx_rkwoutcome_domain_model_surveyconfiguration') .
+                QueryUtility::getWhereClauseDeleted('tx_rkwoutcome_domain_model_surveyconfiguration');
 
             // build final query
             $query = $this->createQuery();
@@ -170,7 +169,6 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             );
 
             return $query->execute();
-
         }
 
         return null;
