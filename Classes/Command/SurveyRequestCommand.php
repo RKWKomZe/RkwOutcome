@@ -31,9 +31,9 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
  *
  * Execute on CLI with: 'vendor/bin/typo3 rkw_outcome:request'
  *
- * @author Steffen Kroggel <developer@steffenkroggel.de>
- * @copyright Steffen Kroggel
- * @package Madj2k_Postmaster
+ * @author Christian Dilger <c.dilger@addorange.de>
+ * @copyright Rkw Kompetenzzentrum
+ * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
 class SurveyRequestCommand extends Command
