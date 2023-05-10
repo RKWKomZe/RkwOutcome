@@ -14,13 +14,12 @@ namespace RKW\RkwOutcome\Controller;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 
 /**
  * SurveyRequestController
  *
- * @author Maximilian Fäßler <maximilian@faesslerweb.de>
- * @author Steffen Kroggel <developer@steffenkroggel.de>
+ * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
@@ -30,33 +29,10 @@ class SurveyRequestController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
 
     /**
-     * surveyRequestRepository
-     *
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      * @inject
      */
-    protected $surveyRequestRepository;
-
-    /**
-     * @var \TYPO3\CMS\Extbase\Object\ObjectManager
-     * @inject
-     */
-    protected $objectManager;
-
-
-    /**
-     * initializeAction
-     *
-     * @throws \TYPO3\CMS\Extbase\Mvc\Exception\NoSuchArgumentException
-     * @throws \TYPO3\CMS\Extbase\Mvc\Exception\UnsupportedRequestTypeException
-     * @throws \TYPO3\CMS\Extbase\Mvc\Exception\StopActionException
-     */
-    public function initializeAction(): void
-    {
-
-        parent::initializeAction();
-
-    }
+    protected SurveyRequestRepository $surveyRequestRepository;
 
 
     /**
@@ -66,7 +42,6 @@ class SurveyRequestController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
      */
     public function showAction()
     {
-
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->surveyRequestRepository->findByUid(14);
         $this->view->assign('surveyRequest', $surveyRequest);

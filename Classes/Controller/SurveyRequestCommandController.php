@@ -30,6 +30,7 @@ use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
+ * @todo Das Ding muss für TYPO3 v9.5 komplett neu
  */
 class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\CommandController
 {

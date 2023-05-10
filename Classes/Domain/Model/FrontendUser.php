@@ -21,8 +21,9 @@ namespace RKW\RkwOutcome\Domain\Model;
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
+ * @todo FeRegister is formerly known as rkw_registration
  */
-class FrontendUser extends \RKW\RkwShop\Domain\Model\FrontendUser
+class FrontendUser extends \Madj2k\FeRegister\Domain\Model\FrontendUser
 {
 
 }
