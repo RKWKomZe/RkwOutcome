@@ -17,7 +17,6 @@ namespace RKW\RkwOutcome\Domain\Repository;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
  * SurveyRequestRepository
@@ -30,10 +29,12 @@ use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
 
-    /*
-    * initializeObject
-    */
-    public function initializeObject()
+    /**
+     * initializeObject
+     *
+     * @return void
+     */
+    public function initializeObject(): void
     {
         $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
         $this->defaultQuerySettings->setRespectStoragePage(false);
@@ -45,11 +46,11 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      *
      * @param int $tolerance
      * @param int $currentTime
-     * @return QueryResultInterface
-     * @throws InvalidQueryException
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * @comment implicitly tested
      */
-    public function findAllPendingSurveyRequests(int $tolerance = 0, int $currentTime = 0): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+    public function findAllPendingSurveyRequests(int $tolerance = 0, int $currentTime = 0): QueryResultInterface
     {
 
         if (! $currentTime) {
@@ -59,7 +60,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $query = $this->createQuery();
 
         $constraints = [];
-
         $constraints[] =
             $query->logicalOr(
                 $query->logicalAnd(
@@ -76,12 +76,12 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         ;
 
         // NOW: construct final query!
+        /** @todo constraints kann - rein logisch - nie leer sein. Auf Variable ganz verzichten? */
         if ($constraints) {
             $query->matching($query->logicalAnd($constraints));
         }
 
         return $query->execute();
-
     }
 
 
@@ -91,25 +91,21 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      * @param int $tolerance
      * @param int $currentTime
      * @return array
-     * @throws InvalidQueryException
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * @comment implicitly tested
      */
     public function findAllPendingSurveyRequestsGroupedByFrontendUser(int $tolerance, int $currentTime): array
     {
 
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequests = $this->findAllPendingSurveyRequests($tolerance, $currentTime);
 
         $surveyRequestsGroupedByFrontendUser = [];
-
         foreach ($surveyRequests as $surveyRequest) {
-
             $surveyRequestsGroupedByFrontendUser[$surveyRequest->getFrontendUser()->getUid()][] = $surveyRequest;
-
         }
 
         return $surveyRequestsGroupedByFrontendUser;
-
     }
 
 
@@ -119,12 +115,15 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      * @param int $frontendUserUid
      * @param int $period
      * @param int $currentTime
-     * @return QueryResultInterface
-     * @throws InvalidQueryException
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * @comment implicitly tested
      */
-    public function findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser(int $frontendUserUid, int $period, int $currentTime = 0): \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
-    {
+    public function findAllNotifiedSurveyRequestsWithinPeriodByFrontendUser(
+        int $frontendUserUid,
+        int $period,
+        int $currentTime = 0
+    ): QueryResultInterface {
 
         if (! $currentTime) {
             $currentTime = time();
@@ -133,7 +132,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $query = $this->createQuery();
 
         $constraints = [];
-
         $constraints[] =
             $query->logicalAnd(
                 $query->greaterThan('notifiedTstamp', $currentTime - $period),

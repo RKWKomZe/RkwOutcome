@@ -30,7 +30,7 @@ class SurveyRequestController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionCo
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
     protected SurveyRequestRepository $surveyRequestRepository;
 

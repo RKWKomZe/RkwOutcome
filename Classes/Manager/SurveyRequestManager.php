@@ -15,12 +15,14 @@ namespace RKW\RkwOutcome\Manager;
  */
 
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Service\LogTrait;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 use TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException;
+use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
@@ -36,12 +38,14 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
 
     use LogTrait;
 
+
     /**
      * Signal name for use in ext_localconf.php
      *
      * @const string
      */
     const SIGNAL_FOR_SENDING_MAIL_SURVEYREQUEST = 'sendMailSurveyRequestToUser';
+
 
     /**
      * Signal name for use in ext_localconf.php
@@ -50,23 +54,23 @@ class SurveyRequestManager implements \TYPO3\CMS\Core\SingletonInterface
      */
     const SIGNAL_AFTER_ORDER_CREATED_USER = 'afterOrderCreatedUser';
 
+
     /**
-     * Signal Slot Dispatcher
-     *
      * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $signalSlotDispatcher;
+    protected Dispatcher $signalSlotDispatcher;
+
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $surveyRequestRepository;
+    protected SurveyRequestRepository $surveyRequestRepository;
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
     protected $surveyConfigurationRepository;
 
