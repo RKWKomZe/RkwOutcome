@@ -72,10 +72,22 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
 
             $constraints = [
-                $queryBuilder->expr()->eq('sc_mm.tablenames', $queryBuilder->createNamedParameter('tx_rkwoutcome_domain_model_surveyconfiguration', \PDO::PARAM_STR)),
-                $queryBuilder->expr()->eq('sc_mm.fieldname', $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)),
-                $queryBuilder->expr()->eq($tableName . '.product', $queryBuilder->createNamedParameter($product->getUid(), \PDO::PARAM_INT)),
-                $queryBuilder->expr()->in('sc_mm.uid_local', $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)),
+                $queryBuilder->expr()->eq(
+                    'sc_mm.tablenames',
+                    $queryBuilder->createNamedParameter('tx_rkwoutcome_domain_model_surveyconfiguration', \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    'sc_mm.fieldname',
+                    $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.product',
+                    $queryBuilder->createNamedParameter($product->getUid(), \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->in(
+                    'sc_mm.uid_local',
+                    $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)
+                ),
             ];
 
             $statement = $queryBuilder
@@ -85,7 +97,10 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                     $tableName,
                     'sys_category_record_mm',
                     'sc_mm',
-                    $queryBuilder->expr()->eq('sc_mm.uid_foreign', $queryBuilder->quoteIdentifier($tableName . '.uid'))
+                    $queryBuilder->expr()->eq(
+                        'sc_mm.uid_foreign',
+                        $queryBuilder->quoteIdentifier($tableName . '.uid')
+                    )
                 )
                 ->where(...$constraints);
 
@@ -132,10 +147,21 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
 
             $constraints = [
-                $queryBuilder->expr()->eq('sc_mm.tablenames', $queryBuilder->createNamedParameter('tx_rkwoutcome_domain_model_surveyconfiguration', \PDO::PARAM_STR)),
-                $queryBuilder->expr()->eq('sc_mm.fieldname', $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)),
-                $queryBuilder->expr()->eq($tableName . '.event', $queryBuilder->createNamedParameter($event->getUid(), \PDO::PARAM_INT)),
-                $queryBuilder->expr()->in('sc_mm.uid_local', $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)),
+                $queryBuilder->expr()->eq(
+                    'sc_mm.tablenames',
+                    $queryBuilder->createNamedParameter('tx_rkwoutcome_domain_model_surveyconfiguration', \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    'sc_mm.fieldname',
+                    $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.event',
+                    $queryBuilder->createNamedParameter($event->getUid(), \PDO::PARAM_INT)
+                ),
+                $queryBuilder->expr()->in('sc_mm.uid_local',
+                    $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)
+                ),
             ];
 
             $statement = $queryBuilder
@@ -145,7 +171,10 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                     $tableName,
                     'sys_category_record_mm',
                     'sc_mm',
-                    $queryBuilder->expr()->eq('sc_mm.uid_foreign', $queryBuilder->quoteIdentifier($tableName . '.uid'))
+                    $queryBuilder->expr()->eq(
+                        'sc_mm.uid_foreign',
+                        $queryBuilder->quoteIdentifier($tableName . '.uid')
+                    )
                 )
                 ->where(...$constraints);
 

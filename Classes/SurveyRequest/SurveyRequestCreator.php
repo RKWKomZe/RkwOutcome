@@ -114,9 +114,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 return $surveyRequest;
 
             }
-        } catch (Exception $e) {
-        } catch (IllegalObjectTypeException $e) {
-        } catch (InvalidQueryException $e) {
+        } catch (\Exception $e) {
         }
 
         $this->logInfo(
@@ -137,9 +135,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
      */
     protected function isSurveyable(AbstractEntity $process): bool
     {
-        $notifiables = $this->getNotifiableObjects($process);
-
-        return count($notifiables) > 0;
+        return count($this->getNotifiableObjects($process)) > 0;
     }
 
 

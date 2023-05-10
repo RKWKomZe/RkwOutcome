@@ -29,7 +29,9 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
 
     /*
-    * initializeObject
+     * initializeObject
+     *
+     * @return void
     */
     public function initializeObject(): void
     {
@@ -55,8 +57,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
         $query = $this->createQuery();
 
-        $constraints = [];
-
         $constraints[] =
             $query->logicalAnd(
                 $query->equals('notifiedTstamp', 0),
@@ -74,13 +74,9 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
             )
         ;
 
-        // NOW: construct final query!
-        if ($constraints) {
-            $query->matching($query->logicalAnd($constraints));
-        }
+        $query->matching($query->logicalAnd($constraints));
 
         return $query->execute();
-
     }
 
 
@@ -100,15 +96,11 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $surveyRequests = $this->findPendingSurveyRequests($surveyWaitingTime, $currentTime);
 
         $surveyRequestsGroupedByFrontendUser = [];
-
         foreach ($surveyRequests as $surveyRequest) {
-
             $surveyRequestsGroupedByFrontendUser[$surveyRequest->getFrontendUser()->getUid()][] = $surveyRequest;
-
         }
 
         return $surveyRequestsGroupedByFrontendUser;
-
     }
 
 
@@ -131,8 +123,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
         $query = $this->createQuery();
 
-        $constraints = [];
-
         $constraints[] =
             $query->logicalAnd(
                 $query->greaterThan('notifiedTstamp', $currentTime - $period),
@@ -140,13 +130,9 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
             )
         ;
 
-        // NOW: construct final query!
-        if ($constraints) {
-            $query->matching($query->logicalAnd($constraints));
-        }
+        $query->matching($query->logicalAnd($constraints));
 
         return $query->execute();
-
     }
 
     /**
@@ -162,8 +148,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
     {
         $query = $this->createQuery();
 
-        $constraints = [];
-
         $constraints[] =
             $query->logicalAnd(
                 $query->greaterThan('notifiedTstamp', 0),
@@ -171,10 +155,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
             )
         ;
 
-        // NOW: construct final query!
-        if ($constraints) {
-            $query->matching($query->logicalAnd($constraints));
-        }
+        $query->matching($query->logicalAnd($constraints));
 
         return $query->execute();
     }

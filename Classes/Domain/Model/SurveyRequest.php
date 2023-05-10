@@ -22,7 +22,6 @@ use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
-
 /**
  * Class SurveyRequest
  *
@@ -77,6 +76,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
     /**
      * @var \RKW\RkwEvents\Domain\Model\Event|null
+     * @todo SK: etwas irritierend, dass du $eventRESERVATIONSubject für Event benutzt
      */
     protected $eventReservationSubject = null;
 
@@ -147,7 +147,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @return \RKW\RkwShop\Domain\Model\Order
      */
-    public function getOrder():? Order
+    public function getOrder(): ?Order
     {
         return $this->order;
     }
@@ -168,7 +168,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * @return \RKW\RkwEvents\Domain\Model\EventReservation
      */
-    public function getEventReservation(): ? EventReservation
+    public function getEventReservation(): ?EventReservation
     {
         return $this->eventReservation;
     }
@@ -211,7 +211,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      *
      * @return \RKW\RkwRegistration\Domain\Model\FrontendUser
      */
-    public function getFrontendUser():? FrontendUser
+    public function getFrontendUser(): ?FrontendUser
     {
         return $this->frontendUser;
     }

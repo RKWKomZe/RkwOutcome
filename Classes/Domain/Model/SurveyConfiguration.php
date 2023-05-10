@@ -15,8 +15,8 @@ namespace RKW\RkwOutcome\Domain\Model;
  */
 
 use RKW\RkwShop\Domain\Model\Product;
+use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
-
 
 /**
  * Class SurveyConfiguration
@@ -142,6 +142,30 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     public function setTargetGroup(ObjectStorage $targetGroup): void
     {
         $this->targetGroup = $targetGroup;
+    }
+
+
+    /**
+     * Adds a targetGroup
+     *
+     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroup
+     * @return void
+     */
+    public function addTargetGroup(Category $targetGroup): void
+    {
+        $this->targetGroup->attach($targetGroup);
+    }
+
+
+    /**
+     * Removes a targetGroup
+     *
+     * @param \TYPO3\CMS\Extbase\Domain\Model\Category $targetGroupToRemove
+     * @return void
+     */
+    public function removeTargetGroup(Category $targetGroupToRemove): void
+    {
+        $this->targetGroup->detach($targetGroupToRemove);
     }
 
 

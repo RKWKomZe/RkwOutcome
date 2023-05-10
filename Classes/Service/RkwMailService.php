@@ -17,6 +17,7 @@ namespace RKW\RkwOutcome\Service;
 use RKW\RkwBasics\Utility\GeneralUtility;
 use RKW\RkwMailer\Service\MailService;
 use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
+use RKW\RkwOutcome\Log\LogTrait;
 use RKW\RkwOutcome\Utility\SurveyRequestUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
@@ -52,8 +53,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
         \RKW\RkwRegistration\Domain\Model\FrontendUser $recipient,
         \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest,
         array $generatedTokens
-    ): void
-    {
+    ): void {
+
         $this->logInfo(
             sprintf(
                 'Mailer: Sending survey request %s to frontend user with %s.',

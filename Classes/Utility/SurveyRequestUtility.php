@@ -15,6 +15,7 @@ namespace RKW\RkwOutcome\Utility;
  */
 
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use RKW\RkwSurvey\Domain\Model\Survey;
 
 /**
  * Class SurveyRequestProcessor
@@ -35,7 +36,10 @@ class SurveyRequestUtility
         $surveyRequest->getTargetGroup()->rewind();
         $targetGroupUid = $surveyRequest->getTargetGroup()->current()->getUid();
 
-        $processSubject = ($surveyRequest->getProcessType() === 'RKW\RkwShop\Domain\Model\Order') ? $surveyRequest->getOrderSubject() : $surveyRequest->getEventReservationSubject();
+        $processSubject = ($surveyRequest->getProcessType() === 'RKW\RkwShop\Domain\Model\Order') ?
+            $surveyRequest->getOrderSubject() :
+            $surveyRequest->getEventReservationSubject();
+
         $processSubject = explode(':', $processSubject);
         $processSubject[0] = explode('\\', $processSubject[0]);
         $processSubjectType = array_pop($processSubject[0]);
