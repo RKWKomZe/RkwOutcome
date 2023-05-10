@@ -14,13 +14,13 @@ namespace RKW\RkwOutcome\SurveyRequest;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Madj2k\FeRegister\Domain\Model\FrontendUser;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Exception;
-use RKW\RkwRegistration\Domain\Model\FrontendUser;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
+use TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException;
 
 /**
  * Class SurveyRequestCreator
@@ -36,7 +36,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
     /**
      * Intermediate function for creating surveyRequests - used by SignalSlot
      *
-     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
+     * @param \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser
      * @param \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\EventReservation $process
      * @return void
      * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
@@ -78,13 +78,13 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
 
                 if ($process instanceof \Rkw\RkwShop\Domain\Model\Order) {
-                    /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
+                    /** @var \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser */
                     $frontendUser = $process->getFrontendUser();
                     $surveyRequest->setOrder($process);
                 }
 
                 if ($process instanceof \Rkw\RkwEvents\Domain\Model\EventReservation) {
-                    /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
+                    /** @var \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser */
                     $frontendUser = $process->getFeUser();
                     $surveyRequest->setEventReservation($process);
                 }
@@ -114,6 +114,8 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 return $surveyRequest;
 
             }
+
+        /** brauchen wir das so differenziert oder genügt \Exception (mit Backslash) */
         } catch (Exception $e) {
         } catch (IllegalObjectTypeException $e) {
         } catch (InvalidQueryException $e) {
@@ -134,11 +136,11 @@ class SurveyRequestCreator extends AbstractSurveyRequest
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
      * @return bool
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws \TYPO3\CMS\Core\Context\Exception\AspectNotFoundException
      */
     protected function isSurveyable(AbstractEntity $process): bool
     {
         $notifiables = $this->getNotifiableObjects($process);
-
         return count($notifiables) > 0;
     }
 

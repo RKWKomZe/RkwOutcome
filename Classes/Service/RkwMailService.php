@@ -14,9 +14,9 @@ namespace RKW\RkwOutcome\Service;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwBasics\Utility\GeneralUtility;
-use RKW\RkwMailer\Service\MailService;
-use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
+use Madj2k\CoreExtended\Utility\GeneralUtility;
+use Madj2k\Postmaster\Mail\MailMessage;
+use Madj2k\Postmaster\Utility\FrontendLocalizationUtility;
 use RKW\RkwOutcome\Utility\SurveyRequestUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 
@@ -37,23 +37,23 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
     /**
      * Send mail to frontend user to submit survey request
      *
-     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $recipient
+     * @param \Madj2k\FeRegister\Domain\Model\FrontendUser $recipient
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
      * @param array $generatedTokens
      * @return void
      * @throws \Exception
-     * @throws \RKW\RkwMailer\Exception
+     * @throws \Madj2k\Postmaster\Exception
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      * @throws \TYPO3Fluid\Fluid\View\Exception\InvalidTemplateResourceException
      * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
      */
     public function sendMailSurveyRequestToUser(
-        \RKW\RkwRegistration\Domain\Model\FrontendUser $recipient,
+        \Madj2k\FeRegister\Domain\Model\FrontendUser $recipient,
         \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest,
         array $generatedTokens
-    ): void
-    {
+    ): void {
+
         $this->logInfo(
             sprintf(
                 'Mailer: Sending survey request %s to frontend user with %s.',
@@ -83,8 +83,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                 )
             );
 
-            /** @var \RKW\RkwMailer\Service\MailService $mailService */
-            $mailService = GeneralUtility::makeInstance(MailService::class);
+            /** @var \Madj2k\Postmaster\Mail\MailMessage $mailService */
+            $mailService = GeneralUtility::makeInstance(MailMessage::class);
 
             if ($recipient->getEmail()) {
 
@@ -103,7 +103,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                         'rkwMailService.subject.userSurveyRequestNotification',
                         'rkw_outcome',
                         null,
-                        $recipient->getTxRkwregistrationLanguageKey()
+                        $recipient->getTxFeregisterLanguageKey()
                     )
                 );
 

@@ -15,8 +15,13 @@ namespace RKW\RkwOutcome\SurveyRequest;
  */
 
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
+use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Service\LogTrait;
+use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 
 /**
  * Class AbstractSurveyRequest
@@ -28,50 +33,60 @@ use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
  */
 abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterface
 {
+
     use LogTrait;
+
 
     /**
      * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $signalSlotDispatcher;
+    protected Dispatcher $signalSlotDispatcher;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $surveyRequestRepository;
+    protected SurveyRequestRepository $surveyRequestRepository;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $persistenceManager;
+    protected PersistenceManager $persistenceManager;
 
 
     /**
      * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $surveyRepository;
+    protected SurveyRepository $surveyRepository;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $surveyConfigurationRepository;
+    protected SurveyConfigurationRepository $surveyConfigurationRepository;
 
 
     /**
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
      * @return array
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws \TYPO3\CMS\Core\Context\Exception\AspectNotFoundException
      */
     protected function getNotifiableObjects(AbstractEntity $process): array
     {
+
+        /** @todo Die code-inspection weist darauf hin, dass getTargetGroup nicht als Methode existiert, vermutlich weil
+         * ich bei mir die Änderungen an der rkw_shop und rkw_events nicht habe.
+         * Vielleicht braucht man dann doch eine Kapsel-Klasse, die die TargetGroup enthält und
+         * den Klassennamen und die uid der Referenzklasse. Bin dafür aber nicht tief genug in der Logik drin, sodass
+         * ich auch nicht sagen kann, wie die TargetGroup dann zu setzen wäre.
+         */
         $this->logInfo(
             sprintf(
                 'Looking for configurations matching process with uid %s and targetGroup %s',
@@ -81,7 +96,6 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
         );
 
         $notifiableObjects = [];
-
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
 
             /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
@@ -94,8 +108,13 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
                     )
                 );
 
+                /** @todo Die code-inspection weist darauf hin, dass getTargetGroup nicht als Methode existiert */
                 /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
-                $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup());
+                $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup(
+                    $orderItem->getProduct(),
+                    $process->getTargetGroup()
+                );
+
                 if (
                     $surveyConfigurations
                     && count($surveyConfigurations->toArray()) > 0
@@ -111,8 +130,13 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
             $event = $process->getEvent();
 
+            /** @todo Die code-inspection weist darauf hin, dass getTargetGroup nicht als Methode existiert */
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
-            $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($event, $process->getTargetGroup());
+            $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup(
+                $event,
+                $process->getTargetGroup()
+            );
+
             if (
                 $surveyConfigurations
                 && count($surveyConfigurations->toArray()) > 0

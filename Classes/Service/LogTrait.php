@@ -14,6 +14,7 @@ namespace RKW\RkwOutcome\Service;
  * The TYPO3 project - inspiring people to share!
  */
 
+use TYPO3\CMS\Core\Log\Logger;
 use TYPO3\CMS\Core\Log\LogLevel;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -25,16 +26,22 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @copyright Rkw Kompetenzzentrum
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
+ * @todo Die Klasse gehört m.E. nicht nach Service. ggf. eigener Ordner "Log" oder so
  */
 trait LogTrait
 {
 
     /**
-     * @var \TYPO3\CMS\Core\Log\Logger
+     * @var \TYPO3\CMS\Core\Log\Logger|null
      */
-    protected $logger;
+    protected ?Logger $logger = null;
 
 
+    /**
+     * Init
+     *
+     * @return void
+     */
     private function initializeTrait(): void
     {
         /** @var \TYPO3\CMS\Core\Log\Logger $logger */
@@ -46,7 +53,7 @@ trait LogTrait
      * @param string $message
      * @return void
      */
-    public function logError(string $message):void
+    public function logError(string $message): void
     {
         $this->initializeTrait();
         $this->logger->log(
@@ -60,7 +67,7 @@ trait LogTrait
      * @param string $message
      * @return void
      */
-    public function logDebug(string $message):void
+    public function logDebug(string $message): void
     {
         $this->initializeTrait();
         $this->logger->log(
@@ -74,7 +81,7 @@ trait LogTrait
      * @param string $message
      * @return void
      */
-    public function logWarning(string $message):void
+    public function logWarning(string $message): void
     {
         $this->initializeTrait();
         $this->logger->log(
@@ -88,7 +95,7 @@ trait LogTrait
      * @param string $message
      * @return void
      */
-    public function logInfo(string $message):void
+    public function logInfo(string $message): void
     {
         $this->initializeTrait();
         $this->logger->log(

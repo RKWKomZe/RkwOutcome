@@ -40,10 +40,8 @@ class TcaProcFunc
             $params['table'] === 'tx_rkwoutcome_domain_model_surveyconfiguration'
             && $params['row']['uid']
         ) {
-            $categoryUidList = [];
 
             // FIRST: Get all sys_category entries
-
             $tableName = 'sys_category';
             $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
             $result = $queryBuilder
@@ -53,12 +51,24 @@ class TcaProcFunc
                     $tableName,
                     'sys_category_record_mm',
                     'sc_mm',
-                    $queryBuilder->expr()->eq('sc_mm.uid_local', $queryBuilder->quoteIdentifier($tableName . '.uid'))
+                    $queryBuilder->expr()->eq(
+                        'sc_mm.uid_local',
+                        $queryBuilder->quoteIdentifier($tableName . '.uid')
+                    )
                 )
                 ->where(
-                    $queryBuilder->expr()->eq('sc_mm.uid_foreign', $queryBuilder->createNamedParameter($params['row']['uid'], \PDO::PARAM_INT)),
-                    $queryBuilder->expr()->eq('sc_mm.tablenames', $queryBuilder->createNamedParameter($params['table'], \PDO::PARAM_STR)),
-                    $queryBuilder->expr()->eq('sc_mm.fieldname', $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR))
+                    $queryBuilder->expr()->eq(
+                        'sc_mm.uid_foreign',
+                        $queryBuilder->createNamedParameter($params['row']['uid'], \PDO::PARAM_INT)
+                    ),
+                    $queryBuilder->expr()->eq(
+                        'sc_mm.tablenames',
+                        $queryBuilder->createNamedParameter($params['table'], \PDO::PARAM_STR)
+                    ),
+                    $queryBuilder->expr()->eq(
+                        'sc_mm.fieldname',
+                        $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)
+                    )
                 )
                 ->execute();
 

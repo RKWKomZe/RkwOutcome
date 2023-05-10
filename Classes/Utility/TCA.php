@@ -18,8 +18,6 @@ use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwShop\Domain\Model\Order;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * TCA
@@ -32,14 +30,16 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
 class TCA
 {
 
-    public function surveyConfigurationTitle(&$parameters): void
+    /**
+     * @param array $parameters
+     * @return void
+     */
+    public function surveyConfigurationTitle(array &$parameters): void
     {
-
         $record = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid']);
-        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
         //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
+        /** @todo: problem ist hier meist, dass die TypoScript-Definition nicht in der Rootpage eingebunden ist. Einige Extensions haben wir da gerne mal vergessen! */
         if ($record['process_type'] === '\\' . Product::class) {
 //            $productRepository = $objectManager->get(ProductRepository::class);
 //            /** @var \RKW\RkwShop\Domain\Model\Product $product */
@@ -66,15 +66,17 @@ class TCA
     }
 
 
-    public function surveyRequestTitle(&$parameters): void
+    /**
+     * @param array $parameters
+     * @return void
+     */
+    public function surveyRequestTitle(array &$parameters): void
     {
 
         $record = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid']);
 
-        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-
         //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
+        /** @todo: problem ist hier meist, dass die TypoScript-Definition nicht in der Rootpage eingebunden ist. Einige Extensions haben wir da gerne mal vergessen! */
         if ($record['process_type'] ===  Order::class) {
             $newTitle = '[Bestellung] ' . $record['order'];
         }

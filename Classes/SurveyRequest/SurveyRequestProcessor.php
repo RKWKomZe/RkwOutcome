@@ -18,9 +18,12 @@ use RKW\RkwOutcome\Domain\Model\SurveyConfiguration;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwSurvey\Domain\Model\Survey;
 use RKW\RkwSurvey\Domain\Model\Token;
+use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
+use TYPO3\CMS\Extbase\SignalSlot\Exception\InvalidSlotException;
+use TYPO3\CMS\Extbase\SignalSlot\Exception\InvalidSlotReturnException;
 
 /**
  * Class SurveyRequestProcessor
@@ -43,9 +46,9 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
     /**
      * @var \RKW\RkwSurvey\Domain\Repository\TokenRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $tokenRepository;
+    protected TokenRepository $tokenRepository;
 
 
     /**
@@ -66,7 +69,8 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
              $currentTime = time();
          }
 
-         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository->findPendingSurveyRequestsGroupedByFrontendUser($surveyWaitingTime, $currentTime) ;
+         $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository
+             ->findPendingSurveyRequestsGroupedByFrontendUser($surveyWaitingTime, $currentTime);
 
          $this->logInfo(
              sprintf(
@@ -90,7 +94,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
                      if ($this->containsProcessableSubject($surveyRequest, $processableSubject)) {
 
                          $surveyConfigurations = $this->getSurveyConfigurations($surveyRequest, $processableSubject);
-
                          if (
                              $surveyConfigurations
                              && (count($surveyConfigurations->toArray()) > 0)
@@ -107,27 +110,22 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
                              try {
                                  $this->sendNotification($surveyRequest, $generatedTokens);
+
+                                 /** brauchen wir das so differenziert oder genügt \Exception (mit Backslash) */
                              } catch (InvalidSlotException $e) {
                              } catch (InvalidSlotReturnException $e) {
                              }
-
                          }
 
                      } else {
-
                          $surveyRequest->setDeleted(true);
-
                      }
 
                      $this->surveyRequestRepository->update($surveyRequest);
                      $this->persistenceManager->persistAll();
-
                      $notifiableSurveyRequests[] = $surveyRequest;
-
                  }
-
              }
-
          }
 
          $this->logInfo(
@@ -178,7 +176,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
             );
 
             return true;
-
         }
 
         return false;
@@ -189,7 +186,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
      * @param int $currentTime
      * @return void
-     *
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      */
@@ -217,11 +213,11 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
      * @param array $surveyRequestsByUser
      * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws \TYPO3\CMS\Core\Context\Exception\AspectNotFoundException
      */
     protected function getProcessable(array $surveyRequestsByUser): ?AbstractEntity
     {
         $notifiableObjects = [];
-
         foreach ($surveyRequestsByUser as $surveyRequest) {
 
             if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
@@ -231,7 +227,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
             if ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
                 $notifiableObjects[$surveyRequest->getUid()] = [$surveyRequest->getEventReservation()->getEvent()];
             }
-
         }
 
         $mergedNotifiableObjects = array_merge(...$notifiableObjects);
@@ -240,17 +235,17 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
         return (empty($mergedNotifiableObjects)) ? null : $mergedNotifiableObjects[$randomKey];
     }
 
+
     /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $processableSubject
      * @return bool
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws \TYPO3\CMS\Core\Context\Exception\AspectNotFoundException
      */
     protected function containsProcessableSubject(SurveyRequest $surveyRequest, AbstractEntity $processableSubject): bool
     {
         $containsProcessableSubject = false;
-        $process = null;
-
         if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
             $process = $surveyRequest->getOrder();
         } else {
@@ -270,6 +265,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
         return $containsProcessableSubject;
     }
 
+
     /**
      * @param int $frontendUserUid
      * @param int $checkPeriod
@@ -278,10 +274,16 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
      * @return bool
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-    protected function isNotificationLimitReached(int $frontendUserUid, int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $currentTime): bool
-    {
+    protected function isNotificationLimitReached(
+        int $frontendUserUid,
+        int $checkPeriod,
+        int $maxSurveysPerPeriodAndFrontendUser,
+        int $currentTime
+    ): bool {
+
         /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $alreadyNotifiedRequests = $this->surveyRequestRepository->findNotifiedSurveyRequestsWithinPeriodByFrontendUser($frontendUserUid, $checkPeriod, $currentTime);
+        $alreadyNotifiedRequests = $this->surveyRequestRepository
+            ->findNotifiedSurveyRequestsWithinPeriodByFrontendUser($frontendUserUid, $checkPeriod, $currentTime);
 
         return count($alreadyNotifiedRequests) >= $maxSurveysPerPeriodAndFrontendUser;
     }
@@ -319,12 +321,17 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
         return $generatedTokens;
     }
 
+
     /**
      * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
      * @return string
      */
     protected function generateTokenName(Survey $survey): string
     {
+        /** @todo see https://github.com/skroggel/typo3-core-extended/blob/master/Classes/Utility/GeneralUtility.php#L364
+         * --> random_bytes — Get cryptographically secure random bytes
+         * Damit sollte der generierte String zuverlässig unique sein, was Datenbankabfragen sparte
+         */
         $characters = 'abcdefghjkmnopqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ';
         $newTokenName = substr(str_shuffle($characters), 0, 10);
 
@@ -335,32 +342,41 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
         return $newTokenName;
     }
 
+
     /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $processableSubject
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * @throws \TYPO3\CMS\Core\Context\Exception\AspectNotFoundException
      */
-    protected function getSurveyConfigurations(SurveyRequest $surveyRequest, AbstractEntity $processableSubject): ?QueryResultInterface
-    {
-        $surveyConfigurations = null;
+    protected function getSurveyConfigurations(
+        SurveyRequest $surveyRequest,
+        AbstractEntity $processableSubject
+    ): ?QueryResultInterface {
 
+        $surveyConfigurations = null;
         if (
             ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class)
             && ($surveyRequest->getOrder() instanceof \RKW\RkwShop\Domain\Model\Order)
         ) {
+            /** CodeInspection meckert, weil Typen nicht passen */
             $surveyRequest->setOrderSubject($processableSubject);
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
-            $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
+            $surveyConfigurations = $this->surveyConfigurationRepository
+                ->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
         }
 
         if (
             ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class)
             && ($surveyRequest->getEventReservation() instanceof \RKW\RkwEvents\Domain\Model\EventReservation)
         ) {
+            /** CodeInspection meckert, weil Typen nicht passen */
+
             $surveyRequest->setEventReservationSubject($processableSubject);
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
-            $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
+            $surveyConfigurations = $this->surveyConfigurationRepository
+                ->findByEventAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
         }
 
         return $surveyConfigurations;
