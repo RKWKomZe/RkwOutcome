@@ -80,7 +80,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
          );
 
          $notifiableSurveyRequests = [];
-
          foreach ($surveyRequestsGroupedByFrontendUser as $frontendUserUid => $surveyRequestsByUser) {
 
              if (
@@ -105,13 +104,12 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
                              $surveyRequest->setNotifiedTstamp($currentTime);
 
                              $generatedTokens = $this->generateTokens($surveyConfiguration);
-
                              $this->markAsNotified($surveyRequest, $currentTime);
 
                              try {
                                  $this->sendNotification($surveyRequest, $generatedTokens);
 
-                                 /** brauchen wir das so differenziert oder genügt \Exception (mit Backslash) */
+                             /** @todo: brauchen wir das so differenziert oder genügt \Exception (mit Backslash) */
                              } catch (InvalidSlotException $e) {
                              } catch (InvalidSlotReturnException $e) {
                              }
@@ -253,7 +251,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
         }
 
         $notifiableObjects = $this->getNotifiableObjects($process);
-
         if (count($notifiableObjects) > 0) {
             foreach ($notifiableObjects as $notifiableObject) {
                 if ($notifiableObject->getUid() === $processableSubject->getUid()) {
@@ -360,7 +357,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
             ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class)
             && ($surveyRequest->getOrder() instanceof \RKW\RkwShop\Domain\Model\Order)
         ) {
-            /** CodeInspection meckert, weil Typen nicht passen */
+            /** @todo CodeInspection meckert, weil Typen nicht passen */
             $surveyRequest->setOrderSubject($processableSubject);
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
             $surveyConfigurations = $this->surveyConfigurationRepository
@@ -371,8 +368,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
             ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class)
             && ($surveyRequest->getEventReservation() instanceof \RKW\RkwEvents\Domain\Model\EventReservation)
         ) {
-            /** CodeInspection meckert, weil Typen nicht passen */
-
+            /** @todo CodeInspection meckert, weil Typen nicht passen */
             $surveyRequest->setEventReservationSubject($processableSubject);
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
             $surveyConfigurations = $this->surveyConfigurationRepository

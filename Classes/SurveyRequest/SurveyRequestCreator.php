@@ -115,7 +115,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
 
             }
 
-        /** brauchen wir das so differenziert oder genügt \Exception (mit Backslash) */
+        /** @todo: brauchen wir das so differenziert oder genügt \Exception (mit Backslash) */
         } catch (Exception $e) {
         } catch (IllegalObjectTypeException $e) {
         } catch (InvalidQueryException $e) {
