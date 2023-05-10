@@ -15,6 +15,7 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
  */
 
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
+use RKW\RkwMailer\Persistence\MarkerReducer;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
@@ -175,6 +176,10 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
      */
     protected function setUpSurveyRequest(string $model, int $modelUid = 1): void
     {
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $markerReducer = $objectManager->get(MarkerReducer::class);
+
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
 
@@ -183,16 +188,14 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         if ($model === \RKW\RkwShop\Domain\Model\Order::class) {
             $process = $this->orderRepository->findByUid($modelUid);
             $frontendUser = $process->getFrontendUser();
-            $surveyRequest->setOrder($process);
         }
 
         if ($model === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
             $process = $this->eventReservationRepository->findByUid($modelUid);
             $frontendUser = $process->getFeUser();
-            $surveyRequest->setEventReservation($process);
         }
 
-        $surveyRequest->setProcessType(get_class($process));
+        $surveyRequest->setProcess($markerReducer->implodeMarker(['process' => $process]));
         $surveyRequest->setFrontendUser($frontendUser);
 
         $process->getTargetGroup()->rewind();

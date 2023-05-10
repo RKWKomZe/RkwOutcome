@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
 use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
+use RKW\RkwMailer\Persistence\MarkerReducer;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
@@ -131,6 +132,12 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
 
     /**
+     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
+     */
+    private $markerReducer;
+
+
+    /**
      * @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor|null
      */
     private $fixture;
@@ -209,6 +216,9 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwSurvey\Domain\Repository\TokenRepository $tokenRepository */
         $this->tokenRepository = $this->objectManager->get(TokenRepository::class);
 
+        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        $this->markerReducer = $this->objectManager->get(MarkerReducer::class);
+
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromName'] = 'RKW';
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailFromAddress'] = 'service@mein.rkw.de';
         $GLOBALS['TYPO3_CONF_VARS']['MAIL']['defaultMailReplyName'] = 'RKW';
@@ -239,20 +249,23 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         if ($model === \RKW\RkwShop\Domain\Model\Order::class) {
             $process = $this->orderRepository->findByUid($modelUid);
             $frontendUser = $process->getFrontendUser();
-            $surveyRequest->setOrder($process);
         }
 
         if ($model === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
             $process = $this->eventReservationRepository->findByUid($modelUid);
             $frontendUser = $process->getFeUser();
-            $surveyRequest->setEventReservation($process);
         }
 
-        $surveyRequest->setProcessType(get_class($process));
         $surveyRequest->setFrontendUser($frontendUser);
 
         $process->getTargetGroup()->rewind();
         $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $markerReducer = $objectManager->get(MarkerReducer::class);
+
+        $surveyRequest->setProcess($markerReducer->implodeMarker(['process' => $process]));
 
         $this->surveyRequestRepository->add($surveyRequest);
         $this->persistenceManager->persistAll();
@@ -312,10 +325,13 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertSame($order, $surveyRequestDb->getOrder());
+        self::assertSame($surveyConfigurationDb, $surveyRequestDb->getSurveyConfiguration());
+
+        $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
+
+        self::assertSame($order, $processMarker['process']);
         $order->getOrderItem()->rewind();
         self::assertSame($order->getOrderItem()->current()->getProduct(), $surveyRequestDb->getOrderSubject());
-        self::assertSame($surveyConfigurationDb, $surveyRequestDb->getSurveyConfiguration());
     }
 
 
@@ -420,7 +436,10 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertSame($order, $surveyRequestDb->getOrder());
+
+        $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
+
+        self::assertSame($order, $processMarker['process']);
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
     }
 
@@ -477,7 +496,10 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertSame($order, $surveyRequestDb->getOrder());
+
+        $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
+
+        self::assertSame($order, $processMarker['process']);
         self::assertNotEquals(3, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertContains($surveyRequestDb->getOrderSubject()->getUid(), [1,2]);
     }
@@ -537,7 +559,10 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertSame($order, $surveyRequestDb->getOrder());
+
+        $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
+
+        self::assertSame($order, $processMarker['process']);
         self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
         self::assertSame(1, $surveyRequestDb->getSurveyConfiguration()->getUid());
@@ -891,7 +916,10 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\EventReservation::class, $surveyRequestDb->getEventReservation());
+
+        $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
+
+        self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\EventReservation::class, $processMarker['process']);
         self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\Event::class, $surveyRequestDb->getEventReservationSubject());
         self::assertSame($event, $surveyRequestDb->getEventReservationSubject());
     }

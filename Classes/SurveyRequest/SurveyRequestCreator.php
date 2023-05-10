@@ -20,7 +20,6 @@ use RKW\RkwRegistration\Domain\Model\FrontendUser;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
-use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
 /**
  * Class SurveyRequestCreator
@@ -80,21 +79,20 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 if ($process instanceof \Rkw\RkwShop\Domain\Model\Order) {
                     /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
                     $frontendUser = $process->getFrontendUser();
-                    $surveyRequest->setOrder($process);
                 }
 
                 if ($process instanceof \Rkw\RkwEvents\Domain\Model\EventReservation) {
                     /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
                     $frontendUser = $process->getFeUser();
-                    $surveyRequest->setEventReservation($process);
                 }
 
                 if (!$frontendUser) {
                     throw new Exception('surveyRequestManager.error.noFrontendUser');
                 }
 
-                $surveyRequest->setProcessType(get_class($process));
                 $surveyRequest->setFrontendUser($frontendUser);
+
+                $surveyRequest->setProcess($this->markerReducer->implodeMarker(['process' => $process]));
 
                 $process->getTargetGroup()->rewind();
                 $surveyRequest->addTargetGroup($process->getTargetGroup()->current());

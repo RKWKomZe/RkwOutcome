@@ -88,6 +88,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 
             if ($recipient->getEmail()) {
 
+                /* @todo: use markerReducer to populate email templates */
                 $mailService->setTo($recipient, [
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,

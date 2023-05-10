@@ -14,7 +14,10 @@ namespace RKW\RkwOutcome\Utility;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwMailer\Persistence\MarkerReducer;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class SurveyRequestProcessor
@@ -27,6 +30,12 @@ use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 class SurveyRequestUtility
 {
     /**
+     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
+     */
+    protected $markerReducer;
+
+
+    /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
      * @return string
      */
@@ -35,7 +44,22 @@ class SurveyRequestUtility
         $surveyRequest->getTargetGroup()->rewind();
         $targetGroupUid = $surveyRequest->getTargetGroup()->current()->getUid();
 
-        $processSubject = ($surveyRequest->getProcessType() === 'RKW\RkwShop\Domain\Model\Order') ? $surveyRequest->getOrderSubject() : $surveyRequest->getEventReservationSubject();
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+
+        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        $markerReducer = $objectManager->get(MarkerReducer::class);
+
+        $process = $markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+
+        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+            $processSubject = $surveyRequest->getOrderSubject();
+        }
+
+        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
+            $processSubject = $surveyRequest->getEventReservationSubject();
+        }
+
         $processSubject = explode(':', $processSubject);
         $processSubject[0] = explode('\\', $processSubject[0]);
         $processSubjectType = array_pop($processSubject[0]);

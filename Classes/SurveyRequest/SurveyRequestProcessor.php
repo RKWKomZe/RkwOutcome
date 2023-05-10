@@ -224,12 +224,14 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
         foreach ($surveyRequestsByUser as $surveyRequest) {
 
-            if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
-                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($surveyRequest->getOrder());
+            $process = $this->markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+
+            if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+                $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($process);
             }
 
-            if ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
-                $notifiableObjects[$surveyRequest->getUid()] = [$surveyRequest->getEventReservation()->getEvent()];
+            if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
+                $notifiableObjects[$surveyRequest->getUid()] = [$process->getEvent()];
             }
 
         }
@@ -249,13 +251,8 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
     protected function containsProcessableSubject(SurveyRequest $surveyRequest, AbstractEntity $processableSubject): bool
     {
         $containsProcessableSubject = false;
-        $process = null;
 
-        if ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class) {
-            $process = $surveyRequest->getOrder();
-        } else {
-            $process = $surveyRequest->getEventReservation();
-        }
+        $process = $this->markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
 
         $notifiableObjects = $this->getNotifiableObjects($process);
 
@@ -345,19 +342,17 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
     {
         $surveyConfigurations = null;
 
-        if (
-            ($surveyRequest->getProcessType() === \RKW\RkwShop\Domain\Model\Order::class)
-            && ($surveyRequest->getOrder() instanceof \RKW\RkwShop\Domain\Model\Order)
-        ) {
+        $process = $this->markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+
+        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+            /* @todo: Müsste man auch noch über MarkerReducer auflösen */
             $surveyRequest->setOrderSubject($processableSubject);
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
             $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
         }
 
-        if (
-            ($surveyRequest->getProcessType() === \RKW\RkwEvents\Domain\Model\EventReservation::class)
-            && ($surveyRequest->getEventReservation() instanceof \RKW\RkwEvents\Domain\Model\EventReservation)
-        ) {
+        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
+            /* @todo: Müsste man auch noch über MarkerReducer auflösen */
             $surveyRequest->setEventReservationSubject($processableSubject);
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
             $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());

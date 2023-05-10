@@ -15,9 +15,7 @@ namespace RKW\RkwOutcome\Domain\Model;
  */
 
 use RKW\RkwEvents\Domain\Model\Event;
-use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwRegistration\Domain\Model\FrontendUser;
-use RKW\RkwShop\Domain\Model\Order;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -37,24 +35,6 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @var \RKW\RkwRegistration\Domain\Model\FrontendUser|null
      */
     protected $frontendUser = null;
-
-
-    /**
-     * @var \RKW\RkwShop\Domain\Model\Order|null
-     */
-    protected $order = null;
-
-
-    /**
-     * @var \RKW\RkwEvents\Domain\Model\EventReservation|null
-     */
-    protected $eventReservation = null;
-
-
-    /**
-     * @var string
-     */
-     protected $processType = '';
 
 
     /**
@@ -85,6 +65,22 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
     protected $surveyConfiguration = null;
+
+
+    /**
+     * process
+     *
+     * @var string
+     */
+    protected $process = '';
+
+
+    /**
+     * processUnserialized
+     *
+     * @var array
+     */
+    protected $processUnserialized = [];
 
 
     /**
@@ -143,66 +139,29 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the order
+     * Returns the process
      *
-     * @return \RKW\RkwShop\Domain\Model\Order
+     * @return array $process
      */
-    public function getOrder():? Order
+    public function getProcess(): array
     {
-        return $this->order;
+        if ($this->processUnserialized) {
+            return $this->processUnserialized;
+        }
+
+        return ($this->process ? unserialize($this->process) : []);
     }
 
-
     /**
-     * Sets the order
+     * Sets the process
      *
-     * @param \RKW\RkwShop\Domain\Model\Order $order
+     * @param array $process
      * @return void
      */
-    public function setOrder(Order $order): void
+    public function setProcess(array $process): void
     {
-        $this->order = $order;
-    }
-
-
-    /**
-     * @return \RKW\RkwEvents\Domain\Model\EventReservation
-     */
-    public function getEventReservation(): ? EventReservation
-    {
-        return $this->eventReservation;
-    }
-
-
-    /**
-     * @param \RKW\RkwEvents\Domain\Model\EventReservation $eventReservation
-     */
-    public function setEventReservation(EventReservation $eventReservation): void
-    {
-        $this->eventReservation = $eventReservation;
-    }
-
-
-    /**
-     * Returns the process type
-     *
-     * @return string
-     */
-    public function getProcessType(): string
-    {
-        return $this->processType;
-    }
-
-
-    /**
-     * Sets the processType
-     *
-     * @param string $processType
-     * @return void
-     */
-    public function setProcessType(string $processType): void
-    {
-        $this->processType = $processType;
+        $this->processUnserialized = $process;
+        $this->process = serialize($process);
     }
 
 

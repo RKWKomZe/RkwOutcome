@@ -67,10 +67,6 @@
 				<source>Select product</source>
 				<target>Ausgewähltes Produkt</target>
 			</trans-unit>
-			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.processType">
-				<source>Process type</source>
-				<target>Typ des Vorgangs</target>
-			</trans-unit>
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyrequest.eventReservation">
 				<source>Event reservation</source>
 				<target>Veranstaltungsanmeldung</target>
