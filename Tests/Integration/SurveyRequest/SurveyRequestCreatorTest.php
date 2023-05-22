@@ -552,7 +552,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestDoesNotSetOrderSubjectOnPersistedNewSurveyRequest(): void
+    public function createSurveyRequestDoesNotSetProcessSubjectOnPersistedNewSurveyRequest(): void
     {
         /**
          * Scenario:
@@ -567,7 +567,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
          * Given the targetGroup-object 1 attached to the surveyConfiguration
          * When the method is called
          * Then a new surveyRequest-object is persisted
-         * Then the surveyRequest-property orderSubject is not set
+         * Then the surveyRequest-property processSubject is not set
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check90.xml');
@@ -583,8 +583,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
 
-        /* @todo: to be replaced as process_subject with marker */
-        self::assertNull($surveyRequestDb->getOrderSubject());
+        self::assertCount(0, $surveyRequestDb->getProcessSubject());
     }
 
 

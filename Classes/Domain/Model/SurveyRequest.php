@@ -14,9 +14,7 @@ namespace RKW\RkwOutcome\Domain\Model;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwEvents\Domain\Model\Event;
 use RKW\RkwRegistration\Domain\Model\FrontendUser;
-use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -50,18 +48,6 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * @var \RKW\RkwShop\Domain\Model\Product|null
-     */
-    protected $orderSubject = null;
-
-
-    /**
-     * @var \RKW\RkwEvents\Domain\Model\Event|null
-     */
-    protected $eventReservationSubject = null;
-
-
-    /**
      * @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
     protected $surveyConfiguration = null;
@@ -81,6 +67,22 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @var array
      */
     protected $processUnserialized = [];
+
+
+    /**
+     * processSubject
+     *
+     * @var string
+     */
+    protected $processSubject = '';
+
+
+    /**
+     * processSubjectUnserialized
+     *
+     * @var array
+     */
+    protected $processSubjectUnserialized = [];
 
 
     /**
@@ -212,47 +214,29 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the orderSubject
+     * Returns the processSubject
      *
-     * @return \RKW\RkwShop\Domain\Model\Product
+     * @return array $processSubject
      */
-    public function getOrderSubject():? Product
+    public function getProcessSubject(): array
     {
-        return $this->orderSubject;
+        if ($this->processSubjectUnserialized) {
+            return $this->processSubjectUnserialized;
+        }
+
+        return ($this->processSubject ? unserialize($this->processSubject) : []);
     }
 
-
     /**
-     * Sets the orderSubject
+     * Sets the processSubject
      *
-     * @param \RKW\RkwShop\Domain\Model\Product $orderSubject
+     * @param array $processSubject
      * @return void
      */
-    public function setOrderSubject(Product $orderSubject): void
+    public function setProcessSubject(array $processSubject): void
     {
-        $this->orderSubject = $orderSubject;
-    }
-
-
-    /**
-     * Returns the eventReservationSubject
-     *
-     * @return \RKW\RkwEvents\Domain\Model\Event
-     */
-    public function getEventReservationSubject():? Event
-    {
-        return $this->eventReservationSubject;
-    }
-
-
-    /**
-     * Sets the eventReservationSubject
-     *
-     * @param \RKW\RkwEvents\Domain\Model\Event $eventReservationSubject
-     */
-    public function setEventReservationSubject(Event $eventReservationSubject): void
-    {
-        $this->eventReservationSubject = $eventReservationSubject;
+        $this->processSubjectUnserialized = $processSubject;
+        $this->processSubject = serialize($processSubject);
     }
 
 

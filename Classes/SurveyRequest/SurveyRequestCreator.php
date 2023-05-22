@@ -91,7 +91,6 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 }
 
                 $surveyRequest->setFrontendUser($frontendUser);
-
                 $surveyRequest->setProcess($this->markerReducer->implodeMarker(['process' => $process]));
 
                 $process->getTargetGroup()->rewind();

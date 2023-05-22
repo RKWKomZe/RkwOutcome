@@ -138,7 +138,7 @@ return [
                 'minitems' => 0,
                 'maxitems' => 1,
             ],
-            'displayCond' => 'FIELD:process_type:=:\RKW\RkwShop\Domain\Model\Product',
+            'displayCond' => 'FIELD:process_type:=:RKW\RkwShop\Domain\Model\Product',
         ],
 
         'event' => [
@@ -153,7 +153,7 @@ return [
                 'minitems' => 0,
                 'maxitems' => 1,
             ],
-            'displayCond' => 'FIELD:process_type:=:\RKW\RkwEvents\Domain\Model\Event',
+            'displayCond' => 'FIELD:process_type:=:RKW\RkwEvents\Domain\Model\Event',
         ],
 
         'survey' => [

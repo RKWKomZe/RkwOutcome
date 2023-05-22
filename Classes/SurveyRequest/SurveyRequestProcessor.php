@@ -343,17 +343,14 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
         $surveyConfigurations = null;
 
         $process = $this->markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+        $surveyRequest->setProcessSubject($this->markerReducer->implodeMarker(['processSubject' => $processableSubject]));
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-            /* @todo: Müsste man auch noch über MarkerReducer auflösen */
-            $surveyRequest->setOrderSubject($processableSubject);
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
             $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
         }
 
         if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
-            /* @todo: Müsste man auch noch über MarkerReducer auflösen */
-            $surveyRequest->setEventReservationSubject($processableSubject);
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
             $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($processableSubject, $surveyRequest->getTargetGroup());
         }

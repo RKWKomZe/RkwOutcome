@@ -328,10 +328,11 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         self::assertSame($surveyConfigurationDb, $surveyRequestDb->getSurveyConfiguration());
 
         $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
-
         self::assertSame($order, $processMarker['process']);
         $order->getOrderItem()->rewind();
-        self::assertSame($order->getOrderItem()->current()->getProduct(), $surveyRequestDb->getOrderSubject());
+
+        $processSubjectMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcessSubject());
+        self::assertSame($order->getOrderItem()->current()->getProduct(), $processSubjectMarker['processSubject']);
     }
 
 
@@ -384,7 +385,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertSame(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertNull($surveyRequestDb->getOrderSubject());
+        self::assertCount(0, $surveyRequestDb->getProcessSubject());
         self::assertNull($surveyRequestDb->getSurveyConfiguration());
     }
 
@@ -438,9 +439,11 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
 
         $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
-
         self::assertSame($order, $processMarker['process']);
-        self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
+
+        $processSubjectMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcessSubject());
+        self::assertEquals(1, $processSubjectMarker['processSubject']->getUid());
+        self::assertNotEquals(2, $processSubjectMarker['processSubject']->getUid());
     }
 
 
@@ -498,10 +501,11 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
 
         $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
-
         self::assertSame($order, $processMarker['process']);
-        self::assertNotEquals(3, $surveyRequestDb->getOrderSubject()->getUid());
-        self::assertContains($surveyRequestDb->getOrderSubject()->getUid(), [1,2]);
+
+        $processSubjectMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcessSubject());
+        self::assertNotEquals(3, $processSubjectMarker['processSubject']->getUid());
+        self::assertContains($processSubjectMarker['processSubject']->getUid(), [1,2]);
     }
 
 
@@ -561,10 +565,12 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
 
         $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
-
         self::assertSame($order, $processMarker['process']);
-        self::assertSame(1, $surveyRequestDb->getOrderSubject()->getUid());
-        self::assertNotSame(2, $surveyRequestDb->getOrderSubject()->getUid());
+
+        $processSubjectMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcessSubject());
+        self::assertSame(1, $processSubjectMarker['processSubject']->getUid());
+        self::assertNotSame(2, $processSubjectMarker['processSubject']->getUid());
+
         self::assertSame(1, $surveyRequestDb->getSurveyConfiguration()->getUid());
     }
 
@@ -643,7 +649,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Then the number of processed requests is 2
          * Then the number of further pending requests is 0
          * Then the number of notified surveyRequest-objects is 1
-         * Then the property processedSubject and the property notifiedTstamp of the notified surveyRequest-object is set
+         * Then the property processSubject and the property notifiedTstamp of the notified surveyRequest-object are set
          * Then the property notifiedTstamp of that notified surveyRequest-object is greater than 1
          */
 
@@ -680,8 +686,9 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $notifiedSurveyRequestDb */
         $notifiedSurveyRequestDb = $notifiedSurveyRequestsDb->getFirst();
         self::assertGreaterThan(0, $notifiedSurveyRequestDb->getNotifiedTstamp());
-        self::assertNotNull($notifiedSurveyRequestDb->getOrderSubject());
+        self::assertCount(1, $notifiedSurveyRequestDb->getProcessSubject());
     }
+
 
     /**
      * @test
@@ -735,12 +742,16 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid1 */
         $surveyRequestProcessedDbUid1 = $this->surveyRequestRepository->findByUid(1);
         self::assertGreaterThan(0, $surveyRequestProcessedDbUid1->getNotifiedTstamp());
-        self::assertSame(1, $surveyRequestProcessedDbUid1->getOrderSubject()->getUid());
+
+        $processSubjectMarker1 = $this->markerReducer->explodeMarker($surveyRequestProcessedDbUid1->getProcessSubject());
+        self::assertEquals(1, $processSubjectMarker1['processSubject']->getUid());
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestProcessedDbUid2 */
         $surveyRequestProcessedDbUid2 = $this->surveyRequestRepository->findByUid(2);
         self::assertGreaterThan(0, $surveyRequestProcessedDbUid2->getNotifiedTstamp());
-        self::assertSame(2, $surveyRequestProcessedDbUid2->getOrderSubject()->getUid());
+
+        $processSubjectMarker2 = $this->markerReducer->explodeMarker($surveyRequestProcessedDbUid2->getProcessSubject());
+        self::assertEquals(2, $processSubjectMarker2['processSubject']->getUid());
     }
 
 
@@ -918,10 +929,14 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         self::assertGreaterThan(0, $surveyRequestDb->getNotifiedTstamp());
 
         $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
-
         self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\EventReservation::class, $processMarker['process']);
-        self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\Event::class, $surveyRequestDb->getEventReservationSubject());
-        self::assertSame($event, $surveyRequestDb->getEventReservationSubject());
+
+        /* @todo: Test schlägt fehl, weil Event immer auf Typ EventScheduled via recordType gesetzt wird und es im
+         * @todo: MarkerReducer dazu kein passendes Repository gibt. Was wäre die adäquate Lösung?
+         */
+        $processSubjectMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcessSubject());
+        self::assertInstanceOf(\RKW\RkwEvents\Domain\Model\Event::class, $processSubjectMarker['processSubject']);
+        self::assertSame($event, $processSubjectMarker['processSubject']);
     }
 
 
