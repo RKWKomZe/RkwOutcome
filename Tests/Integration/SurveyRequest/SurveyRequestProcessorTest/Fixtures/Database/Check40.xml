@@ -77,12 +77,14 @@
         <pid>1</pid>
         <product>1</product>
         <survey>1</survey>
+        <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>2</uid>
         <pid>1</pid>
         <product>2</product>
         <survey>2</survey>
+        <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>

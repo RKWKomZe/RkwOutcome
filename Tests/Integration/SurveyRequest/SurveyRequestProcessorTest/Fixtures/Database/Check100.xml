@@ -29,6 +29,7 @@
         <pid>1</pid>
         <product>1</product>
         <survey>1,2</survey>
+        <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- sys_category -->
     <sys_category>

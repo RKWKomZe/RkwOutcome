@@ -80,13 +80,17 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                     'sc_mm.fieldname',
                     $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)
                 ),
-                $queryBuilder->expr()->eq(
-                    $tableName . '.product',
-                    $queryBuilder->createNamedParameter($product->getUid(), \PDO::PARAM_INT)
-                ),
                 $queryBuilder->expr()->in(
                     'sc_mm.uid_local',
                     $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.process_type',
+                    $queryBuilder->createNamedParameter(\RKW\RkwShop\Domain\Model\Product::class, \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.product',
+                    $queryBuilder->createNamedParameter($product->getUid(), \PDO::PARAM_INT)
                 ),
             ];
 
@@ -155,12 +159,16 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
                     'sc_mm.fieldname',
                     $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)
                 ),
+                $queryBuilder->expr()->in('sc_mm.uid_local',
+                    $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.process_type',
+                    $queryBuilder->createNamedParameter(\RKW\RkwEvents\Domain\Model\Event::class, \PDO::PARAM_STR)
+                ),
                 $queryBuilder->expr()->eq(
                     $tableName . '.event',
                     $queryBuilder->createNamedParameter($event->getUid(), \PDO::PARAM_INT)
-                ),
-                $queryBuilder->expr()->in('sc_mm.uid_local',
-                    $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)
                 ),
             ];
 
