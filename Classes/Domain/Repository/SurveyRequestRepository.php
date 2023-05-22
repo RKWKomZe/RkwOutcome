@@ -14,6 +14,9 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwMailer\Persistence\MarkerReducer;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
@@ -27,6 +30,11 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
  */
 class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
+    /**
+     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
+     */
+    private $markerReducer;
+
 
     /*
      * initializeObject
@@ -57,20 +65,13 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
         $query = $this->createQuery();
 
+        /* @todo: set shippedTstamp in Model surveyRequest, when creating a surveyRequest
+         * @todo: (eventReservation->event.end, order->current)
+         */
         $constraints[] =
             $query->logicalAnd(
                 $query->equals('notifiedTstamp', 0),
-                $query->equals('deleted', 0),
-                $query->logicalOr(
-                    $query->logicalAnd(
-                        $query->lessThan('order.shippedTstamp', $currentTime - $surveyWaitingTime),
-                        $query->greaterThan('order', 0)
-                    ),
-                    $query->logicalAnd(
-                        $query->lessThan('eventReservation.event.end', $currentTime - $surveyWaitingTime),
-                        $query->greaterThan('eventReservation', 0)
-                    )
-                )
+                $query->equals('deleted', 0)
             )
         ;
 
@@ -96,11 +97,61 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $surveyRequests = $this->findPendingSurveyRequests($surveyWaitingTime, $currentTime);
 
         $surveyRequestsGroupedByFrontendUser = [];
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+
+        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        $markerReducer = $objectManager->get(MarkerReducer::class);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         foreach ($surveyRequests as $surveyRequest) {
-            $surveyRequestsGroupedByFrontendUser[$surveyRequest->getFrontendUser()->getUid()][] = $surveyRequest;
+
+            $process = $markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+
+            if (
+                (
+                    $process instanceof \RKW\RkwShop\Domain\Model\Order
+                    && $process->getShippedTstamp() < ($currentTime - $surveyWaitingTime)
+                )
+                ||
+                (
+                    $process instanceof \RKW\RkwEvents\Domain\Model\EventReservation
+                    && $process->getEvent()->getEnd() < ($currentTime - $surveyWaitingTime)
+                )
+            ) {
+                $surveyRequestsGroupedByFrontendUser[$surveyRequest->getFrontendUser()->getUid()][] = $surveyRequest;
+            }
+
         }
 
         return $surveyRequestsGroupedByFrontendUser;
+    }
+
+
+    /**
+     * Finds all notified survey requests
+     * matching a given frontend user
+     *
+     * @param int $frontendUserUid
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     * implicitly tested
+     */
+    public function findNotifiedSurveyRequestsByFrontendUser(int $frontendUserUid): QueryResultInterface
+    {
+        $query = $this->createQuery();
+
+        $constraints[] =
+            $query->logicalAnd(
+                $query->greaterThan('notifiedTstamp', 0),
+                $query->equals('frontend_user', $frontendUserUid)
+            )
+        ;
+
+        $query->matching($query->logicalAnd($constraints));
+
+        return $query->execute();
     }
 
 
@@ -133,31 +184,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $query->matching($query->logicalAnd($constraints));
 
         return $query->execute();
-    }
 
-    /**
-     * Finds all notified survey requests
-     * matching a given frontend user
-     *
-     * @param int $frontendUserUid
-     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
-     * implicitly tested
-     */
-    public function findNotifiedSurveyRequestsByFrontendUser(int $frontendUserUid): QueryResultInterface
-    {
-        $query = $this->createQuery();
-
-        $constraints[] =
-            $query->logicalAnd(
-                $query->greaterThan('notifiedTstamp', 0),
-                $query->equals('frontend_user', $frontendUserUid)
-            )
-        ;
-
-        $query->matching($query->logicalAnd($constraints));
-
-        return $query->execute();
     }
 
 }

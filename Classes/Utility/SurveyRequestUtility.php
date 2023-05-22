@@ -15,10 +15,9 @@ namespace RKW\RkwOutcome\Utility;
  */
 
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
-use RKW\RkwSurvey\Domain\Model\Survey;
 
 /**
- * Class SurveyRequestProcessor
+ * Class SurveyRequestUtility
  *
  * @author Christian Dilger <c.dilger@addorange.de>
  * @copyright Rkw Kompetenzzentrum
@@ -28,6 +27,12 @@ use RKW\RkwSurvey\Domain\Model\Survey;
 class SurveyRequestUtility
 {
     /**
+     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
+     */
+    protected $markerReducer;
+
+
+    /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
      * @return string
      */
@@ -36,11 +41,7 @@ class SurveyRequestUtility
         $surveyRequest->getTargetGroup()->rewind();
         $targetGroupUid = $surveyRequest->getTargetGroup()->current()->getUid();
 
-        $processSubject = ($surveyRequest->getProcessType() === 'RKW\RkwShop\Domain\Model\Order') ?
-            $surveyRequest->getOrderSubject() :
-            $surveyRequest->getEventReservationSubject();
-
-        $processSubject = explode(':', $processSubject);
+        $processSubject = explode(':', $surveyRequest->getProcessSubject()['processSubject']);
         $processSubject[0] = explode('\\', $processSubject[0]);
         $processSubjectType = array_pop($processSubject[0]);
         $processSubjectUid = $processSubject[1];

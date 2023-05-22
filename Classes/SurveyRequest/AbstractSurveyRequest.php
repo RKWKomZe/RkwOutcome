@@ -14,8 +14,11 @@ namespace RKW\RkwOutcome\SurveyRequest;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwMailer\Persistence\MarkerReducer;
 use RKW\RkwOutcome\Log\LogTrait;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class AbstractSurveyRequest
@@ -51,6 +54,18 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
 
 
     /**
+     * @var \TYPO3\CMS\Extbase\Object\ObjectManager|null
+     */
+    protected $objectManager;
+
+
+    /**
+     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
+     */
+    protected $markerReducer;
+
+
+    /**
      * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository
      * @inject
      */
@@ -62,6 +77,19 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
      * @inject
      */
     protected $surveyConfigurationRepository;
+
+
+    /**
+     * @return void
+     */
+    public function __construct()
+    {
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+
+        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        $this->markerReducer = $this->objectManager->get(MarkerReducer::class);
+    }
 
 
     /**

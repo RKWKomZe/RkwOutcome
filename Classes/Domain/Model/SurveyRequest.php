@@ -14,11 +14,7 @@ namespace RKW\RkwOutcome\Domain\Model;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwEvents\Domain\Model\Event;
-use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwRegistration\Domain\Model\FrontendUser;
-use RKW\RkwShop\Domain\Model\Order;
-use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -39,24 +35,6 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * @var \RKW\RkwShop\Domain\Model\Order|null
-     */
-    protected $order = null;
-
-
-    /**
-     * @var \RKW\RkwEvents\Domain\Model\EventReservation|null
-     */
-    protected $eventReservation = null;
-
-
-    /**
-     * @var string
-     */
-     protected $processType = '';
-
-
-    /**
      * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>|null
      */
     protected $targetGroup = null;
@@ -69,22 +47,41 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * @var \RKW\RkwShop\Domain\Model\Product|null
-     */
-    protected $orderSubject = null;
-
-
-    /**
-     * @var \RKW\RkwEvents\Domain\Model\Event|null
-     * @todo SK: etwas irritierend, dass du $eventRESERVATIONSubject für Event benutzt
-     */
-    protected $eventReservationSubject = null;
-
-
-    /**
      * @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
     protected $surveyConfiguration = null;
+
+
+    /**
+     * process
+     *
+     * @var string
+     */
+    protected $process = '';
+
+
+    /**
+     * processUnserialized
+     *
+     * @var array
+     */
+    protected $processUnserialized = [];
+
+
+    /**
+     * processSubject
+     *
+     * @var string
+     */
+    protected $processSubject = '';
+
+
+    /**
+     * processSubjectUnserialized
+     *
+     * @var array
+     */
+    protected $processSubjectUnserialized = [];
 
 
     /**
@@ -143,66 +140,29 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the order
+     * Returns the process
      *
-     * @return \RKW\RkwShop\Domain\Model\Order
+     * @return array $process
      */
-    public function getOrder(): ?Order
+    public function getProcess(): array
     {
-        return $this->order;
+        if ($this->processUnserialized) {
+            return $this->processUnserialized;
+        }
+
+        return ($this->process ? unserialize($this->process) : []);
     }
 
-
     /**
-     * Sets the order
+     * Sets the process
      *
-     * @param \RKW\RkwShop\Domain\Model\Order $order
+     * @param array $process
      * @return void
      */
-    public function setOrder(Order $order): void
+    public function setProcess(array $process): void
     {
-        $this->order = $order;
-    }
-
-
-    /**
-     * @return \RKW\RkwEvents\Domain\Model\EventReservation
-     */
-    public function getEventReservation(): ?EventReservation
-    {
-        return $this->eventReservation;
-    }
-
-
-    /**
-     * @param \RKW\RkwEvents\Domain\Model\EventReservation $eventReservation
-     */
-    public function setEventReservation(EventReservation $eventReservation): void
-    {
-        $this->eventReservation = $eventReservation;
-    }
-
-
-    /**
-     * Returns the process type
-     *
-     * @return string
-     */
-    public function getProcessType(): string
-    {
-        return $this->processType;
-    }
-
-
-    /**
-     * Sets the processType
-     *
-     * @param string $processType
-     * @return void
-     */
-    public function setProcessType(string $processType): void
-    {
-        $this->processType = $processType;
+        $this->processUnserialized = $process;
+        $this->process = serialize($process);
     }
 
 
@@ -253,47 +213,30 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Returns the orderSubject
+     * Returns the processSubject
      *
-     * @return \RKW\RkwShop\Domain\Model\Product
+     * @return array $processSubject
      */
-    public function getOrderSubject():? Product
+    public function getProcessSubject(): array
     {
-        return $this->orderSubject;
+        if ($this->processSubjectUnserialized) {
+            return $this->processSubjectUnserialized;
+        }
+
+        return ($this->processSubject ? unserialize($this->processSubject) : []);
     }
 
 
     /**
-     * Sets the orderSubject
+     * Sets the processSubject
      *
-     * @param \RKW\RkwShop\Domain\Model\Product $orderSubject
+     * @param array $processSubject
      * @return void
      */
-    public function setOrderSubject(Product $orderSubject): void
+    public function setProcessSubject(array $processSubject): void
     {
-        $this->orderSubject = $orderSubject;
-    }
-
-
-    /**
-     * Returns the eventReservationSubject
-     *
-     * @return \RKW\RkwEvents\Domain\Model\Event
-     */
-    public function getEventReservationSubject():? Event
-    {
-        return $this->eventReservationSubject;
-    }
-
-
-    /**
-     * Sets the eventReservationSubject
-     *
-     * @param \RKW\RkwEvents\Domain\Model\Event $eventReservationSubject
-     */
-    public function setEventReservationSubject(Event $eventReservationSubject): void
-    {
-        $this->eventReservationSubject = $eventReservationSubject;
+        $this->processSubjectUnserialized = $processSubject;
+        $this->processSubject = serialize($processSubject);
     }
 
 
