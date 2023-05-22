@@ -12,10 +12,10 @@ config.tx_extbase.persistence {
       newRecordStoragePid = {$plugin.tx_rkwoutcome.persistence.storagePid}
 
       mapping {
-          tableName = tx_rkwoutcome_domain_model_surveyrequest
-          columns {
-            deleted.mapOnProperty = deleted
-          }
+        tableName = tx_rkwoutcome_domain_model_surveyrequest
+        columns {
+          deleted.mapOnProperty = deleted
+        }
       }
 
     }
@@ -55,28 +55,8 @@ plugin.tx_rkwoutcome {
   }
 }
 
-# Module configuration
 module.tx_rkwoutcome {
-  persistence {
-    storagePid = {$module.tx_rkwoutcome.persistence.storagePid}
-  }
-
-  view {
-    layoutRootPaths {
-      0 = EXT:rkw_outcome/Resources/Private/Layouts/Backend/
-      1 = {$module.tx_rkwoutcome.view.layoutRootPath}
-    }
-
-    templateRootPaths {
-      0 = EXT:rkw_outcome/Resources/Private/Templates/Backend/
-      1 = {$module.tx_rkwoutcome.view.templateRootPath}
-    }
-
-    partialRootPaths {
-      0 = EXT:rkw_outcome/Resources/Private/Partials/Backend/
-      1 = {$module.tx_rkwoutcome.view.partialRootPath}
-    }
-  }
-
   settings < plugin.tx_rkwoutcome.settings
+  persistence < plugin.tx_rkwoutcome.persistence
+  view < plugin.tx_rkwoutcome.view
 }
