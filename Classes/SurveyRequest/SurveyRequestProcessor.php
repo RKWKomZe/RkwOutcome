@@ -113,6 +113,9 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
                              $this->markAsNotified($surveyRequest, $currentTime);
 
                              try {
+                                 /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+                                 $surveyRequest = $this->surveyRequestRepository->findByUid($surveyRequest->getUid());
+
                                  $this->sendNotification($surveyRequest, $generatedTokens);
                              } catch (\Exception $e) {
                              }

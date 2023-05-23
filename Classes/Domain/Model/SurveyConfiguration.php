@@ -29,6 +29,12 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 {
     /**
+     * @var string
+     */
+    protected $processType = '';
+
+
+    /**
      * @var \RKW\RkwShop\Domain\Model\Product|null
      */
     protected $product = null;
@@ -73,6 +79,29 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     protected function initStorageObjects(): void
     {
         $this->targetGroup = new \TYPO3\CMS\Extbase\Persistence\ObjectStorage();
+    }
+
+
+    /**
+     * Returns the processType
+     *
+     * @return string $processType
+     */
+    public function getProcessType(): string
+    {
+        return $this->processType;
+    }
+
+
+    /**
+     * Sets the processType
+     *
+     * @param string $processType
+     * @return void
+     */
+    public function setProcessType(string $processType): void
+    {
+        $this->processType = $processType;
     }
 
 
@@ -190,6 +219,5 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     {
         $this->mailText = $mailText;
     }
-
 
 }
