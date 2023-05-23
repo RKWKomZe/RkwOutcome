@@ -15,6 +15,7 @@ namespace RKW\RkwOutcome\Utility;
  */
 
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class SurveyRequestUtility
@@ -41,15 +42,15 @@ class SurveyRequestUtility
         $surveyRequest->getTargetGroup()->rewind();
         $targetGroupUid = $surveyRequest->getTargetGroup()->current()->getUid();
 
-        $processSubject = explode(':', $surveyRequest->getProcessSubject()['processSubject']);
-        $processSubject[0] = explode('\\', $processSubject[0]);
-        $processSubjectType = array_pop($processSubject[0]);
-        $processSubjectUid = $processSubject[1];
+        $objectDefinition = GeneralUtility::trimExplode(':', $surveyRequest->getProcessSubject()['processSubject']);
+        $processSubjectFQDNAsArray = GeneralUtility::trimExplode('\\', $objectDefinition[0]);
+        $processSubjectModelName = array_pop($processSubjectFQDNAsArray);
+        $processSubjectUid = (int)$objectDefinition[1];
 
         $surveyRequestTags = [
-            $targetGroupUid, // targetGroupUid
-            $processSubjectType, // processSubjectType
-            $processSubjectUid  // processSubjectUid
+            $targetGroupUid,
+            $processSubjectModelName,
+            $processSubjectUid
         ];
 
         return implode(',', $surveyRequestTags);

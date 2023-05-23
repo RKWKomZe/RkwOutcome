@@ -167,7 +167,6 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
 
 
     /**
-     *
      * @param string $model
      * @param int $modelUid
      *
@@ -227,7 +226,6 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
         $this->surveyRequestProcessor->processPendingSurveyRequests(
@@ -239,6 +237,7 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
 
+        /** @var string $tags */
         $tags = SurveyRequestUtility::buildSurveyRequestTags($surveyRequestDb);
         self::assertEquals('10,Product,2', $tags);
     }

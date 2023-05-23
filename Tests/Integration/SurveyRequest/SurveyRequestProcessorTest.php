@@ -308,7 +308,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
         $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
@@ -372,7 +371,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $this->orderRepository->update($order);
         $this->persistenceManager->persistAll();
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
         $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
@@ -385,7 +383,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
         self::assertSame(0, $surveyRequestDb->getNotifiedTstamp());
-        self::assertCount(0, $surveyRequestDb->getProcessSubject());
+        self::assertEmpty($surveyRequestDb->getProcessSubject());
         self::assertNull($surveyRequestDb->getSurveyConfiguration());
     }
 
@@ -424,7 +422,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
         $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
@@ -486,7 +483,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
         $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
@@ -550,7 +546,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
         $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
@@ -605,7 +600,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
@@ -664,7 +658,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
@@ -686,7 +679,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $notifiedSurveyRequestDb */
         $notifiedSurveyRequestDb = $notifiedSurveyRequestsDb->getFirst();
         self::assertGreaterThan(0, $notifiedSurveyRequestDb->getNotifiedTstamp());
-        self::assertCount(1, $notifiedSurveyRequestDb->getProcessSubject());
+        self::assertNotEmpty($notifiedSurveyRequestDb->getProcessSubject());
     }
 
 
@@ -728,7 +721,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
@@ -795,7 +787,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(Carbon::now()->timestamp);
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
@@ -814,7 +805,6 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $order->setShippedTstamp(Carbon::now()->addDays(2)->timestamp);
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 3);
 
         //  Processing pending survey requests on $initialDate + 3 days

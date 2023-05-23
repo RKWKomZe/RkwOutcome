@@ -583,7 +583,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
 
-        self::assertCount(0, $surveyRequestDb->getProcessSubject());
+        self::assertEmpty($surveyRequestDb->getProcessSubject());
     }
 
 
