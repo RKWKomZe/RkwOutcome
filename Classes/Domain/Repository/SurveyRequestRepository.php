@@ -30,12 +30,6 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
  */
 class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
-    /**
-     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
-     */
-    private $markerReducer;
-
-
     /*
      * initializeObject
      *
@@ -65,9 +59,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 
         $query = $this->createQuery();
 
-        /* @todo: set shippedTstamp in Model surveyRequest, when creating a surveyRequest
-         * @todo: (eventReservation->event.end, order->current)
-         */
         $constraints[] =
             $query->logicalAnd(
                 $query->equals('notifiedTstamp', 0),
