@@ -14,10 +14,10 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwBasics\Helper\QueryTypo3;
 use RKW\RkwEvents\Domain\Model\Event;
-use RKW\RkwOutcome\Domain\Model\SurveyConfiguration;
 use RKW\RkwShop\Domain\Model\Product;
+use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
@@ -67,39 +67,51 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
         if (count($targetGroupsList)) {
 
-            // 2. set leftJoin over categories
-            $leftJoin = '
-                LEFT JOIN sys_category_record_mm AS sys_category_record_mm
-                    ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign
-                    AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\'
-                    AND sys_category_record_mm.fieldname = \'target_group\'
-                LEFT JOIN sys_category AS sys_category
-                    ON sys_category_record_mm.uid_local=sys_category.uid
-                    AND sys_category.deleted = 0
-            ';
+            $tableName = 'tx_rkwoutcome_domain_model_surveyconfiguration';
+            /** @var \TYPO3\CMS\Core\Database\Query\QueryBuilder $queryBuilder */
+            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
 
-            // 3. set constraints
             $constraints = [
-                '(((sys_category.sys_language_uid IN (0,-1))) OR sys_category.uid IS NULL)',
-                'tx_rkwoutcome_domain_model_surveyconfiguration.product = ' . $product->getUid(),
+                $queryBuilder->expr()->eq(
+                    'sc_mm.tablenames',
+                    $queryBuilder->createNamedParameter('tx_rkwoutcome_domain_model_surveyconfiguration', \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    'sc_mm.fieldname',
+                    $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->in(
+                    'sc_mm.uid_local',
+                    $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.process_type',
+                    $queryBuilder->createNamedParameter(\RKW\RkwShop\Domain\Model\Product::class, \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.product',
+                    $queryBuilder->createNamedParameter($product->getUid(), \PDO::PARAM_INT)
+                ),
             ];
 
-            // 5. Final statement
-            $finalStatement = '
-                SELECT tx_rkwoutcome_domain_model_surveyconfiguration.*
-                FROM tx_rkwoutcome_domain_model_surveyconfiguration
-                ' . $leftJoin . '
-                WHERE
-                    sys_category.uid IN(' . implode(',', $targetGroupsList) . ')
-                    AND ' . implode(' AND ', $constraints) .
-                QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
-                QueryTypo3::getWhereClauseForDeleteFields('tx_rkwoutcome_domain_model_surveyconfiguration')
-                ;
+            $statement = $queryBuilder
+                ->select('*')
+                ->from($tableName)
+                ->leftJoin(
+                    $tableName,
+                    'sys_category_record_mm',
+                    'sc_mm',
+                    $queryBuilder->expr()->eq(
+                        'sc_mm.uid_foreign',
+                        $queryBuilder->quoteIdentifier($tableName . '.uid')
+                    )
+                )
+                ->where(...$constraints);
 
             // build final query
             $query = $this->createQuery();
             $query->statement(
-                $finalStatement
+                $statement
             );
 
             return $query->execute();
@@ -134,39 +146,50 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
 
         if (count($targetGroupsList)) {
 
-            // 2. set leftJoin over categories
-            $leftJoin = '
-                LEFT JOIN sys_category_record_mm AS sys_category_record_mm
-                    ON tx_rkwoutcome_domain_model_surveyconfiguration.uid=sys_category_record_mm.uid_foreign
-                    AND sys_category_record_mm.tablenames = \'tx_rkwoutcome_domain_model_surveyconfiguration\'
-                    AND sys_category_record_mm.fieldname = \'target_group\'
-                LEFT JOIN sys_category AS sys_category
-                    ON sys_category_record_mm.uid_local=sys_category.uid
-                    AND sys_category.deleted = 0
-            ';
+            $tableName = 'tx_rkwoutcome_domain_model_surveyconfiguration';
+            /** @var \TYPO3\CMS\Core\Database\Query\QueryBuilder $queryBuilder */
+            $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($tableName);
 
-            // 3. set constraints
             $constraints = [
-                '(((sys_category.sys_language_uid IN (0,-1))) OR sys_category.uid IS NULL)',
-                'tx_rkwoutcome_domain_model_surveyconfiguration.event = ' . $event->getUid(),
+                $queryBuilder->expr()->eq(
+                    'sc_mm.tablenames',
+                    $queryBuilder->createNamedParameter('tx_rkwoutcome_domain_model_surveyconfiguration', \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    'sc_mm.fieldname',
+                    $queryBuilder->createNamedParameter('target_group', \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->in('sc_mm.uid_local',
+                    $queryBuilder->createNamedParameter(implode(',', $targetGroupsList), \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.process_type',
+                    $queryBuilder->createNamedParameter(\RKW\RkwEvents\Domain\Model\Event::class, \PDO::PARAM_STR)
+                ),
+                $queryBuilder->expr()->eq(
+                    $tableName . '.event',
+                    $queryBuilder->createNamedParameter($event->getUid(), \PDO::PARAM_INT)
+                ),
             ];
 
-            // 5. Final statement
-            $finalStatement = '
-                SELECT tx_rkwoutcome_domain_model_surveyconfiguration.*
-                FROM tx_rkwoutcome_domain_model_surveyconfiguration
-                ' . $leftJoin . '
-                WHERE
-                    sys_category.uid IN(' . implode(',', $targetGroupsList) . ')
-                    AND ' . implode(' AND ', $constraints) .
-                QueryTypo3::getWhereClauseForEnableFields('tx_rkwoutcome_domain_model_surveyconfiguration') .
-                QueryTypo3::getWhereClauseForDeleteFields('tx_rkwoutcome_domain_model_surveyconfiguration')
-            ;
+            $statement = $queryBuilder
+                ->select('*')
+                ->from($tableName)
+                ->leftJoin(
+                    $tableName,
+                    'sys_category_record_mm',
+                    'sc_mm',
+                    $queryBuilder->expr()->eq(
+                        'sc_mm.uid_foreign',
+                        $queryBuilder->quoteIdentifier($tableName . '.uid')
+                    )
+                )
+                ->where(...$constraints);
 
             // build final query
             $query = $this->createQuery();
             $query->statement(
-                $finalStatement
+                $statement
             );
 
             return $query->execute();

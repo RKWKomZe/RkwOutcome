@@ -11,18 +11,6 @@ call_user_func(
         //=================================================================
         // Configure Plugins
         //=================================================================
-        \TYPO3\CMS\Extbase\Utility\ExtensionUtility::configurePlugin(
-            'RKW.' . $extKey,
-            'SurveyRequest',
-            array(
-                'SurveyRequest' => 'show',
-            ),
-
-            // non-cacheable actions
-            array(
-                'SurveyRequest' => 'show',
-            )
-        );
 
         //=================================================================
         // Register CommandController

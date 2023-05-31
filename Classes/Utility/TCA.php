@@ -32,6 +32,10 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
 class TCA
 {
 
+    /**
+     * @param array $parameters
+     * @return void
+     */
     public function surveyConfigurationTitle(&$parameters): void
     {
 
@@ -40,7 +44,7 @@ class TCA
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
         //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
-        if ($record['process_type'] === '\\' . Product::class) {
+        if ($record['process_type'] === Product::class) {
 //            $productRepository = $objectManager->get(ProductRepository::class);
 //            /** @var \RKW\RkwShop\Domain\Model\Product $product */
 //            $product = $productRepository->findByUid($record['product']);
@@ -51,7 +55,7 @@ class TCA
             $newTitle = '[Product] ' . $record['product'] . ' (' .  $record['target_group'] . ')';
         }
 
-        if ($record['process_type'] === '\\' . Event::class) {
+        if ($record['process_type'] === Event::class) {
 //            $eventRepository = $objectManager->get(EventRepository::class);
 //            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
 //            $event = $eventRepository->findByUid($record['event']);
@@ -75,6 +79,7 @@ class TCA
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
         //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
+        /** @todo: problem ist hier meist, dass die TypoScript-Definition nicht in der Rootpage eingebunden ist. Einige Extensions haben wir da gerne mal vergessen! */
         if ($record['process_type'] ===  Order::class) {
             $newTitle = '[Bestellung] ' . $record['order'];
         }

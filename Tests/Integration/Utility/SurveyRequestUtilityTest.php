@@ -15,6 +15,7 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
  */
 
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
+use RKW\RkwMailer\Persistence\MarkerReducer;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
@@ -166,7 +167,6 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
 
 
     /**
-     *
      * @param string $model
      * @param int $modelUid
      *
@@ -175,6 +175,10 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
      */
     protected function setUpSurveyRequest(string $model, int $modelUid = 1): void
     {
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+        $markerReducer = $objectManager->get(MarkerReducer::class);
+
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
 
@@ -183,16 +187,14 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         if ($model === \RKW\RkwShop\Domain\Model\Order::class) {
             $process = $this->orderRepository->findByUid($modelUid);
             $frontendUser = $process->getFrontendUser();
-            $surveyRequest->setOrder($process);
         }
 
         if ($model === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
             $process = $this->eventReservationRepository->findByUid($modelUid);
             $frontendUser = $process->getFeUser();
-            $surveyRequest->setEventReservation($process);
         }
 
-        $surveyRequest->setProcessType(get_class($process));
+        $surveyRequest->setProcess($markerReducer->implodeMarker(['process' => $process]));
         $surveyRequest->setFrontendUser($frontendUser);
 
         $process->getTargetGroup()->rewind();
@@ -224,7 +226,6 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         $order->setShippedTstamp(strtotime('-2 days'));
         $this->orderRepository->update($order);
 
-        //  workaround - add order as Order-Object to SurveyRequest, as it is not working via Fixture due to process = AbstractEntity
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
 
         $this->surveyRequestProcessor->processPendingSurveyRequests(
@@ -236,6 +237,7 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */
         $surveyRequestDb = $this->surveyRequestRepository->findByUid(1);
 
+        /** @var string $tags */
         $tags = SurveyRequestUtility::buildSurveyRequestTags($surveyRequestDb);
         self::assertEquals('10,Product,2', $tags);
     }

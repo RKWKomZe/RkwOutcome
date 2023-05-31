@@ -15,10 +15,13 @@ namespace RKW\RkwOutcome\Service;
  */
 
 use RKW\RkwBasics\Utility\GeneralUtility;
+use RKW\RkwMailer\Persistence\MarkerReducer;
 use RKW\RkwMailer\Service\MailService;
 use RKW\RkwMailer\Utility\FrontendLocalizationUtility;
+use RKW\RkwOutcome\Log\LogTrait;
 use RKW\RkwOutcome\Utility\SurveyRequestUtility;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class RkwMailService
@@ -52,8 +55,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
         \RKW\RkwRegistration\Domain\Model\FrontendUser $recipient,
         \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest,
         array $generatedTokens
-    ): void
-    {
+    ): void {
+
         $this->logInfo(
             sprintf(
                 'Mailer: Sending survey request %s to frontend user with %s.',
@@ -88,9 +91,27 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
 
             if ($recipient->getEmail()) {
 
+                /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+                $objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(ObjectManager::class);
+
+                /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+                $markerReducer = $objectManager->get(MarkerReducer::class);
+
+                $processSubjectMarker = $markerReducer->explodeMarker($surveyRequest->getProcessSubject());
+                $processSubject = $processSubjectMarker['processSubject'];
+
+                $mailText = '';
+
+                /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+                if ($surveyConfiguration = $surveyRequest->getSurveyConfiguration()) {
+                    $mailText = $surveyConfiguration->getMailText();
+                    $mailText = preg_replace('/###subjectTitle###/', $processSubject->getTitle(), $mailText);
+                }
+
                 $mailService->setTo($recipient, [
                     'marker'  => [
                         'surveyRequest' => $surveyRequest,
+                        'mailText' => $mailText,
                         'frontendUser' => $recipient,
                         'generatedTokens' => $generatedTokens,
                         'surveyRequestTags' => SurveyRequestUtility::buildSurveyRequestTags($surveyRequest),

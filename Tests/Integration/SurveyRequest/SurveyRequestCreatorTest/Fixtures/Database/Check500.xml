@@ -32,6 +32,7 @@
         <pid>1</pid>
         <event>1</event>
         <survey>1</survey>
+        <process_type>RKW\RkwEvents\Domain\Model\Event</process_type>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>

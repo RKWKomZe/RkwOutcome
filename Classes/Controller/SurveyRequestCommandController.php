@@ -15,7 +15,7 @@ namespace RKW\RkwOutcome\Controller;
  */
 
 use RKW\RkwBasics\Utility\GeneralUtility;
-use RKW\RkwOutcome\Service\LogTrait;
+use RKW\RkwOutcome\Log\LogTrait;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
 use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
@@ -42,8 +42,12 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
      * @param int $surveyWaitingTime
      * @return void
      */
-    public function processSurveyRequestsCommand(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $surveyWaitingTime = 0): void
-    {
+    public function processSurveyRequestsCommand(
+        int $checkPeriod,
+        int $maxSurveysPerPeriodAndFrontendUser,
+        int $surveyWaitingTime = 0
+    ): void {
+
         try {
 
             /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */

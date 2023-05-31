@@ -9,7 +9,7 @@
     <rkwMailer:plaintextLineBreaks>
         <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
         \n\n
-        {surveyRequest.surveyConfiguration.mailText}
+        {mailText}
         \n\n
         <f:for each="{surveyRequest.surveyConfiguration.survey}" as="survey">
             <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
@@ -34,9 +34,8 @@
         <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
     </h1>
     <p>
-        <f:format.nl2br>{surveyRequest.surveyConfiguration.mailText}</f:format.nl2br>
+        <f:format.nl2br>{mailText}</f:format.nl2br>
     </p>
-
 
     <f:for each="{surveyRequest.surveyConfiguration.survey}" as="survey">
         <p>

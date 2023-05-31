@@ -1,5 +1,5 @@
 <?php
-namespace RKW\RkwOutcome\Service;
+namespace RKW\RkwOutcome\Log;
 
 /*
  * This file is part of the TYPO3 CMS project.
@@ -32,9 +32,14 @@ trait LogTrait
     /**
      * @var \TYPO3\CMS\Core\Log\Logger
      */
-    protected $logger;
+    protected $logger = null;
 
 
+    /**
+     * initializeTrait
+     *
+     * @return void
+     */
     private function initializeTrait(): void
     {
         /** @var \TYPO3\CMS\Core\Log\Logger $logger */
@@ -46,7 +51,7 @@ trait LogTrait
      * @param string $message
      * @return void
      */
-    public function logError(string $message):void
+    public function logError(string $message): void
     {
         $this->initializeTrait();
         $this->logger->log(
@@ -60,7 +65,7 @@ trait LogTrait
      * @param string $message
      * @return void
      */
-    public function logDebug(string $message):void
+    public function logDebug(string $message): void
     {
         $this->initializeTrait();
         $this->logger->log(
@@ -74,7 +79,7 @@ trait LogTrait
      * @param string $message
      * @return void
      */
-    public function logWarning(string $message):void
+    public function logWarning(string $message): void
     {
         $this->initializeTrait();
         $this->logger->log(
@@ -88,7 +93,7 @@ trait LogTrait
      * @param string $message
      * @return void
      */
-    public function logInfo(string $message):void
+    public function logInfo(string $message): void
     {
         $this->initializeTrait();
         $this->logger->log(

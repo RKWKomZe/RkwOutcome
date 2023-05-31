@@ -14,9 +14,11 @@ namespace RKW\RkwOutcome\SurveyRequest;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwOutcome\Domain\Model\SurveyRequest;
-use RKW\RkwOutcome\Service\LogTrait;
+use RKW\RkwMailer\Persistence\MarkerReducer;
+use RKW\RkwOutcome\Log\LogTrait;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class AbstractSurveyRequest
@@ -52,6 +54,18 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
 
 
     /**
+     * @var \TYPO3\CMS\Extbase\Object\ObjectManager|null
+     */
+    protected $objectManager;
+
+
+    /**
+     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
+     */
+    protected $markerReducer;
+
+
+    /**
      * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository
      * @inject
      */
@@ -66,12 +80,33 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
 
 
     /**
+     * @return void
+     */
+    public function __construct()
+    {
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+
+        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        $this->markerReducer = $this->objectManager->get(MarkerReducer::class);
+    }
+
+
+    /**
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
      * @return array
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
     protected function getNotifiableObjects(AbstractEntity $process): array
     {
+
+        /** @todo SK Die code-inspection weist darauf hin, dass getTargetGroup nicht als Methode existiert, vermutlich weil
+         * ich bei mir die Änderungen an der rkw_shop und rkw_events nicht habe.
+         * Vielleicht braucht man dann doch eine Kapsel-Klasse, die die TargetGroup enthält und
+         * den Klassennamen und die uid der Referenzklasse. Bin dafür aber nicht tief genug in der Logik drin, sodass
+         * ich auch nicht sagen kann, wie die TargetGroup dann zu setzen wäre.
+         */
+
         $this->logInfo(
             sprintf(
                 'Looking for configurations matching process with uid %s and targetGroup %s',
@@ -95,7 +130,10 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
                 );
 
                 /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
-                $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup($orderItem->getProduct(), $process->getTargetGroup());
+                $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup(
+                    $orderItem->getProduct(),
+                    $process->getTargetGroup()
+                );
                 if (
                     $surveyConfigurations
                     && count($surveyConfigurations->toArray()) > 0
@@ -112,7 +150,10 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
             $event = $process->getEvent();
 
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
-            $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup($event, $process->getTargetGroup());
+            $surveyConfigurations = $this->surveyConfigurationRepository->findByEventAndTargetGroup(
+                $event,
+                $process->getTargetGroup()
+            );
             if (
                 $surveyConfigurations
                 && count($surveyConfigurations->toArray()) > 0
