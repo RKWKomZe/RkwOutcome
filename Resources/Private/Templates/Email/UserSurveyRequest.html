@@ -1,31 +1,25 @@
 <html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
     xmlns:rkwMailer="http://typo3.org/ns/RKW/RkwMailer/ViewHelpers"
+    xmlns:rkwOutcome="http://typo3.org/ns/RKW/RkwOutcome/ViewHelpers"
     data-namespace-typo3-fluid="true">
 
 <f:layout name="Email/{mailType}" />
 
 <!-- PLAINTEXT -->
 <f:section name="Plaintext">
-    <rkwMailer:plaintextLineBreaks>
-        <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
-        \n\n
-        {mailText}
-        \n\n
-        <f:for each="{surveyRequest.surveyConfiguration.survey}" as="survey">
-            <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
-                <f:if condition="generatedTokens.{survey.uid}">
-                    <f:then>
-                        <f:variable name="generatedToken" value="{generatedTokens.{survey.uid}}"></f:variable>
-                        <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags, token: generatedToken}' />
-                    </f:then>
-                    <f:else>
-                        <rkwMailer:frontend.link absolute="TRUE" pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags}' />
-                    </f:else>
-                </f:if>
-            </rkwMailer:email.replace.redirectLinks>
-            \n\n
-        </f:for>
-    </rkwMailer:plaintextLineBreaks>
+    <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
+
+    <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
+        <rkwOutcome:email.replace.surveyPlaceHolders
+            targetUid="{targetUid}"
+            surveyRequest="{surveyRequest}"
+            queueMail="{queueMail}"
+            isPlaintext="true"
+            generatedTokens="{generatedTokens}"
+        >
+            {mailText}
+        </rkwOutcome:email.replace.surveyPlaceHolders>
+    </rkwMailer:email.replace.redirectLinks>
 </f:section>
 
 <!-- HTML -->
@@ -34,26 +28,16 @@
         <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
     </h1>
     <p>
-        <f:format.nl2br>{mailText}</f:format.nl2br>
+        <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="false">
+            <rkwOutcome:email.replace.surveyPlaceHolders
+                targetUid="{targetUid}"
+                surveyRequest="{surveyRequest}"
+                queueMail="{queueMail}"
+                isPlaintext="false"
+                generatedTokens="{generatedTokens}"
+            >
+                {mailText}
+            </rkwOutcome:email.replace.surveyPlaceHolders>
+        </rkwMailer:email.replace.redirectLinks>
     </p>
-
-    <f:for each="{surveyRequest.surveyConfiguration.survey}" as="survey">
-        <p>
-            <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}">
-                <f:if condition="generatedTokens.{survey.uid}">
-                    <f:then>
-                        <f:variable name="generatedToken" value="{generatedTokens.{survey.uid}}"></f:variable>
-                        <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags, token: generatedToken }' />" target="_blank">
-                            <rkwMailer:frontend.translate key="templates_email_userSurveyRequest.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwOutcome" arguments="{0 : survey.name}"/>
-                        </a>
-                    </f:then>
-                    <f:else>
-                        <a href="<rkwMailer:frontend.link absolute='TRUE' pageUid='{surveyPid}' action='welcome' controller='Survey' extensionName='RkwSurvey' pluginName='Survey' arguments='{survey: survey, tags: surveyRequestTags}' />" target="_blank">
-                            <rkwMailer:frontend.translate key="templates_email_userSurveyRequest.goToSurvey" languageKey="{frontendUser.txRkwregistrationLanguageKey}" extensionName="rkwOutcome" arguments="{0 : survey.name}"/>
-                        </a>
-                    </f:else>
-                </f:if>
-            </rkwMailer:email.replace.redirectLinks>
-        </p>
-    </f:for>
 </f:section>

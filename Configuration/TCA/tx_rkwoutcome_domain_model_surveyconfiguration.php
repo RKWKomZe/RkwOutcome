@@ -167,6 +167,7 @@ return [
                 'size' => 5,
                 'minitems' => 1,
                 'maxitems' => 5,
+                'itemsProcFunc' => 'RKW\RkwOutcome\UserFunctions\OptionLabels->getSurveyNamesWithUid',
             ],
         ],
 

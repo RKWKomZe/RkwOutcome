@@ -100,13 +100,11 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                 $processSubjectMarker = $markerReducer->explodeMarker($surveyRequest->getProcessSubject());
                 $processSubject = $processSubjectMarker['processSubject'];
 
-                $mailText = '';
-
                 /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-                if ($surveyConfiguration = $surveyRequest->getSurveyConfiguration()) {
-                    $mailText = $surveyConfiguration->getMailText();
-                    $mailText = preg_replace('/###subjectTitle###/', $processSubject->getTitle(), $mailText);
-                }
+                $surveyConfiguration = $surveyRequest->getSurveyConfiguration();
+
+                $mailText = $surveyConfiguration->getMailText();
+                $mailText = preg_replace('/###subjectTitle###/', $processSubject->getTitle(), $mailText);
 
                 $mailService->setTo($recipient, [
                     'marker'  => [
@@ -115,7 +113,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                         'frontendUser' => $recipient,
                         'generatedTokens' => $generatedTokens,
                         'surveyRequestTags' => SurveyRequestUtility::buildSurveyRequestTags($surveyRequest),
-                        'surveyPid' => (int) $settingsDefault['surveyShowPid']
+                        'targetUid' => (int) $settingsDefault['surveyShowPid']
                     ]
                 ]);
 
