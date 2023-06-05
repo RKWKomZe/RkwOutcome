@@ -43,6 +43,11 @@
 				<source>Text for notification email</source>
 				<target>Text für Benachrichtigungs-E-Mail</target>
 			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.surveyWaitingTime">
+				<source>Waiting period in seconds</source>
+				<target>Wartezeit in Sekunden</target>
+			</trans-unit>
+
 
             <!-- ##################################################### -->
             <!-- tx_rkwoutcome_domain_model_surveyrequest              -->

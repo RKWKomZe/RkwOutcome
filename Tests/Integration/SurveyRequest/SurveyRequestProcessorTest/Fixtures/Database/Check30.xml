@@ -62,6 +62,7 @@
         <product>1</product>
         <survey>2</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
+        <survey_waiting_time>86400</survey_waiting_time>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>

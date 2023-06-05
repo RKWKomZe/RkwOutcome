@@ -17,6 +17,7 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwMailer\Persistence\MarkerReducer;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
+use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
 use RKW\RkwOutcome\Utility\SurveyRequestUtility;
@@ -78,6 +79,12 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      */
     private $surveyRequestRepository;
+
+
+    /**
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository|null
+     */
+    private $surveyConfigurationRepository;
 
 
     /**
@@ -152,6 +159,9 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Repository\OrderRepository $orderRepository */
         $this->orderRepository = $this->objectManager->get(OrderRepository::class);
 
+        /** @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository $surveyConfigurationRepository */
+        $this->surveyConfigurationRepository = $this->objectManager->get(SurveyConfigurationRepository::class);
+
         /** @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository */
         $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
 
@@ -169,11 +179,12 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
     /**
      * @param string $model
      * @param int $modelUid
+     * @param int $surveyConfigurationUid
      *
      * @return void
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      */
-    protected function setUpSurveyRequest(string $model, int $modelUid = 1): void
+    protected function setUpSurveyRequest(string $model, int $modelUid = 1, int $surveyConfigurationUid = 1): void
     {
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
@@ -186,19 +197,27 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
 
         if ($model === \RKW\RkwShop\Domain\Model\Order::class) {
             $process = $this->orderRepository->findByUid($modelUid);
+            $process->getOrderItem()->rewind();
+            $processSubject = $process->getOrderItem()->current()->getProduct();
             $frontendUser = $process->getFrontendUser();
         }
 
         if ($model === \RKW\RkwEvents\Domain\Model\EventReservation::class) {
             $process = $this->eventReservationRepository->findByUid($modelUid);
+            $processSubject = $process->getEvent();
             $frontendUser = $process->getFeUser();
         }
 
-        $surveyRequest->setProcess($markerReducer->implodeMarker(['process' => $process]));
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+        $surveyConfiguration = $this->surveyConfigurationRepository->findByUid($surveyConfigurationUid);
+        $surveyRequest->setSurveyConfiguration($surveyConfiguration);
         $surveyRequest->setFrontendUser($frontendUser);
 
         $process->getTargetGroup()->rewind();
         $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
+
+        $surveyRequest->setProcess($markerReducer->implodeMarker(['process' => $process]));
+        $surveyRequest->setProcessSubject($markerReducer->implodeMarker(['processSubject' => $processSubject]));
 
         $this->surveyRequestRepository->add($surveyRequest);
         $this->persistenceManager->persistAll();
@@ -230,8 +249,7 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
 
         $this->surveyRequestProcessor->processPendingSurveyRequests(
             $this->checkPeriod,
-            $this->maxSurveysPerPeriodAndFrontendUser,
-            (1 * 24 * 60 * 60)
+            $this->maxSurveysPerPeriodAndFrontendUser
         );
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequestDb */

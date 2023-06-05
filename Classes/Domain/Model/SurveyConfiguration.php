@@ -59,6 +59,12 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
+     * @var int
+     */
+    protected $surveyWaitingTime = 0;
+
+
+    /**
      * __construct
      */
     public function __construct()
@@ -218,6 +224,28 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     public function setMailText(string $mailText): void
     {
         $this->mailText = $mailText;
+    }
+
+    /**
+     * Returns the surveyWaitingTime
+     *
+     * @return int $surveyWaitingTime
+     */
+    public function getSurveyWaitingTime(): int
+    {
+        return $this->surveyWaitingTime;
+    }
+
+
+    /**
+     * Sets the surveyWaitingTime
+     *
+     * @param int $surveyWaitingTime
+     * @return void
+     */
+    public function setSurveyWaitingTime(string $surveyWaitingTime): void
+    {
+        $this->surveyWaitingTime = $surveyWaitingTime;
     }
 
 }

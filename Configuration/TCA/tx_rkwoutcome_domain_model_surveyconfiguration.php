@@ -23,10 +23,10 @@ return [
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyconfiguration.gif'
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, mail_text',
+        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, mail_text, survey_waiting_time',
     ],
     'types' => [
-        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, mail_text'],
+        '1' => ['showitem' => 'process_type, sys_language_uid, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, mail_text, survey_waiting_time'],
     ],
     'columns' => [
 
@@ -178,6 +178,16 @@ return [
                 'cols' => '40',
                 'rows' => '15',
                 'eval' => 'trim',
+            ],
+        ],
+
+        'survey_waiting_time' => [
+            'exclude' => 0,
+            'label' => 'LLL:EXT:rkw_outcome/Resources/Private/Language/locallang_db.xlf:tx_rkwoutcome_domain_model_surveyconfiguration.surveyWaitingTime',
+            'config' => [
+                'type'       => 'input',
+                'eval'       => 'int',
+                'default'    => 0
             ],
         ],
 

@@ -19,6 +19,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
  * Class SurveyRequestRepository
@@ -45,13 +46,12 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
     /**
      * Finds all pending survey requests due to be processed
      *
-     * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * implicitly tested
      */
-    public function findPendingSurveyRequests(int $surveyWaitingTime = 0, int $currentTime = 0): ?QueryResultInterface
+    public function findPendingSurveyRequests(int $currentTime = 0): ?QueryResultInterface
     {
         if (! $currentTime) {
             $currentTime = time();
@@ -76,16 +76,15 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      * Finds all pending survey requests due to be processed
      * and groups them by attached frontend user
      *
-     * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return array
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * implicitly tested
      */
-    public function findPendingSurveyRequestsGroupedByFrontendUser(int $surveyWaitingTime, int $currentTime): array
+    public function findPendingSurveyRequestsGroupedByFrontendUser(int $currentTime): array
     {
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequests = $this->findPendingSurveyRequests($surveyWaitingTime, $currentTime);
+        $surveyRequests = $this->findPendingSurveyRequests($currentTime);
 
         $surveyRequestsGroupedByFrontendUser = [];
 
@@ -99,6 +98,9 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         foreach ($surveyRequests as $surveyRequest) {
 
             $process = $markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+            $surveyConfiguration = $surveyRequest->getSurveyConfiguration();
+            $surveyWaitingTime = $surveyConfiguration->getSurveyWaitingTime();
 
             if (
                 (
