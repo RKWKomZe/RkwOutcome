@@ -121,7 +121,7 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                     FrontendLocalizationUtility::translate(
                         'rkwMailService.subject.userSurveyRequestNotification',
                         'rkw_outcome',
-                        null,
+                        [$processSubject->getTitle()],
                         $recipient->getTxRkwregistrationLanguageKey()
                     )
                 );

@@ -148,12 +148,13 @@ class SurveyRequestCreator extends AbstractSurveyRequest
 
     /**
      * @param AbstractEntity $process
-     * @return mixed|null
+     * @return AbstractEntity
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-    protected function getRandomProcessSubject(AbstractEntity $process)
+    protected function getRandomProcessSubject(AbstractEntity $process): AbstractEntity
     {
         $notifiableObjects = $this->getNotifiableObjects($process);
+
         $randomKey = array_rand($notifiableObjects);
         $processSubject = (empty($notifiableObjects)) ? null : $notifiableObjects[$randomKey];
 

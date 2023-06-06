@@ -15,7 +15,7 @@
 			<!-- ##################### -->
             <trans-unit id="rkwMailService.subject.userSurveyRequestNotification">
                 <source>Notification: Survey request</source>
-                <target>Mitteilung: Fragebogen</target>
+                <target>Bitte um Ihr Feedback zu %s</target>
             </trans-unit>
 
 
