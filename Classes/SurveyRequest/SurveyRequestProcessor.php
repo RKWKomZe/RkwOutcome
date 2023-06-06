@@ -59,21 +59,20 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
      *
      * @param int $checkPeriod
      * @param int $maxSurveysPerPeriodAndFrontendUser
-     * @param int $surveyWaitingTime
      * @param int $currentTime
      * @return array
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\UnknownObjectException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-     public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $surveyWaitingTime = 0, int $currentTime = 0): array
+     public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $currentTime = 0): array
      {
          if (! $currentTime) {
              $currentTime = time();
          }
 
          $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository
-             ->findPendingSurveyRequestsGroupedByFrontendUser($surveyWaitingTime, $currentTime) ;
+             ->findPendingSurveyRequestsGroupedByFrontendUser($currentTime) ;
 
          $this->logInfo(
              sprintf(
@@ -346,7 +345,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
         $surveyConfigurations = null;
 
         $process = $this->markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
-        $surveyRequest->setProcessSubject($this->markerReducer->implodeMarker(['processSubject' => $processableSubject]));
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */

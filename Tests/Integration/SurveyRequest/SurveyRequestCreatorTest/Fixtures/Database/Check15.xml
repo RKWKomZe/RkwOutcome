@@ -26,14 +26,30 @@
         <uid>1</uid>
         <pid>1</pid>
         <amount>1</amount>
+        <product>1</product>
+        <ext_order>1</ext_order>
+    </tx_rkwshop_domain_model_orderitem>
+    <tx_rkwshop_domain_model_orderitem>
+        <uid>2</uid>
+        <pid>1</pid>
+        <amount>1</amount>
         <product>2</product>
         <ext_order>1</ext_order>
     </tx_rkwshop_domain_model_orderitem>
     <!-- products -->
     <tx_rkwshop_domain_model_product>
+        <uid>1</uid>
+        <pid>1</pid>
+        <title>Erstes Produkt</title>
+        <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
+        <admin_email>test3@test.de</admin_email>
+        <stock>1</stock>
+        <backend_user />
+    </tx_rkwshop_domain_model_product>
+    <tx_rkwshop_domain_model_product>
         <uid>2</uid>
         <pid>1</pid>
-        <title>Produkt mit Fragebogen</title>
+        <title>Zweites Produkt</title>
         <subtitle>Mit Unterüberschriften kann man alles länger machen</subtitle>
         <admin_email>test3@test.de</admin_email>
         <stock>1</stock>
@@ -43,26 +59,39 @@
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>1</uid>
         <pid>1</pid>
-        <product>2</product>
+        <product>1</product>
         <survey>1</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
-        <survey_waiting_time>86400</survey_waiting_time>
+        <survey_waiting_time>172800</survey_waiting_time>
+    </tx_rkwoutcome_domain_model_surveyconfiguration>
+    <tx_rkwoutcome_domain_model_surveyconfiguration>
+        <uid>2</uid>
+        <pid>1</pid>
+        <product>2</product>
+        <survey>2</survey>
+        <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
+        <survey_waiting_time>172800</survey_waiting_time>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
-        <name>Meine Umfrage</name>
+        <name>Erste Umfrage</name>
+    </tx_rkwsurvey_domain_model_survey>
+    <tx_rkwsurvey_domain_model_survey>
+        <uid>2</uid>
+        <pid>1</pid>
+        <name>Zweite Umfrage</name>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>
-        <uid>10</uid>
+        <uid>1</uid>
         <pid>1</pid>
         <title>Unternehmen</title>
     </sys_category>
     <!-- sys_category_record_mm -->
     <sys_category_record_mm>
-        <uid_local>10</uid_local>
+        <uid_local>1</uid_local>
         <uid_foreign>1</uid_foreign>
         <tablenames>tx_rkwshop_domain_model_order</tablenames>
         <sorting>0</sorting>
@@ -70,8 +99,16 @@
         <fieldname>target_group</fieldname>
     </sys_category_record_mm>
     <sys_category_record_mm>
-        <uid_local>10</uid_local>
+        <uid_local>1</uid_local>
         <uid_foreign>1</uid_foreign>
+        <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
+        <sorting>0</sorting>
+        <sorting_foreign>1</sorting_foreign>
+        <fieldname>target_group</fieldname>
+    </sys_category_record_mm>
+    <sys_category_record_mm>
+        <uid_local>1</uid_local>
+        <uid_foreign>2</uid_foreign>
         <tablenames>tx_rkwoutcome_domain_model_surveyconfiguration</tablenames>
         <sorting>0</sorting>
         <sorting_foreign>1</sorting_foreign>

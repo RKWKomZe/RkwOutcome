@@ -233,7 +233,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
      * @test
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
-    public function createSurveyRequestPersistsNewSurveyRequestIfOrderMatchesSurveyConfiguration(): void
+    public function createSurveyRequestPersistsNewSurveyRequestIfOrderContainsProductMatchingSurveyConfiguration(): void
     {
         /**
          * Scenario:
@@ -247,12 +247,18 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
          * Given the targetGroup-object 1 attached to the surveyConfiguration
          * When the method is called
          * Then a new surveyRequest-object is persisted
+         * Then the surveyConfiguration-property of this surveyRequest-object is set to the surveyConfiguration object
+         * Then the process-property of that surveyRequest-object is set to the order object
+         * Then the processSubject-property of that surveyRequest-object is set to the surveyConfiguration-property product
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
 
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfigurationDb */
+        $surveyConfigurationDb = $this->surveyConfigurationRepository->findByUid(1);
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -267,6 +273,74 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequestDb = $surveyRequestsDb->getFirst();
         self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
+
+        self::assertSame($surveyConfigurationDb, $surveyRequestDb->getSurveyConfiguration());
+
+        $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
+        self::assertSame($order, $processMarker['process']);
+
+        $order->getOrderItem()->rewind();
+        $processSubjectMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcessSubject());
+        self::assertSame($order->getOrderItem()->current()->getProduct(), $processSubjectMarker['processSubject']);
+    }
+
+    /**
+     * @test
+     * @throws \Nimut\TestingFramework\Exception\Exception
+     */
+    public function createSurveyRequestPersistsNewSurveyRequestWithRandomProcessSubjectIfProductsMatchDifferentSurveyConfigurations(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object 1 that belongs to that order-object
+         * Given a product-object 1 that belongs to that orderItem-object 1
+         * Given a surveyConfiguration-object 1 that is persisted
+         * Given the surveyConfiguration-object 1 property product is set to the product-object 1
+         * Given the targetGroup-object 1 is attached to the surveyConfiguration-object 1
+         * Given an orderItem-object 2 that belongs to that order-object
+         * Given a product-object 2 that belongs to that orderItem-object 2
+         * Given a surveyConfiguration-object 2 that is persisted
+         * Given the surveyConfiguration-object 2 property product is set to the product-object 2
+         * Given the targetGroup-object 1 is attached to the surveyConfiguration-object 2
+         * When the method is called
+         * Then a new surveyRequest-object is persisted
+         * Then the surveyConfiguration-property of this surveyRequest-object is randomly set to one of the surveyConfiguration objects
+         * Then the process-property of that surveyRequest-object is set to the order object
+         * Then the processSubject-property of that surveyRequest-object is set to the surveyConfiguration-property product of the randomly selected surveyConfiguration object
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check15.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfigurationDb */
+        $surveyConfigurationDb = $this->surveyConfigurationRepository->findByUid(1);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+
+        $this->fixture->createSurveyRequest($order);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(1, $surveyRequestsDb);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequestDb = $surveyRequestsDb->getFirst();
+        self::assertInstanceOf(SurveyRequest::class, $surveyRequestDb);
+
+        self::assertContains($surveyRequestDb->getSurveyConfiguration()->getUid(), [1,2]);
+
+        $processMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcess());
+        self::assertSame($order, $processMarker['process']);
+
+        $processSubjectMarker = $this->markerReducer->explodeMarker($surveyRequestDb->getProcessSubject());
+        self::assertSame($surveyRequestDb->getSurveyConfiguration()->getProduct(), $processSubjectMarker['processSubject']);
     }
 
 
@@ -511,7 +585,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
 
 
     /**
-     * @test
+     * @todo: Kann weg!
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestDoesNotSetSurveyConfigurationOnPersistedNewSurveyRequest(): void
@@ -549,7 +623,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
 
 
     /**
-     * @test
+     * @todo Kann weg!
      * @throws \Nimut\TestingFramework\Exception\Exception
      */
     public function createSurveyRequestDoesNotSetProcessSubjectOnPersistedNewSurveyRequest(): void

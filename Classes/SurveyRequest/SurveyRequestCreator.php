@@ -19,7 +19,6 @@ use RKW\RkwOutcome\Exception;
 use RKW\RkwRegistration\Domain\Model\FrontendUser;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 
 /**
  * Class SurveyRequestCreator
@@ -76,22 +75,34 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
                 $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
 
+                $processSubject = $this->getRandomProcessSubject($process);
+
                 if ($process instanceof \Rkw\RkwShop\Domain\Model\Order) {
                     /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
                     $frontendUser = $process->getFrontendUser();
+                    /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+                    $surveyConfiguration = $this->surveyConfigurationRepository
+                        ->findByProductAndTargetGroup($processSubject, $process->getTargetGroup())
+                        ->getFirst();
                 }
 
                 if ($process instanceof \Rkw\RkwEvents\Domain\Model\EventReservation) {
                     /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
                     $frontendUser = $process->getFeUser();
+                    /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+                    $surveyConfiguration = $this->surveyConfigurationRepository
+                        ->findByEventAndTargetGroup($processSubject, $process->getTargetGroup())
+                        ->getFirst();
                 }
 
                 if (!$frontendUser) {
                     throw new Exception('surveyRequestManager.error.noFrontendUser');
                 }
 
+                $surveyRequest->setSurveyConfiguration($surveyConfiguration);
                 $surveyRequest->setFrontendUser($frontendUser);
                 $surveyRequest->setProcess($this->markerReducer->implodeMarker(['process' => $process]));
+                $surveyRequest->setProcessSubject($this->markerReducer->implodeMarker(['processSubject' => $processSubject]));
 
                 $process->getTargetGroup()->rewind();
                 $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
@@ -133,6 +144,20 @@ class SurveyRequestCreator extends AbstractSurveyRequest
     protected function isSurveyable(AbstractEntity $process): bool
     {
         return count($this->getNotifiableObjects($process)) > 0;
+    }
+
+    /**
+     * @param AbstractEntity $process
+     * @return mixed|null
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
+     */
+    protected function getRandomProcessSubject(AbstractEntity $process)
+    {
+        $notifiableObjects = $this->getNotifiableObjects($process);
+        $randomKey = array_rand($notifiableObjects);
+        $processSubject = (empty($notifiableObjects)) ? null : $notifiableObjects[$randomKey];
+
+        return $processSubject;
     }
 
 

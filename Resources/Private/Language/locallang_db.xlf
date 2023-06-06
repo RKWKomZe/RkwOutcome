@@ -32,6 +32,12 @@
 			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.targetGroups">
 				<source>Targetgroups</source>
 			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.mailText">
+				<source>Text for notification email</source>
+			</trans-unit>
+			<trans-unit id="tx_rkwoutcome_domain_model_surveyconfiguration.surveyWaitingTime">
+				<source>Waiting period in seconds</source>
+			</trans-unit>
 
             <!-- ##################################################### -->
             <!-- tx_rkwoutcome_domain_model_surveyrequest              -->

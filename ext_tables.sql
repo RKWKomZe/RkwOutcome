@@ -50,6 +50,7 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyconfiguration (
 	product int(11) unsigned DEFAULT '0',
 	event int(11) unsigned DEFAULT '0',
 	survey varchar(255) DEFAULT '' NOT NULL,
+	survey_waiting_time int(11) unsigned DEFAULT '0' NOT NULL,
 
 	mail_text text NOT NULL,
 

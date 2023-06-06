@@ -39,13 +39,11 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
      *
      * @param int $checkPeriod
      * @param int $maxSurveysPerPeriodAndFrontendUser
-     * @param int $surveyWaitingTime
      * @return void
      */
     public function processSurveyRequestsCommand(
         int $checkPeriod,
-        int $maxSurveysPerPeriodAndFrontendUser,
-        int $surveyWaitingTime = 0
+        int $maxSurveysPerPeriodAndFrontendUser
     ): void {
 
         try {
@@ -55,7 +53,7 @@ class SurveyRequestCommandController extends \TYPO3\CMS\Extbase\Mvc\Controller\C
 
             /** @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor $surveyRequestProcessor */
             $surveyRequestProcessor = $objectManager->get(SurveyRequestProcessor::class);
-            $surveyRequestProcessor->processPendingSurveyRequests($checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $surveyWaitingTime);
+            $surveyRequestProcessor->processPendingSurveyRequests($checkPeriod, $maxSurveysPerPeriodAndFrontendUser);
 
         } catch (\Exception $e) {
 
