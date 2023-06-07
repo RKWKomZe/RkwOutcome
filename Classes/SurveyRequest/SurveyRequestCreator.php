@@ -14,9 +14,9 @@ namespace RKW\RkwOutcome\SurveyRequest;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Madj2k\FeRegister\Domain\Model\FrontendUser;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Exception;
-use RKW\RkwRegistration\Domain\Model\FrontendUser;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 
@@ -34,7 +34,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
     /**
      * Intermediate function for creating surveyRequests - used by SignalSlot
      *
-     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
+     * @param \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser
      * @param \RKW\RkwShop\Domain\Model\Order|\RKW\RkwEvents\Domain\Model\EventReservation $process
      * @return void
      * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
@@ -75,10 +75,11 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
                 $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
 
+                $surveyConfiguration = null;
                 $processSubject = $this->getRandomProcessSubject($process);
 
                 if ($process instanceof \Rkw\RkwShop\Domain\Model\Order) {
-                    /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
+                    /** @var \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser */
                     $frontendUser = $process->getFrontendUser();
                     /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                     $surveyConfiguration = $this->surveyConfigurationRepository
@@ -87,7 +88,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 }
 
                 if ($process instanceof \Rkw\RkwEvents\Domain\Model\EventReservation) {
-                    /** @var \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser */
+                    /** @var \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser */
                     $frontendUser = $process->getFeUser();
                     /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                     $surveyConfiguration = $this->surveyConfigurationRepository
@@ -101,8 +102,8 @@ class SurveyRequestCreator extends AbstractSurveyRequest
 
                 $surveyRequest->setSurveyConfiguration($surveyConfiguration);
                 $surveyRequest->setFrontendUser($frontendUser);
-                $surveyRequest->setProcess($this->markerReducer->implodeMarker(['process' => $process]));
-                $surveyRequest->setProcessSubject($this->markerReducer->implodeMarker(['processSubject' => $processSubject]));
+                $surveyRequest->setProcess($this->markerReducer->implode(['process' => $process]));
+                $surveyRequest->setProcessSubject($this->markerReducer->implode(['processSubject' => $processSubject]));
 
                 $process->getTargetGroup()->rewind();
                 $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
@@ -148,17 +149,15 @@ class SurveyRequestCreator extends AbstractSurveyRequest
 
     /**
      * @param AbstractEntity $process
-     * @return AbstractEntity
+     * @return AbstractEntity|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-    protected function getRandomProcessSubject(AbstractEntity $process): AbstractEntity
+    protected function getRandomProcessSubject(AbstractEntity $process):? AbstractEntity
     {
         $notifiableObjects = $this->getNotifiableObjects($process);
 
         $randomKey = array_rand($notifiableObjects);
-        $processSubject = (empty($notifiableObjects)) ? null : $notifiableObjects[$randomKey];
-
-        return $processSubject;
+        return (empty($notifiableObjects)) ? null : $notifiableObjects[$randomKey];
     }
 
 

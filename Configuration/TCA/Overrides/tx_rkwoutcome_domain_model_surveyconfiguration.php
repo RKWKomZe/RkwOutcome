@@ -1,5 +1,4 @@
 <?php
-
 defined('TYPO3_MODE') || die('Access denied.');
 
 call_user_func(
@@ -29,5 +28,5 @@ call_user_func(
         //  @todo: Does not work as TCEFORM.tx_rkwoutcome_domain_model_surveyconfiguration.target_group.config.treeConfig.rootUid = 147 in 50-categories.typoscript!?
         //  $GLOBALS['TCA']['tx_rkwoutcome_domain_model_surveyconfiguration']['columns']['target_group']['config']['treeConfig']['rootUid'] = 147;
     },
-    $_EXTKEY
+    'rkw_outcome'
 );

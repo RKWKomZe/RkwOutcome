@@ -14,12 +14,11 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwMailer\Persistence\MarkerReducer;
+use Madj2k\Accelerator\Persistence\MarkerReducer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
  * Class SurveyRequestRepository
@@ -31,7 +30,7 @@ use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
  */
 class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
-    /*
+    /**
      * initializeObject
      *
      * @return void
@@ -48,7 +47,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      *
      * @param int $currentTime
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * implicitly tested
      */
     public function findPendingSurveyRequests(int $currentTime = 0): ?QueryResultInterface
@@ -91,13 +89,13 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
-        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        /** @var \Madj2k\Accelerator\Persistence\MarkerReducer $markerReducer */
         $markerReducer = $objectManager->get(MarkerReducer::class);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         foreach ($surveyRequests as $surveyRequest) {
 
-            $process = $markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+            $process = $markerReducer->explode($surveyRequest->getProcess())['process'];
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
             $surveyConfiguration = $surveyRequest->getSurveyConfiguration();
             $surveyWaitingTime = $surveyConfiguration->getSurveyWaitingTime();
@@ -159,8 +157,12 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * implicitly tested
      */
-    public function findNotifiedSurveyRequestsWithinPeriodByFrontendUser(int $frontendUserUid, int $period, int $currentTime = 0): QueryResultInterface
-    {
+    public function findNotifiedSurveyRequestsWithinPeriodByFrontendUser(
+        int $frontendUserUid,
+        int $period,
+        int $currentTime = 0
+    ) : QueryResultInterface {
+
         if (! $currentTime) {
             $currentTime = time();
         }
@@ -177,7 +179,5 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $query->matching($query->logicalAnd($constraints));
 
         return $query->execute();
-
     }
-
 }

@@ -27,11 +27,6 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  */
 class SurveyRequestUtility
 {
-    /**
-     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
-     */
-    protected $markerReducer;
-
 
     /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest

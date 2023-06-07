@@ -17,9 +17,7 @@ config.tx_extbase.persistence {
           deleted.mapOnProperty = deleted
         }
       }
-
     }
-
   }
 }
 

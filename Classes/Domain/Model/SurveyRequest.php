@@ -14,7 +14,7 @@ namespace RKW\RkwOutcome\Domain\Model;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwRegistration\Domain\Model\FrontendUser;
+use Madj2k\FeRegister\Domain\Model\FrontendUser;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 
@@ -29,65 +29,57 @@ use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 {
     /**
-     * @var \RKW\RkwRegistration\Domain\Model\FrontendUser|null
+     * @var \Madj2k\FeRegister\Domain\Model\FrontendUser|null
      */
-    protected $frontendUser = null;
+    protected ?FrontendUser $frontendUser = null;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>|null
      */
-    protected $targetGroup = null;
+    protected ?ObjectStorage $targetGroup = null;
 
 
     /**
      * @var int
      */
-    protected $notifiedTstamp = 0;
+    protected int $notifiedTstamp = 0;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration|null
      */
-    protected $surveyConfiguration = null;
+    protected ?SurveyConfiguration $surveyConfiguration = null;
 
 
     /**
-     * process
-     *
      * @var string
      */
-    protected $process = '';
+    protected string $process = '';
 
 
     /**
-     * processUnserialized
-     *
      * @var array
      */
-    protected $processUnserialized = [];
+    protected array $processUnserialized = [];
 
 
     /**
-     * processSubject
-     *
      * @var string
      */
-    protected $processSubject = '';
+    protected string $processSubject = '';
 
 
     /**
-     * processSubjectUnserialized
-     *
      * @var array
      */
-    protected $processSubjectUnserialized = [];
+    protected array $processSubjectUnserialized = [];
 
 
     /**
      * @var bool
      */
-    protected $deleted = false;
+    protected bool $deleted = false;
 
 
     /**
@@ -153,6 +145,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
         return ($this->process ? unserialize($this->process) : []);
     }
 
+
     /**
      * Sets the process
      *
@@ -169,7 +162,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Returns the frontendUser
      *
-     * @return \RKW\RkwRegistration\Domain\Model\FrontendUser
+     * @return \Madj2k\FeRegister\Domain\Model\FrontendUser
      */
     public function getFrontendUser(): ?FrontendUser
     {
@@ -180,7 +173,7 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * Sets the frontendUser
      *
-     * @param \RKW\RkwRegistration\Domain\Model\FrontendUser $frontendUser
+     * @param \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser
      * @return void
      */
     public function setFrontendUser(FrontendUser $frontendUser): void
