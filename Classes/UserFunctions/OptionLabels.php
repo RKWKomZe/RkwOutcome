@@ -15,8 +15,6 @@ namespace RKW\RkwOutcome\UserFunctions;
  * The TYPO3 project - inspiring people to share!
  */
 
-use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
-
 
 /**
  * Class OptionLabels
@@ -33,6 +31,8 @@ class OptionLabels
      *
      * @params array &$params
      * @params object $pObj
+     * @param array $params
+     * @param $pObj
      * @return void
      */
     public static function getSurveyNamesWithUid(array &$params, $pObj): void

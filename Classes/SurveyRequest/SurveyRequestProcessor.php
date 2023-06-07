@@ -18,6 +18,7 @@ use RKW\RkwOutcome\Domain\Model\SurveyConfiguration;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwSurvey\Domain\Model\Survey;
 use RKW\RkwSurvey\Domain\Model\Token;
+use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
@@ -49,9 +50,9 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
     /**
      * @var \RKW\RkwSurvey\Domain\Repository\TokenRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $tokenRepository;
+    protected TokenRepository $tokenRepository;
 
 
     /**
@@ -65,8 +66,12 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-     public function processPendingSurveyRequests(int $checkPeriod, int $maxSurveysPerPeriodAndFrontendUser, int $currentTime = 0): array
-     {
+     public function processPendingSurveyRequests(
+         int $checkPeriod,
+         int $maxSurveysPerPeriodAndFrontendUser,
+         int $currentTime = 0
+     ): array {
+
          if (! $currentTime) {
              $currentTime = time();
          }
@@ -118,13 +123,10 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
                                  $this->sendNotification($surveyRequest, $generatedTokens);
                              } catch (\Exception $e) {
                              }
-
                          }
 
                      } else {
-
                          $surveyRequest->setDeleted(true);
-
                      }
 
                      $this->surveyRequestRepository->update($surveyRequest);
@@ -224,7 +226,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
     {
         $notifiableObjects = [];
         foreach ($surveyRequestsByUser as $surveyRequest) {
-            $process = $this->markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+            $process = $this->markerReducer->explode($surveyRequest->getProcess())['process'];
             $notifiableObjects[$surveyRequest->getUid()] = $this->getNotifiableObjects($process);
         }
 
@@ -243,7 +245,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
     protected function containsProcessableSubject(SurveyRequest $surveyRequest, AbstractEntity $processableSubject): bool
     {
         $containsProcessableSubject = false;
-        $process = $this->markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
+        $process = $this->markerReducer->explode($surveyRequest->getProcess())['process'];
 
         $notifiableObjects = $this->getNotifiableObjects($process);
 
@@ -257,6 +259,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
         return $containsProcessableSubject;
     }
+
 
     /**
      * @param int $frontendUserUid
@@ -317,9 +320,13 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
     /**
      * @param \RKW\RkwSurvey\Domain\Model\Survey $survey
      * @return string
+     * @throws \Exception
      */
     protected function generateTokenName(Survey $survey): string
     {
+
+        /** @todo check if this is enough */
+        return \Madj2k\CoreExtended\Utility\GeneralUtility::getUniqueRandomString();
 
         $bytes = random_bytes(self::RANDOM_STRING_LENGTH / 2);
         $newTokenName = bin2hex($bytes);
@@ -330,6 +337,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
         return $newTokenName;
     }
+
 
     /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
@@ -344,8 +352,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
         $surveyConfigurations = null;
 
-        $process = $this->markerReducer->explodeMarker($surveyRequest->getProcess())['process'];
-
+        $process = $this->markerReducer->explode($surveyRequest->getProcess())['process'];
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
             /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
             $surveyConfigurations = $this->surveyConfigurationRepository

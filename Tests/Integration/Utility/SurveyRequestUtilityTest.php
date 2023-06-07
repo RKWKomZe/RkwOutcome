@@ -15,7 +15,8 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
  */
 
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
-use RKW\RkwMailer\Persistence\MarkerReducer;
+use Madj2k\Accelerator\Persistence\MarkerReducer;
+use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
@@ -46,15 +47,17 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
      * @var string[]
      */
     protected $testExtensionsToLoad = [
-        'typo3conf/ext/rkw_basics',
+        'typo3conf/ext/accelerator',
+        'typo3conf/ext/core_extended',
+        'typo3conf/ext/fe_register',
+        'typo3conf/ext/postmaster',
         'typo3conf/ext/rkw_events',
-        'typo3conf/ext/rkw_mailer',
         'typo3conf/ext/rkw_outcome',
-        'typo3conf/ext/rkw_registration',
         'typo3conf/ext/rkw_shop',
         'typo3conf/ext/rkw_survey',
         'typo3conf/ext/static_info_tables',
     ];
+
 
 
     /**
@@ -64,59 +67,57 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
 
 
     /**
-     * @var \RKW\RkwEvents\Domain\Repository\EventReservationRepository
+     * @var \RKW\RkwEvents\Domain\Repository\EventReservationRepository|null
      */
-    private $eventReservationRepository;
+    private ?EventReservationRepository $eventReservationRepository = null;
 
 
     /**
-     * @var \RKW\RkwShop\Domain\Repository\OrderRepository
+     * @var \RKW\RkwShop\Domain\Repository\OrderRepository|null
      */
-    private $orderRepository;
+    private ?OrderRepository $orderRepository = null;
 
 
     /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository|null
      */
-    private $surveyRequestRepository;
+    private ?SurveyRequestRepository $surveyRequestRepository = null;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository|null
      */
-    private $surveyConfigurationRepository;
+    private ?SurveyConfigurationRepository $surveyConfigurationRepository = null;
 
 
     /**
      * @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor|null
      */
-    private $surveyRequestProcessor;
+    private ?SurveyRequestProcessor $surveyRequestProcessor = null;
 
 
     /**
-     * PersistenceManager
-     *
-     * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
+     * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager|null
      */
-    protected $persistenceManager;
+    protected ?PersistenceManager $persistenceManager = null;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Object\ObjectManager|null
      */
-    private $objectManager;
+    private ?ObjectManager $objectManager = null;
 
 
     /**
      * @var int
      */
-    protected $checkPeriod;
+    protected int $checkPeriod = 0;
 
 
     /**
      * @var int
      */
-    protected $maxSurveysPerPeriodAndFrontendUser;
+    protected int $maxSurveysPerPeriodAndFrontendUser = 0;
 
 
     /**
@@ -133,12 +134,18 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         $this->setUpFrontendRootPage(
             1,
             [
-                'EXT:rkw_basics/Configuration/TypoScript/constants.typoscript',
-                'EXT:rkw_basics/Configuration/TypoScript/setup.typoscript',
+                'EXT:core_extended/Configuration/TypoScript/constants.typoscript',
+                'EXT:core_extended/Configuration/TypoScript/setup.typoscript',
+                'EXT:accelerator/Configuration/TypoScript/constants.typoscript',
+                'EXT:accelerator/Configuration/TypoScript/setup.typoscript',
+                'EXT:fe_register/Configuration/TypoScript/constants.typoscript',
+                'EXT:fe_register/Configuration/TypoScript/setup.typoscript',
+                'EXT:postmaster/Configuration/TypoScript/constants.typoscript',
+                'EXT:postmaster/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_outcome/Configuration/TypoScript/constants.typoscript',
                 'EXT:rkw_outcome/Configuration/TypoScript/setup.typoscript',
-                'EXT:rkw_registration/Configuration/TypoScript/constants.typoscript',
-                'EXT:rkw_registration/Configuration/TypoScript/setup.typoscript',
+                'EXT:rkw_events/Configuration/TypoScript/constants.typoscript',
+                'EXT:rkw_events/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_shop/Configuration/TypoScript/constants.typoscript',
                 'EXT:rkw_shop/Configuration/TypoScript/setup.typoscript',
                 'EXT:rkw_survey/Configuration/TypoScript/constants.typoscript',
@@ -175,14 +182,14 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         $this->maxSurveysPerPeriodAndFrontendUser = 1;
     }
 
+    //==================================================================================================
 
     /**
      * @param string $model
      * @param int $modelUid
      * @param int $surveyConfigurationUid
-     *
      * @return void
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     * @throws \Exception
      */
     protected function setUpSurveyRequest(string $model, int $modelUid = 1, int $surveyConfigurationUid = 1): void
     {
@@ -216,17 +223,18 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         $process->getTargetGroup()->rewind();
         $surveyRequest->addTargetGroup($process->getTargetGroup()->current());
 
-        $surveyRequest->setProcess($markerReducer->implodeMarker(['process' => $process]));
-        $surveyRequest->setProcessSubject($markerReducer->implodeMarker(['processSubject' => $processSubject]));
+        $surveyRequest->setProcess($markerReducer->implode(['process' => $process]));
+        $surveyRequest->setProcessSubject($markerReducer->implode(['processSubject' => $processSubject]));
 
         $this->surveyRequestRepository->add($surveyRequest);
         $this->persistenceManager->persistAll();
     }
 
+    //==================================================================================================
 
     /**
      * @test
-     * @throws \Nimut\TestingFramework\Exception\Exception
+     * @throws \Exception
      */
     public function buildSurveyRequestTagsReturnsExpectedResult(): void
     {
@@ -235,7 +243,7 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
          *
          * Given persisted surveyRequest-object
          * When the method is called
-         * Then ii should return a comma separated string contain targegGroupUid, class of product and productUid
+         * Then ii should return a comma separated string contain targetGroupUid, class of product and productUid
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check10.xml');
@@ -259,6 +267,8 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
         $tags = SurveyRequestUtility::buildSurveyRequestTags($surveyRequestDb);
         self::assertEquals('10,Product,2', $tags);
     }
+
+    //==================================================================================================
 
 
     /**

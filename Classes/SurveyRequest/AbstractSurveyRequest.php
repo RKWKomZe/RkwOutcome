@@ -14,11 +14,16 @@ namespace RKW\RkwOutcome\SurveyRequest;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwMailer\Persistence\MarkerReducer;
+use Madj2k\Accelerator\Persistence\MarkerReducer;
+use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
+use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwOutcome\Log\LogTrait;
+use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
+use TYPO3\CMS\Extbase\SignalSlot\Dispatcher;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\DomainObject\AbstractEntity;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 /**
  * Class AbstractSurveyRequest
@@ -34,49 +39,49 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
 
     /**
      * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $signalSlotDispatcher;
+    protected Dispatcher $signalSlotDispatcher;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $surveyRequestRepository;
+    protected SurveyRequestRepository $surveyRequestRepository;
+
+
+    /**
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
+     * @TYPO3\CMS\Extbase\Annotation\Inject
+     */
+    protected SurveyConfigurationRepository $surveyConfigurationRepository;
+
+
+    /**
+     * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository
+     * @TYPO3\CMS\Extbase\Annotation\Inject
+     */
+    protected SurveyRepository $surveyRepository;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
-     * @inject
+     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected $persistenceManager;
+    protected PersistenceManager $persistenceManager;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Object\ObjectManager|null
      */
-    protected $objectManager;
+    protected ?ObjectManager $objectManager = null;
 
 
     /**
-     * @var \RKW\RkwMailer\Persistence\MarkerReducer|null
+     * @var \Madj2k\Accelerator\Persistence\MarkerReducer|null
      */
-    protected $markerReducer;
-
-
-    /**
-     * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository
-     * @inject
-     */
-    protected $surveyRepository;
-
-
-    /**
-     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
-     * @inject
-     */
-    protected $surveyConfigurationRepository;
+    protected ?MarkerReducer $markerReducer = null;
 
 
     /**
@@ -87,7 +92,7 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
-        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        /** @var \Madj2k\Accelerator\Persistence\MarkerReducer $markerReducer */
         $this->markerReducer = $this->objectManager->get(MarkerReducer::class);
     }
 
@@ -134,6 +139,7 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
                     $orderItem->getProduct(),
                     $process->getTargetGroup()
                 );
+
                 if (
                     $surveyConfigurations
                     && count($surveyConfigurations->toArray()) > 0

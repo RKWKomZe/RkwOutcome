@@ -36,7 +36,7 @@ class TCA
      * @param array $parameters
      * @return void
      */
-    public function surveyConfigurationTitle(&$parameters): void
+    public function surveyConfigurationTitle(array &$parameters): void
     {
 
         $record = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid']);

@@ -31,37 +31,37 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     /**
      * @var string
      */
-    protected $processType = '';
+    protected string $processType = '';
 
 
     /**
      * @var \RKW\RkwShop\Domain\Model\Product|null
      */
-    protected $product = null;
+    protected ?Product $product = null;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\RKW\RkwSurvey\Domain\Model\Survey>|null
      */
-    protected $survey = null;
+    protected ?ObjectStorage $survey = null;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Persistence\ObjectStorage<\TYPO3\CMS\Extbase\Domain\Model\Category>|null
      */
-    protected $targetGroup = null;
+    protected ?ObjectStorage $targetGroup = null;
 
 
     /**
      * @var string
      */
-    protected $mailText = '';
+    protected string $mailText = '';
 
 
     /**
      * @var int
      */
-    protected $surveyWaitingTime = 0;
+    protected int $surveyWaitingTime = 0;
 
 
     /**

@@ -15,8 +15,9 @@ namespace RKW\RkwOutcome\ViewHelpers\Email\Replace;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwMailer\Domain\Model\QueueMail;
-use RKW\RkwMailer\Domain\Model\QueueRecipient;
+use Madj2k\Postmaster\Domain\Model\QueueMail;
+use Madj2k\Postmaster\Domain\Model\QueueRecipient;
+use Madj2k\Postmaster\UriBuilder\EmailUriBuilder;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use RKW\RkwOutcome\Utility\SurveyRequestUtility;
 use RKW\RkwSurvey\Domain\Model\Survey;
@@ -24,7 +25,6 @@ use TYPO3\CMS\Core\Log\LogLevel;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
-use RKW\RkwMailer\UriBuilder\EmailUriBuilder;
 use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithContentArgumentAndRenderStatic;
 
@@ -78,7 +78,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
         array $arguments,
         \Closure $renderChildrenClosure,
         RenderingContextInterface $renderingContext
-    ) {
+    ): string {
 
         $value = $renderChildrenClosure();
         $queueMail = $arguments['queueMail'];
@@ -94,7 +94,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
             if ($queueMail) {
 
                 // plaintext replacement
-                if ($isPlaintext == true) {
+                if ($isPlaintext) {
 
                     foreach ($surveyRequest->getSurveyConfiguration()->getSurvey() as $survey) {
 
@@ -102,9 +102,9 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
                             $survey,
                             $surveyRequest,
                             $targetUid,
-                            $generatedTokens,
                             $queueMail,
                             $queueRecipient,
+                            $generatedTokens,
                             $additionalParams
                         );
                         $actionLinkPlain = $survey->getName() . '(' . $actionLink . ')';
@@ -115,8 +115,8 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
                             $actionLinkPlain,
                             $value
                         );
-
                     }
+
                 // HTML- replacement
                 } else {
 
@@ -126,9 +126,9 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
                             $survey,
                             $surveyRequest,
                             $targetUid,
-                            $generatedTokens,   //  @todo: evtl. in additional params unterbringen, ebenso wie targetUid
                             $queueMail,
                             $queueRecipient,
+                            $generatedTokens,   //  @todo: evtl. in additional params unterbringen, ebenso wie targetUid
                             $additionalParams
                         );
                         $actionLinkHtml = '<a href="' . $actionLink . '" target="_blank">' . $survey->getName() . '</a>';
@@ -148,7 +148,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
         } catch (\Exception $e) {
 
             $logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-            $logger()->log(
+            $logger->log(
                 LogLevel::ERROR,
                 sprintf(
                     'Error while trying to replace survey links: %s',
@@ -167,9 +167,9 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
      * @param Survey $survey
      * @param SurveyRequest $surveyRequest
      * @param int $targetUid
-     * @param array $generatedTokens
      * @param QueueMail $queueMail
-     * @param QueueRecipient $queueRecipient
+     * @param QueueRecipient|null $queueRecipient
+     * @param array $generatedTokens
      * @param array $additionalParams
      * @return string
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
@@ -179,9 +179,9 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
         Survey $survey,
         SurveyRequest $surveyRequest,
         int $targetUid,
-        array $generatedTokens = [],
         QueueMail $queueMail,
         QueueRecipient $queueRecipient = null,
+        array $generatedTokens = [],
         array $additionalParams = []
     ): string {
 
@@ -189,7 +189,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
-        /** @var \RKW\RkwMailer\UriBuilder\EmailUriBuilder $uriBuilder */
+        /** @var \Madj2k\Postmaster\UriBuilder\EmailUriBuilder $uriBuilder */
         $uriBuilder = $objectManager->get(EmailUriBuilder::class);
 
         $arguments = [

@@ -33,8 +33,8 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
 
-    /*
-    * @return void
+    /**
+     * @return void
     */
     public function initializeObject(): void
     {
@@ -48,9 +48,7 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
      *
      * @param \RKW\RkwShop\Domain\Model\Product $product
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
-     *
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * implicitly tested
      */
     public function findByProductAndTargetGroup(Product $product, ObjectStorage $targetGroups): ?QueryResultInterface
@@ -127,9 +125,7 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
      *
      * @param \RKW\RkwEvents\Domain\Model\Event $event
      * @param \TYPO3\CMS\Extbase\Persistence\ObjectStorage $targetGroups
-     *
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * implicitly tested
      */
     public function findByEventAndTargetGroup(Event $event, ObjectStorage $targetGroups): ?QueryResultInterface
@@ -193,7 +189,6 @@ class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repos
             );
 
             return $query->execute();
-
         }
 
         return null;
