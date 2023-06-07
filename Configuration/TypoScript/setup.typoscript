@@ -52,6 +52,7 @@ plugin.tx_rkwoutcome {
   settings {
     targetGroupsPid = {$plugin.tx_rkwoutcome.settings.targetGroupsPid}
     surveyShowPid = {$plugin.tx_rkwoutcome.settings.surveyShowPid}
+    rootPageUid = {$plugin.tx_rkwoutcome.settings.rootPageUid}
   }
 }
 

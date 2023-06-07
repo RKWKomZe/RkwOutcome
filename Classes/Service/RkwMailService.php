@@ -113,7 +113,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                         'frontendUser' => $recipient,
                         'generatedTokens' => $generatedTokens,
                         'surveyRequestTags' => SurveyRequestUtility::buildSurveyRequestTags($surveyRequest),
-                        'targetUid' => (int) $settingsDefault['surveyShowPid']
+                        'targetUid' => (int) $settingsDefault['surveyShowPid'],
+                        'process' => SurveyRequestUtility::getProcessInformation($surveyRequest)
                     ]
                 ]);
 
@@ -125,6 +126,8 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
                         $recipient->getTxRkwregistrationLanguageKey()
                     )
                 );
+
+                $mailService->getQueueMail()->setSettingsPid((int) $settingsDefault['rootPageUid']);
 
                 $this->logInfo(
                     sprintf(
