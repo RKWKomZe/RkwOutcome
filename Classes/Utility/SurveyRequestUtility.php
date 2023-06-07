@@ -14,7 +14,7 @@ namespace RKW\RkwOutcome\Utility;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwMailer\Persistence\MarkerReducer;
+use Madj2k\Accelerator\Persistence\MarkerReducer;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
@@ -62,16 +62,16 @@ class SurveyRequestUtility
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(ObjectManager::class);
 
-        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        /** @var \Madj2k\Accelerator\Persistence\MarkerReducer $markerReducer */
         $markerReducer = $objectManager->get(MarkerReducer::class);
 
         $surveyRequest->getTargetGroup()->rewind();
         $targetGroupUid = $surveyRequest->getTargetGroup()->current()->getUid();
 
-        $processMarker = $markerReducer->explodeMarker($surveyRequest->getProcess());
+        $processMarker = $markerReducer->explode($surveyRequest->getProcess());
         $process = $processMarker['process'];
 
-        $processSubjectMarker = $markerReducer->explodeMarker($surveyRequest->getProcessSubject());
+        $processSubjectMarker = $markerReducer->explode($surveyRequest->getProcessSubject());
         $processSubject = $processSubjectMarker['processSubject'];
 
         return [
