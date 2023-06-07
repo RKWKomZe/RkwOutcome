@@ -28,16 +28,19 @@
         <rkwMailer:recipientSalutation queueRecipient="{queueRecipient}" prependText="<rkwMailer:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
     </h1>
     <p>
-        <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="false">
-            <rkwOutcome:email.replace.surveyPlaceHolders
-                targetUid="{targetUid}"
-                surveyRequest="{surveyRequest}"
-                queueMail="{queueMail}"
-                isPlaintext="false"
-                generatedTokens="{generatedTokens}"
-            >
-                {mailText}
-            </rkwOutcome:email.replace.surveyPlaceHolders>
-        </rkwMailer:email.replace.redirectLinks>
+        <f:format.nl2br>
+            <rkwMailer:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="false">
+                <rkwOutcome:email.replace.surveyPlaceHolders
+                    targetUid="{targetUid}"
+                    surveyRequest="{surveyRequest}"
+                    queueMail="{queueMail}"
+                    isPlaintext="false"
+                    generatedTokens="{generatedTokens}"
+                >
+                    {mailText}
+                </rkwOutcome:email.replace.surveyPlaceHolders>
+            </rkwMailer:email.replace.redirectLinks>
+        </f:format.nl2br>
     </p>
+    <p><rkwMailer:email.translate key="templates_email_userSurveyRequest.orderInfo" languageKey="{queueRecipient.languageCode}" arguments="{0: '{f:format.date(date: process.date, format: \'d.m.Y H:i\')}', 1: '{process.targetGroup.name}', 2: '{process.subject.name}'}" extensionName="rkwOutcome"/></p>
 </f:section>

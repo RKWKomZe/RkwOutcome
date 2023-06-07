@@ -19,7 +19,10 @@ plugin.tx_rkwoutcome {
     # cat=plugin.tx_rkwoutcome//a; type=integer; label=Pid of target groups
     targetGroupsPid =
 
-    # cat=plugin.tx_rkwoutcome//a; type=integer; label=Pid of survey detail page
+    # cat=plugin.tx_rkwoutcome//a; type=integer; label=Uid of survey detail page
     surveyShowPid =
+
+    # cat=plugin.tx_rkwoutcome//a; type=integer; label=Uid of root page with typoscript settings
+    rootPageUid =
   }
 }

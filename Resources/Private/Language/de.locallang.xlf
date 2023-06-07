@@ -63,6 +63,15 @@
 				<source>Go to survey %s</source>
 				<target>Zur Umfrage %s</target>
 			</trans-unit>
+			<trans-unit id="templates_email_userSurveyRequest.orderInfo">
+				<source>Thank you very much as you have ordered on %s as %s our product %s.</source>
+				<target>Hinweis: Sie erhalten diese Benachrichtigung, da Sie am %s als %s unser Produkt %s bestellt haben.</target>
+			</trans-unit>
+			<trans-unit id="templates_email_userSurveyRequest.eventInfo">
+				<source>Thank you very much as you have participated on %s as %s in our event %s.</source>
+				<target>Hinweis: Sie erhalten diese Benachrichtigung, da Sie am %s als %s an unserer Veranstaltung %s teilgenommen haben.</target>
+			</trans-unit>
+
 
 			<!-- ##################### -->
 			<!-- Frontend Templates -->

@@ -58,6 +58,12 @@
 			<trans-unit id="templates_email_userSurveyRequest.goToSurvey">
 				<source>Go to survey %s</source>
 			</trans-unit>
+			<trans-unit id="templates_email_userSurveyRequest.orderInfo">
+				<source>Thank you very much as you have ordered on %s as %s our product %s.</source>
+			</trans-unit>
+			<trans-unit id="templates_email_userSurveyRequest.eventInfo">
+				<source>Thank you very much as you have participated on %s as %s in our event %s.</source>
+			</trans-unit>
 
 
 			<!-- ##################### -->

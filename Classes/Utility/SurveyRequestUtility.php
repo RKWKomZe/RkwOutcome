@@ -14,8 +14,10 @@ namespace RKW\RkwOutcome\Utility;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwMailer\Persistence\MarkerReducer;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
  * Class SurveyRequestUtility
@@ -55,4 +57,37 @@ class SurveyRequestUtility
 
         return implode(',', $surveyRequestTags);
     }
+
+    /**
+     * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
+     * @return array
+     */
+    public static function getProcessInformation(SurveyRequest $surveyRequest): array
+    {
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $objectManager = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(ObjectManager::class);
+
+        /** @var \RKW\RkwMailer\Persistence\MarkerReducer $markerReducer */
+        $markerReducer = $objectManager->get(MarkerReducer::class);
+
+        $surveyRequest->getTargetGroup()->rewind();
+        $targetGroupUid = $surveyRequest->getTargetGroup()->current()->getUid();
+
+        $processMarker = $markerReducer->explodeMarker($surveyRequest->getProcess());
+        $process = $processMarker['process'];
+
+        $processSubjectMarker = $markerReducer->explodeMarker($surveyRequest->getProcessSubject());
+        $processSubject = $processSubjectMarker['processSubject'];
+
+        return [
+            'date' => $process->getCrdate(),
+            'subject' => [
+                'name' => $processSubject->getTitle()
+            ],
+            'targetGroup' => [
+                'name' => $surveyRequest->getTargetGroup()->current()->getTitle()
+            ]
+        ];
+    }
+
 }
