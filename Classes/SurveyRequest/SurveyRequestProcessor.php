@@ -98,7 +98,10 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
                  /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
                  foreach ($surveyRequestsByUser as $surveyRequest) {
 
-                     if ($this->containsProcessableSubject($surveyRequest, $processableSubject)) {
+                     if (
+                         ($this->containsProcessableSubject($surveyRequest, $processableSubject))
+                         && ($surveyRequest->getFrontendUser()->getTxFeregisterConsentMarketing())
+                     ){
 
                          $surveyConfigurations = $this->getSurveyConfigurations($surveyRequest, $processableSubject);
 
@@ -121,8 +124,12 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
                                  $surveyRequest = $this->surveyRequestRepository->findByUid($surveyRequest->getUid());
 
                                  $this->sendNotification($surveyRequest, $generatedTokens);
+
                              } catch (\Exception $e) {
+                                 // do nothing
                              }
+
+                             $notifiableSurveyRequests[] = $surveyRequest;
                          }
 
                      } else {
@@ -131,7 +138,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
                      $this->surveyRequestRepository->update($surveyRequest);
                      $this->persistenceManager->persistAll();
-                     $notifiableSurveyRequests[] = $surveyRequest;
                  }
              }
          }
@@ -235,6 +241,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
         return (empty($mergedNotifiableObjects)) ? null : $mergedNotifiableObjects[$randomKey];
     }
+
 
     /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest

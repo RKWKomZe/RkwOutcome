@@ -16,6 +16,7 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
 
 use Carbon\Carbon;
 use Madj2k\Accelerator\Persistence\MarkerReducer;
+use Madj2k\CoreExtended\Utility\FrontendSimulatorUtility;
 use Madj2k\FeRegister\Domain\Repository\FrontendUserRepository;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
@@ -232,6 +233,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
 
         $this->checkPeriod = 7 * 24 * 60 * 60;
         $this->maxSurveysPerPeriodAndFrontendUser = 1;
+
     }
 
 
@@ -289,12 +291,11 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function processPendingSurveyRequestMarksSurveyRequestAsNotifiedIfShippedTstampIsLessThanNowMinusSurveyWaitingTime(): void
+    public function processPendingSurveyRequestMarksAsNotifiedIfShippedTstampIsLessThanSurveyWaitingTime(): void
     {
         /**
          * Scenario:
          *
-         * Given a persisted survey
          * Given a persisted product
          * Given a persisted surveyConfiguration-object
          * Given the surveyConfiguration-property surveyWaitingTime is set to 1 * 24 * 60 * 60 seconds (1 day)
@@ -306,6 +307,8 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Given the product-property ot the contained orderItem-object is set to the same product-object
          * Given the targetGroup-object 1 is attached to that order-object
          * Given a persisted surveyRequest-object
+         * Given that surveyRequest-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given the surveyRequest-property process is set to that order-object
          * Given the surveyRequest-property processSubject is set to that product-object
          * Given the surveyRequest-property surveyConfiguration is set to the persisted surveyConfiguration-object
@@ -339,12 +342,63 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function processPendingSurveyRequestDoesNotMarkSurveyRequestAsNotifiedIfShippedTstampIsGreaterThanNowMinusSurveyWaitingTime(): void
+    public function processPendingSurveyRequestDeletesIfFrontendUserHasNoMarketingOptin(): void
     {
         /**
          * Scenario:
          *
-         * Given a persisted survey
+         * Given a persisted product
+         * Given a persisted surveyConfiguration-object
+         * Given the surveyConfiguration-property surveyWaitingTime is set to 1 * 24 * 60 * 60 seconds (1 day)
+         * Given the surveyConfiguration-property survey is set to that survey-object
+         * Given the surveyConfiguration-property product is set to that product-object
+         * Given the targetGroup-object 1 is attached to that surveyConfiguration-object
+         * Given a persisted order-object
+         * Given the order-property shippedTstamp is set to less than (now (time()) - surveyWaitingTime (1 day))
+         * Given the product-property ot the contained orderItem-object is set to the same product-object
+         * Given the targetGroup-object 1 is attached to that order-object
+         * Given a persisted surveyRequest-object
+         * Given that surveyRequest-object belongs to a persisted frontendUser
+         * Given that frontendUser as NOT opted-in to marketing
+         * Given the surveyRequest-property process is set to that order-object
+         * Given the surveyRequest-property processSubject is set to that product-object
+         * Given the surveyRequest-property surveyConfiguration is set to the persisted surveyConfiguration-object
+         * When the method is called
+         * Then no surveyRequests have been sent
+         * Then the former surveyRequest has been deleted
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check15.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+        $order->setShippedTstamp(strtotime('-2 days'));
+        $this->orderRepository->update($order);
+
+        $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 1, 1);
+
+        $notifiedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser
+        );
+
+        self::assertCount(0, $notifiedSurveyRequests);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+    }
+
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function processPendingSurveyRequestDoesNotMarkAsNotifiedIfShippedTstampIsGreaterThanSurveyWaitingTime(): void
+    {
+        /**
+         * Scenario:
+         *
          * Given a persisted product
          * Given a persisted surveyConfiguration-object
          * Given the surveyConfiguration-property survey is set to that survey-object
@@ -356,6 +410,8 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Given the product-property ot the contained orderItem-object is set to the same product-object
          * Given the targetGroup-object 1 is attached to that order-object
          * Given a persisted surveyRequest-object
+         * Given that surveyRequest-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given the surveyRequest-property process is set to that order-object
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp remains 0
@@ -410,6 +466,8 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Given the product-property of the first orderItem-object is set to the first product-object
          * Given the product-property of the second orderItem-object is set to the second product-object
          * Given a persisted surveyRequest-object
+         * Given that surveyRequest-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given the surveyRequest-property process is set to that order
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
@@ -451,12 +509,17 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @todo Move to SurveyRequestCreatorTest
      * @throws \Exception
      */
-    public function processPendingSurveyRequestSetsSurveyRequestPropertyProcessSubjectToRandomProductAssociatedWithSurveyConfiguration(): void
+    public function processPendingSurveyRequestSetsProcessSubjectToRandomProduct(): void
     {
         /**
          * Scenario:
          *
+         * Given a persisted surveyRequest-object
+         * Given that survey belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a first persisted product
+         * Given that survey belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a first persisted surveyConfiguration-object
          * Given the surveyConfiguration-property of the first surveyConfiguration-object is set to the first product-object
          * Given a second persisted product
@@ -470,6 +533,8 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Given the product-property of the second orderItem-object is set to the second product-object
          * Given the product-property of the third orderItem-object is set to the third product-object
          * Given a persisted surveyRequest-object
+         * Given that surveyRequest-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given the surveyRequest-property process is set to that order
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
@@ -512,7 +577,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @todo Move to SurveyRequestCreatorTest
      * @throws \Exception
      */
-    public function processPendingSurveyRequestSetsProcessedSurveyRequestPropertyProcessSubjectToSingleProductAssociatedWithMatchingSurveyConfigurationEvenIfASecondProductWithNotMatchingSurveyConfigurationExists(): void
+    public function processPendingSurveyRequestSetsProcessSubjectToSingleProduct(): void
     {
         /**
          * Scenario:
@@ -533,6 +598,8 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Given the product-property of the first orderItem-object is set to the product-object 1
          * Given the product-property of the second orderItem-object is set to the product-object 2
          * Given a persisted surveyRequest-object
+         * Given that surveyRequest-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given the surveyRequest-property process is set to that order
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp is set to > 0
@@ -582,8 +649,12 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Scenario:
          *
          * Given a persisted surveyRequest-object 1
+         * Given that surveyRequest-object 1 belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given property notifiedTstamp of surveyRequest-object 1 is set to 1
          * Given a persisted surveyRequest-object 2
+         * Given that surveyRequest-object 2 belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * When the method is called
          * Then the number of processed requests is 1
          * Then the property notifiedTstamp of surveyRequest-object 1 remains 1
@@ -638,10 +709,12 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Scenario:
          *
          * Given a persisted frontendUser 1
+         * Given that frontendUser 1 as opted-in to marketing
          * Given a persisted surveyRequest-object 1 that belongs to frontendUser-object 1
          * Given a persisted order-object 1 that belongs to surveyRequest-object 1
          * Given a persisted product-object 1 that belongs to order-object 1
          * Given a persisted frontendUser 2
+         * Given that frontendUser 2 as opted-in to marketing
          * Given a persisted surveyRequest-object 2 that belongs to frontendUser-object 2
          * Given a persisted order-object 2 that belongs to surveyRequest-object 2
          * Given a persisted product-object 2 that belongs to order-object 2
@@ -703,6 +776,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Given maxSurveysPerPeriodAndFrontendUser is set to 1
          * Given surveyWaitingTime is set to 0
          * Given a persisted frontendUser 1
+         * Given that frontendUser 1 as opted-in to marketing
          * Given a persisted surveyRequest-object 1 that belongs to frontendUser-object 1
          * Given a persisted surveyRequest-object 2 that belongs to frontendUser-object 1
          * When the method is called 2 days after the order

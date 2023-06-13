@@ -14,11 +14,11 @@ namespace RKW\RkwOutcome\Domain\Repository;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Madj2k\CoreExtended\Domain\Repository\StoragePidAwareAbstractRepository;
 use RKW\RkwEvents\Domain\Model\Event;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
 use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
 
@@ -30,17 +30,21 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyConfigurationRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
+class SurveyConfigurationRepository extends StoragePidAwareAbstractRepository
+// extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
 
     /**
+     * initializeObject
+     *
      * @return void
-    */
+     * @todo is this really what we want?
     public function initializeObject(): void
     {
         $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
         $this->defaultQuerySettings->setRespectStoragePage(false);
     }
+     */
 
 
     /**

@@ -1,29 +1,9 @@
 <?php
-
-use RKW\RkwOutcome\Controller\SurveyRequestCommandController;
-
 defined('TYPO3_MODE') || die('Access denied.');
 
 call_user_func(
     function($extKey)
     {
-
-        //=================================================================
-        // Configure Plugins
-        //=================================================================
-
-        //=================================================================
-        // Register CommandController
-        //=================================================================
-        $GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['extbase']['commandControllers'][] = SurveyRequestCommandController::class;
-
-        //=================================================================
-        // Register TCA evaluation to be available in 'eval' of TCA
-        //=================================================================
-
-        //=================================================================
-        // Register Hooks
-        //=================================================================
 
         //=================================================================
         // Register SignalSlots
@@ -65,7 +45,7 @@ call_user_func(
                 // add a FileWriter
                 'TYPO3\\CMS\\Core\\Log\\Writer\\FileWriter' => array(
                     // configuration for the writer
-                    'logFile' => 'typo3temp/var/logs/tx_rkwoutcome.log'
+                    'logFile' => \TYPO3\CMS\Core\Core\Environment::getVarPath()  . '/log/tx_rkwoutcome.log'
                 )
             ),
         );

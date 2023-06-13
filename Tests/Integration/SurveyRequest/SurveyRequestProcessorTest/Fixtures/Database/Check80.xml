@@ -11,6 +11,7 @@
         <address />
         <zip>10969</zip>
         <city>Hamburg</city>
+        <tx_feregister_consent_marketing>1</tx_feregister_consent_marketing>
     </fe_users>
     <fe_users>
         <uid>2</uid>
@@ -23,6 +24,7 @@
         <address />
         <zip>10115</zip>
         <city>Berlin</city>
+        <tx_feregister_consent_marketing>1</tx_feregister_consent_marketing>
     </fe_users>
     <!-- orders -->
     <tx_rkwshop_domain_model_order>

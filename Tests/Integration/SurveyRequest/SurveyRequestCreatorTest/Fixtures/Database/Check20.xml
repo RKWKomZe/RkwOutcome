@@ -11,6 +11,8 @@
         <address />
         <zip>10969</zip>
         <city>Hamburg</city>
+        <tx_feregister_consent_marketing>1</tx_feregister_consent_marketing>
+
     </fe_users>
     <!-- order -->
     <tx_rkwshop_domain_model_order>

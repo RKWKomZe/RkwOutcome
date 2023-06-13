@@ -187,6 +187,8 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
             ]
         );
 
+
+
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
@@ -239,12 +241,14 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestPersistsNewSurveyRequestIfOrderContainsProductMatchingSurveyConfiguration(): void
+    public function createSurveyRequestPersistsIfOrderContainsProductMatchingSurveyConfiguration(): void
     {
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object that belongs to that order-object
          * Given a product-object that belongs to that orderItem-object
@@ -270,7 +274,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(0, $surveyRequestsDb);
 
-        $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -295,12 +299,14 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestPersistsNewSurveyRequestWithRandomProcessSubjectIfProductsMatchDifferentSurveyConfigurations(): void
+    public function createSurveyRequestPersistsRandomizedIfProductsMatchDifferentSurveyConfigurations(): void
     {
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object 1 that belongs to that order-object
          * Given a product-object 1 that belongs to that orderItem-object 1
@@ -331,7 +337,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(0, $surveyRequestsDb);
 
-        $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -355,12 +361,14 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestDoesNotPersistNewSurveyRequestIfOrderDoesNotMatchSurveyConfigurationProduct(): void
+    public function createSurveyRequestIgnoresIfOrderDoesNotMatchSurveyConfigurationProduct(): void
     {
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object that belongs to that order-object
          * Given a product-object 1 that belongs to that orderItem-object
@@ -381,7 +389,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(0, $surveyRequestsDb);
 
-        $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -393,12 +401,14 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestDoesNotPersistNewSurveyRequestIfOrderDoesNotMatchSurveyConfigurationTargetGroup(): void
+    public function createSurveyRequestIgnoresIfOrderDoesNotMatchSurveyConfigurationTargetGroup(): void
     {
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object that belongs to that order-object
          * Given a product-object 1 that belongs to that orderItem-object
@@ -415,11 +425,46 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
 
-        $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
         self::assertCount(0, $surveyRequestsDb);
+    }
+
+    /**
+     * @test
+     * @throws \Exception
+     */
+    public function createSurveyRequestIgnoresIfUserHasNoMarketingConsent(): void
+    {
+        /**
+         * Scenario:
+         *
+         * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as NOT opted-in to marketing
+         * Given a targetGroup-object 1 that is attached to that order-object
+         * Given an orderItem-object that belongs to that order-object
+         * Given a product-object that belongs to that orderItem-object
+         * Given a surveyConfiguration-object that is persisted
+         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
+         * Given the targetGroup-object 1 attached to the surveyConfiguration
+         * When the method is called
+         * Then no new surveyRequest-object is persisted
+         */
+
+        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check35.xml');
+
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
+        $order = $this->orderRepository->findByUid(1);
+
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
+        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
+        self::assertCount(0, $surveyRequestsDb);
+
     }
 
 
@@ -433,6 +478,8 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
          * Scenario:
          *
          * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object that belongs to that order-object
          * Given a product-object that belongs to that orderItem-object
@@ -449,7 +496,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
 
-        $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -478,6 +525,8 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
          * Scenario:
          *
          * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object that belongs to that order-object
          * Given a product-object that belongs to that orderItem-object
@@ -516,6 +565,8 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
          * Scenario:
          *
          * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a frontendUser-object that is persisted
          * Given the order-property frontendUser is set to that frontendUser-object
          * Given a targetGroup-object 1 that is attached to that order-object
@@ -537,7 +588,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /** @var \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
-        $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -559,7 +610,8 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
          * Scenario:
          *
          * Given an order-object that is persisted
-         * Given the order-property frontendUser is set to that frontendUser-object
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object that belongs to that order-object
          * Given a product-object that belongs to that orderItem-object
@@ -576,7 +628,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
 
-        $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -590,94 +642,18 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         self::assertSame($order->getTargetGroup()->current(), $surveyRequestDb->getTargetGroup()->current());
     }
 
-
-    /**
-     * @todo: Kann weg!
-     * @throws \Exception
-     */
-    public function createSurveyRequestDoesNotSetSurveyConfigurationOnPersistedNewSurveyRequest(): void
-    {
-        /**
-         * Scenario:
-         *
-         * Given an order-object that is persisted
-         * Given the order-property frontendUser is set to that frontendUser-object
-         * Given a targetGroup-object 1 that is attached to that order-object
-         * Given an orderItem-object that belongs to that order-object
-         * Given a product-object that belongs to that orderItem-object
-         * Given a surveyConfiguration-object that is persisted
-         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
-         * Given the targetGroup-object 1 attached to the surveyConfiguration
-         * When the method is called
-         * Then a new surveyRequest-object is persisted
-         * Then the surveyRequest-property surveyConfiguration is not set
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check80.xml');
-
-        /** @var \RKW\RkwShop\Domain\Model\Order $order */
-        $order = $this->orderRepository->findByUid(1);
-
-        $this->fixture->createSurveyRequest($order);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequestDb = $surveyRequestsDb->getFirst();
-        self::assertNull($surveyRequestDb->getSurveyConfiguration());
-    }
-
-
-    /**
-     * @todo Kann weg!
-     * @throws \Exception
-     */
-    public function createSurveyRequestDoesNotSetProcessSubjectOnPersistedNewSurveyRequest(): void
-    {
-        /**
-         * Scenario:
-         *
-         * Given an order-object that is persisted
-         * Given the order-property frontendUser is set to that frontendUser-object
-         * Given a targetGroup-object 1 that is attached to that order-object
-         * Given an orderItem-object that belongs to that order-object
-         * Given a product-object that belongs to that orderItem-object
-         * Given a surveyConfiguration-object that is persisted
-         * Given the surveyConfiguration-property product is set to the same product-object as the orderItem-property product
-         * Given the targetGroup-object 1 attached to the surveyConfiguration
-         * When the method is called
-         * Then a new surveyRequest-object is persisted
-         * Then the surveyRequest-property processSubject is not set
-         */
-
-        $this->importDataSet(self::FIXTURE_PATH . '/Database/Check90.xml');
-
-        /** @var \RKW\RkwShop\Domain\Model\Order $order */
-        $order = $this->orderRepository->findByUid(1);
-
-        $this->fixture->createSurveyRequest($order);
-
-        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
-        $surveyRequestsDb = $this->surveyRequestRepository->findAll();
-
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequestDb = $surveyRequestsDb->getFirst();
-
-        self::assertEmpty($surveyRequestDb->getProcessSubject());
-    }
-
-
     /**
      * @test
      * @throws \Exception
      */
-    public function createSurveyRequestPersistsNewSurveyRequestIfOrderWithMultipleOrderItemsContainsAtLeastOneProductMatchingSurveyConfiguration(): void
+    public function createSurveyRequestPersistsWithMultipleOrderItemsContainsAtLeastOneProductMatchingSurveyConfiguration(): void
     {
         /**
          * Scenario:
          *
          * Given an order-object that is persisted
+         * Given that order-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given a targetGroup-object 1 that is attached to that order-object
          * Given an orderItem-object 1 that is persisted and belongs to that order-object
          * Given a product-object 1 that is persisted and belongs to that orderItem-object 1
@@ -692,10 +668,10 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check100.xml');
 
-        /** @var \RKW\RkwShop\Domain\Model\Order $process */
+        /** @var \RKW\RkwShop\Domain\Model\Order $order */
         $order = $this->orderRepository->findByUid(1);
 
-        $this->fixture->createSurveyRequest($order);
+        $this->fixture->createSurveyRequest($order, $order->getFrontendUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
@@ -713,8 +689,9 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /**
          * Scenario:
          *
-         * Given a frontendUser-object that is persisted
          * Given an event-object that is persisted
+         * Given that event-object belongs to a persisted frontendUser
+         * Given that frontendUser as opted-in to marketing
          * Given an eventReservation-object that is persisted and belongs to that event-object
          * Given a frontendUser-object that is persisted and belongs to that eventReservation-object
          * Given a targetGroup-object 1 that is attached to that eventReservation-object
@@ -733,11 +710,13 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
         /** @var \RKW\RkwEvents\Domain\Model\EventReservation $eventReservation */
         $eventReservation = $this->eventReservationRepository->findByUid(1);
 
+        $event = $this->eventRepository->findAll();
+
         /** @var \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser */
         $frontendUser = $this->frontendUserRepository->findByUid(1);
 
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
-        $surveyRequest = $this->fixture->createSurveyRequest($eventReservation);
+        $surveyRequest = $this->fixture->createSurveyRequest($eventReservation, $eventReservation->getFeUser());
 
         /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyRequests */
         $surveyRequestsDb = $this->surveyRequestRepository->findAll();
