@@ -11,12 +11,14 @@
         <address />
         <zip>10969</zip>
         <city>Hamburg</city>
+        <tx_feregister_consent_marketing>1</tx_feregister_consent_marketing>
     </fe_users>
     <!-- event -->
     <tx_rkwevents_domain_model_event>
         <uid>1</uid>
         <pid>1</pid>
         <title>Shoptalk</title>
+        <reservation>1</reservation>
     </tx_rkwevents_domain_model_event>
     <!-- eventReservations -->
     <tx_rkwevents_domain_model_eventreservation>

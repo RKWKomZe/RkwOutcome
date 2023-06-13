@@ -15,6 +15,7 @@ namespace RKW\RkwOutcome\Domain\Repository;
  */
 
 use Madj2k\Accelerator\Persistence\MarkerReducer;
+use Madj2k\CoreExtended\Domain\Repository\StoragePidAwareAbstractRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\Typo3QuerySettings;
@@ -28,20 +29,20 @@ use TYPO3\CMS\Extbase\Persistence\QueryResultInterface;
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
+class SurveyRequestRepository extends StoragePidAwareAbstractRepository
+// extends \TYPO3\CMS\Extbase\Persistence\Repository
 {
     /**
      * initializeObject
      *
      * @return void
-    */
+     * @todo is this really what we want?
     public function initializeObject(): void
     {
-        $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
-        $this->defaultQuerySettings->setRespectStoragePage(false);
+    $this->defaultQuerySettings = $this->objectManager->get(Typo3QuerySettings::class);
+    $this->defaultQuerySettings->setRespectStoragePage(false);
     }
-
-
+     */
     /**
      * Finds all pending survey requests due to be processed
      *
@@ -60,7 +61,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
         $constraints[] =
             $query->logicalAnd(
                 $query->equals('notifiedTstamp', 0),
-                $query->equals('deleted', 0)
+                $query->equals('deleted', 0),
             )
         ;
 
@@ -76,7 +77,6 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      *
      * @param int $currentTime
      * @return array
-     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * implicitly tested
      */
     public function findPendingSurveyRequestsGroupedByFrontendUser(int $currentTime): array
@@ -128,6 +128,7 @@ class SurveyRequestRepository extends \TYPO3\CMS\Extbase\Persistence\Repository
      * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      * implicitly tested
+     * @todo never used method. Remove?
      */
     public function findNotifiedSurveyRequestsByFrontendUser(int $frontendUserUid): QueryResultInterface
     {

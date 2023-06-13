@@ -1,3 +1,12 @@
+config.tx_extbase.persistence {
+    classes {
+        RKW\RkwOutcome\Domain\Model\SurveyRequest {
+            # very important to set the storagePid explicitly - otherwise it will add to the pid of related objects
+            newRecordStoragePid = 1
+        }
+    }
+}
+
 # Extension configuration
 plugin.tx_rkwoutcome {
 	view {
@@ -12,7 +21,7 @@ plugin.tx_rkwoutcome {
         }
 	}
 	persistence {
-		storagePid = 
+		storagePid = 1
 	}
 
 	settings {
@@ -53,6 +62,30 @@ module.tx_rkwoutcome {
 	}
 }
 
+plugin.tx_feregister {
+	persistence {
+		storagePid = 1
+    }
+}
+module.tx_feregister < plugin.tx_feregister
+
+
+plugin.tx_rkwevents {
+	persistence {
+		storagePid = 1
+    }
+}
+module.tx_rkwevents < plugin.tx_rkwevents
+
+
+plugin.tx_rkwshop {
+	persistence {
+		storagePid = 1
+    }
+}
+module.tx_rkwshop < plugin.tx_rkwshop
+
+#==============================================
 
 config {
     doctype = html5

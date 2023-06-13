@@ -46,7 +46,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
     public function createSurveyRequestSignalSlot(FrontendUser $frontendUser, $process): void
     {
         try {
-            $this->createSurveyRequest($process);
+            $this->createSurveyRequest($process, $frontendUser);
         } catch (\RKW\RkwOutcome\Exception $exception) {
             // do nothing
         }
@@ -57,6 +57,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
      * Creates a survey request
      *
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @param \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser
      * @return \RKW\RkwOutcome\Domain\Model\SurveyRequest|null
      * @throws \RKW\RkwOutcome\Exception
      * @throws \TYPO3\CMS\Extbase\Persistence\Generic\Exception
@@ -65,12 +66,10 @@ class SurveyRequestCreator extends AbstractSurveyRequest
      * @throws \TYPO3\CMS\Extbase\Configuration\Exception\InvalidConfigurationTypeException
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-    public function createSurveyRequest (AbstractEntity $process): ?SurveyRequest
+    public function createSurveyRequest (AbstractEntity $process, FrontendUser $frontendUser): ?SurveyRequest
     {
-        $frontendUser = null;
-
         try {
-            if ($this->isSurveyable($process)) {
+            if ($this->isSurveyable($process, $frontendUser)) {
 
                 /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
                 $surveyRequest = GeneralUtility::makeInstance(SurveyRequest::class);
@@ -79,8 +78,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 $processSubject = $this->getRandomProcessSubject($process);
 
                 if ($process instanceof \Rkw\RkwShop\Domain\Model\Order) {
-                    /** @var \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser */
-                    $frontendUser = $process->getFrontendUser();
+
                     /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                     $surveyConfiguration = $this->surveyConfigurationRepository
                         ->findByProductAndTargetGroup($processSubject, $process->getTargetGroup())
@@ -88,8 +86,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 }
 
                 if ($process instanceof \Rkw\RkwEvents\Domain\Model\EventReservation) {
-                    /** @var \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser */
-                    $frontendUser = $process->getFeUser();
+
                     /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
                     $surveyConfiguration = $this->surveyConfigurationRepository
                         ->findByEventAndTargetGroup($processSubject, $process->getTargetGroup())
@@ -121,9 +118,10 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 );
 
                 return $surveyRequest;
-
             }
+
         } catch (\Exception $e) {
+            // do nothing
         }
 
         $this->logInfo(
@@ -139,13 +137,15 @@ class SurveyRequestCreator extends AbstractSurveyRequest
 
     /**
      * @param \TYPO3\CMS\Extbase\DomainObject\AbstractEntity $process
+     * @param \Madj2k\FeRegister\Domain\Model\FrontendUser $frontendUser
      * @return bool
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-    protected function isSurveyable(AbstractEntity $process): bool
+    protected function isSurveyable(AbstractEntity $process, FrontendUser $frontendUser): bool
     {
-        return count($this->getNotifiableObjects($process)) > 0;
+        return $frontendUser->getTxFeregisterConsentMarketing() && count($this->getNotifiableObjects($process)) > 0;
     }
+
 
     /**
      * @param AbstractEntity $process

@@ -1,24 +1,24 @@
 config.tx_extbase.persistence {
 
-  // make sure ref_index is updated
-  updateReferenceIndex = 1
+    // make sure ref_index is updated
+    updateReferenceIndex = 1
 
-  // enableAutomaticCacheClearing = 1
-  classes {
+    // enableAutomaticCacheClearing = 1
+    classes {
 
-    RKW\RkwOutcome\Domain\Model\SurveyRequest {
+        RKW\RkwOutcome\Domain\Model\SurveyRequest {
 
-      # very important to set the storagePid explicitly - otherwise it will add to the pid of related objects
-      newRecordStoragePid = {$plugin.tx_rkwoutcome.persistence.storagePid}
+            # very important to set the storagePid explicitly - otherwise it will add to the pid of related objects
+            newRecordStoragePid = {$plugin.tx_rkwoutcome.persistence.storagePid}
 
-      mapping {
-        tableName = tx_rkwoutcome_domain_model_surveyrequest
-        columns {
-          deleted.mapOnProperty = deleted
+            mapping {
+                tableName = tx_rkwoutcome_domain_model_surveyrequest
+                columns {
+                    deleted.mapOnProperty = deleted
+                }
+            }
         }
-      }
     }
-  }
 }
 
 #================================================================================
@@ -26,36 +26,36 @@ config.tx_extbase.persistence {
 #================================================================================
 
 plugin.tx_rkwoutcome {
-  view {
-    layoutRootPaths {
-      0 = EXT:rkw_outcome/Resources/Private/Layouts/
-      1 = {$plugin.tx_rkwoutcome.view.layoutRootPath}
+    view {
+        layoutRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Layouts/
+            1 = {$plugin.tx_rkwoutcome.view.layoutRootPath}
+        }
+
+        templateRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Templates/
+            1 = {$plugin.tx_rkwoutcome.view.templateRootPath}
+        }
+
+        partialRootPaths {
+            0 = EXT:rkw_outcome/Resources/Private/Partials/
+            1 = {$plugin.tx_rkwoutcome.view.partialRootPath}
+        }
     }
 
-    templateRootPaths {
-      0 = EXT:rkw_outcome/Resources/Private/Templates/
-      1 = {$plugin.tx_rkwoutcome.view.templateRootPath}
+    persistence {
+        storagePid = {$plugin.tx_rkwoutcome.persistence.storagePid}
     }
 
-    partialRootPaths {
-      0 = EXT:rkw_outcome/Resources/Private/Partials/
-      1 = {$plugin.tx_rkwoutcome.view.partialRootPath}
+    settings {
+        targetGroupsPid = {$plugin.tx_rkwoutcome.settings.targetGroupsPid}
+        surveyShowPid = {$plugin.tx_rkwoutcome.settings.surveyShowPid}
+        rootPageUid = {$plugin.tx_rkwoutcome.settings.rootPageUid}
     }
-  }
-
-  persistence {
-    storagePid = {$plugin.tx_rkwoutcome.persistence.storagePid}
-  }
-
-  settings {
-    targetGroupsPid = {$plugin.tx_rkwoutcome.settings.targetGroupsPid}
-    surveyShowPid = {$plugin.tx_rkwoutcome.settings.surveyShowPid}
-    rootPageUid = {$plugin.tx_rkwoutcome.settings.rootPageUid}
-  }
 }
 
 module.tx_rkwoutcome {
-  settings < plugin.tx_rkwoutcome.settings
-  persistence < plugin.tx_rkwoutcome.persistence
-  view < plugin.tx_rkwoutcome.view
+    settings < plugin.tx_rkwoutcome.settings
+    persistence < plugin.tx_rkwoutcome.persistence
+    view < plugin.tx_rkwoutcome.view
 }

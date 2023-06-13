@@ -1,28 +1,28 @@
 plugin.tx_rkwoutcome {
-  view {
-    # cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template layouts (FE)
-    layoutRootPath = EXT:rkw_outcome/Resources/Private/Layouts/
+    view {
+        # cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template layouts (FE)
+        layoutRootPath = EXT:rkw_outcome/Resources/Private/Layouts/
 
-    # cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template root (FE)
-    templateRootPath = EXT:rkw_outcome/Resources/Private/Templates/
+        # cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template root (FE)
+        templateRootPath = EXT:rkw_outcome/Resources/Private/Templates/
 
-    # cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template partials (FE)
-    partialRootPath = EXT:rkw_outcome/Resources/Private/Partials/
-  }
+        # cat=plugin.tx_rkwoutcome/file; type=string; label=Path to template partials (FE)
+        partialRootPath = EXT:rkw_outcome/Resources/Private/Partials/
+    }
 
-  persistence {
-    # cat=plugin.tx_rkwoutcome//a; type=string; label=Default storage PID
-    storagePid =
-  }
+    persistence {
+        # cat=plugin.tx_rkwoutcome//a; type=string; label=Default storage PID
+        storagePid =
+    }
 
-  settings {
-    # cat=plugin.tx_rkwoutcome//a; type=integer; label=Pid of target groups
-    targetGroupsPid =
+    settings {
+        # cat=plugin.tx_rkwoutcome//a; type=integer; label=Pid of target groups
+        targetGroupsPid =
 
-    # cat=plugin.tx_rkwoutcome//a; type=integer; label=Uid of survey detail page
-    surveyShowPid =
+        # cat=plugin.tx_rkwoutcome//a; type=integer; label=Uid of survey detail page
+        surveyShowPid =
 
-    # cat=plugin.tx_rkwoutcome//a; type=integer; label=Uid of root page with typoscript settings
-    rootPageUid =
-  }
+        # cat=plugin.tx_rkwoutcome//a; type=integer; label=Uid of root page with typoscript settings
+        rootPageUid =
+    }
 }
