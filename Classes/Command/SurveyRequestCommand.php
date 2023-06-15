@@ -60,14 +60,14 @@ class SurveyRequestCommand extends Command
         $this->setDescription('Processes all pending survey requests.')
             ->addArgument(
                 'checkPeriod',
-                InputArgument::REQUIRED,
-                'Defines WHAT (default: 30 days)',
+                InputArgument::OPTIONAL,
+                'Period of time to be checked for maximum number of allowed notifications (default: 30 days)',
                 30
             )
             ->addArgument(
                 'maxSurveysPerPeriodAndFrontendUser',
-                InputArgument::REQUIRED,
-                'Defines WHAT (Default: 0)',
+                InputArgument::OPTIONAL,
+                'Maximum number of notifications to send out for a given period of time (Default: 0)',
                 '0'
             );
     }
