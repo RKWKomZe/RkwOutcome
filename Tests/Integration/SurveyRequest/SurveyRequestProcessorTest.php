@@ -15,8 +15,8 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
  */
 
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Madj2k\Accelerator\Persistence\MarkerReducer;
-use Madj2k\CoreExtended\Utility\FrontendSimulatorUtility;
 use Madj2k\FeRegister\Domain\Repository\FrontendUserRepository;
 use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
@@ -30,7 +30,6 @@ use RKW\RkwSurvey\Domain\Repository\SurveyRepository;
 use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
-use TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 /**
@@ -774,61 +773,66 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          *
          * Given checkPeriod is set to 7 * 24 * 60 * 60 (last 7 days)
          * Given maxSurveysPerPeriodAndFrontendUser is set to 1
-         * Given surveyWaitingTime is set to 0
+         * Given surveyWaitingTime is set to 86400
          * Given a persisted frontendUser 1
-         * Given that frontendUser 1 as opted-in to marketing
+         * Given that frontendUser 1 has opted-in to marketing
          * Given a persisted surveyRequest-object 1 that belongs to frontendUser-object 1
          * Given a persisted surveyRequest-object 2 that belongs to frontendUser-object 1
-         * When the method is called 2 days after the order
-         * Then the number of processed requests is 2
-         * Given an additional persisted surveyRequest-within the checkPeriod that belongs to frontendUser-object 1
-         * When the method is called
+         * When the method is called 2 days (surveyWaitingTime + 1 day) after the order
+         * Then the number of processed requests is 1 (selected out of 2 pending survey requests)
+         * Given an additional persisted surveyRequest-object 3 that belongs to frontendUser-object 1
+         * When the method is called again less than 7 days (checkPeriod) after its first call
          * Then the number of processed requests is 0
+         * When the method is called again later than 7 days (checkPeriod) after its first call
+         * Then the number of processed requests is 1
+         * Then the number of pending requests is 0
          */
 
         $this->importDataSet(self::FIXTURE_PATH . '/Database/Check90.xml');
 
         //  set now to initial shipping date = first workday of the year
-        $initialDate = Carbon::create(2023, 1, 2);
+        $initialDate = CarbonImmutable::now()->startOfYear();
         Carbon::setTestNow($initialDate);
 
         //  First two orders shipped on $initialDate
-        /** @var \RKW\RkwShop\Domain\Model\Order $order */
-        $order = $this->orderRepository->findByUid(1);
-        $order->setShippedTstamp(Carbon::now()->timestamp);
-        $this->orderRepository->update($order);
+        /** @var \RKW\RkwShop\Domain\Model\Order $order1 */
+        $order1 = $this->orderRepository->findByUid(1);
+        $order1->setShippedTstamp($initialDate->timestamp);
+        $this->orderRepository->update($order1);
 
-        /** @var \RKW\RkwShop\Domain\Model\Order $order */
-        $order = $this->orderRepository->findByUid(2);
-        $order->setShippedTstamp(Carbon::now()->timestamp);
-        $this->orderRepository->update($order);
+        /** @var \RKW\RkwShop\Domain\Model\Order $order2 */
+        $order2 = $this->orderRepository->findByUid(2);
+        $order2->setShippedTstamp($initialDate->timestamp);
+        $this->orderRepository->update($order2);
 
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class);
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 2);
 
-        //  Processing pending survey requests on $initialDate + 1 day
+        //  Processing pending survey requests on $initialDate + 2 days
         $processedSurveyRequests = $this->fixture->processPendingSurveyRequests(
             $this->checkPeriod,
             $this->maxSurveysPerPeriodAndFrontendUser,
-            0,
-            Carbon::now()->addDays(2)->timestamp
+            $initialDate->addDays(2)->timestamp
         );
-        self::assertCount(2, $processedSurveyRequests);
+        self::assertCount(1, $processedSurveyRequests);
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $pendingSurveyRequestsDb */
+        $pendingSurveyRequestsDb = $this->surveyRequestRepository->findPendingSurveyRequests();
+        self::assertCount(0, $pendingSurveyRequestsDb);
 
         //  Third order on $initialDate + 2 days
         /** @var \RKW\RkwShop\Domain\Model\Order $order */
-        $order = $this->orderRepository->findByUid(2);
-        $order->setShippedTstamp(Carbon::now()->addDays(2)->timestamp);
-        $this->orderRepository->update($order);
+        $order3 = $this->orderRepository->findByUid(3);
+        $order3->setShippedTstamp($initialDate->addDays(2)->timestamp);
+        $this->orderRepository->update($order3);
 
         $this->setUpSurveyRequest(\RKW\RkwShop\Domain\Model\Order::class, 3);
 
-        //  Processing pending survey requests on $initialDate + 3 days
+        //  Processing pending survey requests on $initialDate + 4 days
         $processedSurveyRequests = $this->fixture->processPendingSurveyRequests(
             $this->checkPeriod,
             $this->maxSurveysPerPeriodAndFrontendUser,
-            0,
-            Carbon::now()->addDays(3)->timestamp
+            $initialDate->addDays(4)->timestamp
         );
         self::assertCount(0, $processedSurveyRequests);
 
@@ -836,6 +840,21 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
         $pendingSurveyRequestsDb = $this->surveyRequestRepository->findPendingSurveyRequests();
 
         self::assertCount(1, $pendingSurveyRequestsDb);
+
+        //  Processing pending survey requests on $initialDate + $checkPeriod + 1 day
+        $processedSurveyRequests = $this->fixture->processPendingSurveyRequests(
+            $this->checkPeriod,
+            $this->maxSurveysPerPeriodAndFrontendUser,
+            $initialDate->addDays(9)->timestamp
+        );
+        self::assertCount(1, $processedSurveyRequests);
+        self::assertEquals(3, $processedSurveyRequests[0]->getUid());
+
+        /** @var  \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $pendingSurveyRequestsDb */
+        $pendingSurveyRequestsDb = $this->surveyRequestRepository->findPendingSurveyRequests();
+
+        self::assertCount(0, $pendingSurveyRequestsDb);
+
     }
 
     //==================================================================================================
