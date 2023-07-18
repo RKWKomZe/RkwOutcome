@@ -27,7 +27,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
- * Class CleanupCommand
+ * Class ProcessPendingSurveyRequestsCommand
  *
  * Execute on CLI with: 'vendor/bin/typo3 rkw_outcome:request'
  *
@@ -36,7 +36,7 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyRequestCommand extends Command
+class ProcessPendingSurveyRequestsCommand extends Command
 {
 
     /**
@@ -110,8 +110,8 @@ class SurveyRequestCommand extends Command
         $io->title($this->getDescription());
         $io->newLine();
 
-        $checkPeriod = $input->getOption('checkPeriod');
-        $maxSurveysPerPeriodAndFrontendUser= $input->getOption('maxSurveysPerPeriodAndFrontendUser');
+        $checkPeriod = $input->getArgument('checkPeriod') * 24 * 60 * 60;
+        $maxSurveysPerPeriodAndFrontendUser= $input->getArgument('maxSurveysPerPeriodAndFrontendUser');
 
         $result = 0;
         try {
