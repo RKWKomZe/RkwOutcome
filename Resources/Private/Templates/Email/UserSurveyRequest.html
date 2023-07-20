@@ -7,19 +7,18 @@
 
 <!-- PLAINTEXT -->
 <f:section name="Plaintext">
-    <postmaster:email.recipientSalutation queueRecipient="{queueRecipient}" prependText="<postmaster:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
-
-    <postmaster:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
-        <rkwOutcome:email.replace.surveyPlaceHolders
-            targetUid="{targetUid}"
-            surveyRequest="{surveyRequest}"
-            queueMail="{queueMail}"
-            isPlaintext="true"
-            generatedTokens="{generatedTokens}"
-        >
-            {mailText}
-        </rkwOutcome:email.replace.surveyPlaceHolders>
-    </postmaster:email.replace.redirectLinks>
+<postmaster:email.recipientSalutation queueRecipient="{queueRecipient}" prependText="<postmaster:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
+<postmaster:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
+<rkwOutcome:email.replace.surveyPlaceHolders
+    targetUid="{targetUid}"
+    surveyRequest="{surveyRequest}"
+    queueMail="{queueMail}"
+    isPlaintext="true"
+    generatedTokens="{generatedTokens}"
+>
+{mailText}
+</rkwOutcome:email.replace.surveyPlaceHolders>
+</postmaster:email.replace.redirectLinks>
 </f:section>
 
 <!-- HTML -->

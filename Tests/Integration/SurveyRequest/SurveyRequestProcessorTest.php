@@ -410,7 +410,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
          * Given the targetGroup-object 1 is attached to that order-object
          * Given a persisted surveyRequest-object
          * Given that surveyRequest-object belongs to a persisted frontendUser
-         * Given that frontendUser as opted-in to marketing
+         * Given that frontendUser has opted-in to marketing
          * Given the surveyRequest-property process is set to that order-object
          * When the method is called
          * Then the surveyRequest-property notifiedTstamp remains 0
