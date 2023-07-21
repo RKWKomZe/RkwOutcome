@@ -14,7 +14,10 @@ namespace RKW\RkwOutcome\Command;
  * The TYPO3 project - inspiring people to share!
  */
 
-use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
+use RKW\RkwOutcome\SurveyRequest\SurveyRequestCreator;
+use RKW\RkwShop\Domain\Model\Order;
+use RKW\RkwShop\Domain\Repository\CategoryRepository;
+use RKW\RkwShop\Domain\Repository\OrderRepository;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,9 +28,10 @@ use TYPO3\CMS\Core\Log\LogLevel;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
+use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
 
 /**
- * Class CleanupCommand
+ * Class CreateMissingSurveyRequestsCommand
  *
  * Execute on CLI with: 'vendor/bin/typo3 rkw_outcome:request'
  *
@@ -36,13 +40,32 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyRequestCommand extends Command
+class CreateMissingSurveyRequestsCommand extends Command
 {
 
     /**
-     * @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor|null
+     * @var \RKW\RkwShop\Domain\Repository\OrderRepository|null
      */
-    protected ?SurveyRequestProcessor $surveyRequestProcessor = null;
+    private ?OrderRepository $orderRepository = null;
+
+
+    /**
+     * @var \RKW\RkwShop\Domain\Repository\CategoryRepository|null
+     */
+    private ?CategoryRepository $categoryRepository;
+
+
+    /**
+     * @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestCreator |null
+     */
+    protected ?SurveyRequestCreator $surveyRequestCreator = null;
+
+
+    /**
+     * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
+     * @TYPO3\CMS\Extbase\Annotation\Inject
+     */
+    protected PersistenceManager $persistenceManager;
 
 
     /**
@@ -57,17 +80,17 @@ class SurveyRequestCommand extends Command
      */
     protected function configure(): void
     {
-        $this->setDescription('Processes all pending survey requests.')
+        $this->setDescription('Creates potentially missing survey request.')
             ->addArgument(
-                'checkPeriod',
+                'orderUid',
                 InputArgument::OPTIONAL,
-                'Period of time to be checked for maximum number of allowed notifications (default: 30 days)',
-                30
+                'Uid for order to be checked (Default: 0)',
+                '0'
             )
             ->addArgument(
-                'maxSurveysPerPeriodAndFrontendUser',
+                'targetGroupUid',
                 InputArgument::OPTIONAL,
-                'Maximum number of notifications to send out for a given period of time (Default: 0)',
+                'Uid for targetGroup to be attached (Default: 0)',
                 '0'
             );
     }
@@ -90,8 +113,17 @@ class SurveyRequestCommand extends Command
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
-        /** @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor $surveyRequestProcessor */
-        $this->surveyRequestProcessor = $objectManager->get(SurveyRequestProcessor::class);
+        /** @var \RKW\RkwShop\Domain\Repository\OrderRepository $orderRepository */
+        $this->orderRepository = $objectManager->get(OrderRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Repository\CategoryRepository $categoryRepository */
+        $this->categoryRepository = $objectManager->get(CategoryRepository::class);
+
+        /** @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestCreator $surveyRequestCreator */
+        $this->surveyRequestCreator = $objectManager->get(SurveyRequestCreator::class);
+
+        /** @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager */
+        $this->persistenceManager = $objectManager->get(PersistenceManager::class);
     }
 
 
@@ -110,28 +142,42 @@ class SurveyRequestCommand extends Command
         $io->title($this->getDescription());
         $io->newLine();
 
-        $checkPeriod = $input->getOption('checkPeriod');
-        $maxSurveysPerPeriodAndFrontendUser= $input->getOption('maxSurveysPerPeriodAndFrontendUser');
+        $orderUid = $input->getArgument('orderUid');
+        $targetGroupUid = $input->getArgument('targetGroupUid');
 
         $result = 0;
+        $surveyRequest = null;
         try {
 
-            $processed = count(
-                $this->surveyRequestProcessor->processPendingSurveyRequests(
-                    $checkPeriod,
-                    $maxSurveysPerPeriodAndFrontendUser,
-                )
-            );
+            /** @var \RKW\RkwShop\Domain\Model\Order $order */
+            $order = $this->orderRepository->findByUid($orderUid);
 
-            if ($processed) {
-                $io->note('Processing was successful.');
+            if (
+                $order->getFrontendUser()->getTxFeregisterConsentMarketing()
+            ) {
+                if (
+                    $targetGroupUid
+                    && ! $order->getTargetGroup()
+                ) {
+                    $order = $this->addMissingTargetGroup($order, $targetGroupUid);
+                }
+
+                $surveyRequest = $this->surveyRequestCreator->createSurveyRequest(
+                    $order,
+                    $order->getFrontendUser(),
+                );
+
+            }
+
+            if ($surveyRequest instanceof \RKW\RkwOutcome\Domain\Model\SurveyRequest) {
+                $io->note('Created missing survey request.');
             } else {
-                $io->note('Nothing to process.');
+                $io->note('Nothing to create.');
             }
 
         } catch (\Exception $e) {
 
-            $message = sprintf('An unexpected error occurred while trying to process survey-requests: %s',
+            $message = sprintf('An unexpected error occurred while trying to create a survey request for order: %s',
                 str_replace(array("\n", "\r"), '', $e->getMessage())
             );
 
@@ -158,5 +204,20 @@ class SurveyRequestCommand extends Command
         }
 
         return $this->logger;
+    }
+
+    /**
+     * @param \RKW\RkwShop\Domain\Model\Order $order
+     * @param                                 $targetGroupUid
+     * @return \RKW\RkwShop\Domain\Model\Order $order
+     * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
+     */
+    protected function addMissingTargetGroup(\RKW\RkwShop\Domain\Model\Order $order, $targetGroupUid): Order
+    {
+        $order->addTargetGroup($this->categoryRepository->findByUid($targetGroupUid));
+        $this->orderRepository->add($order);
+        $this->persistenceManager->persistAll();
+
+        return $order;
     }
 }

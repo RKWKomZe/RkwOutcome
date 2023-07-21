@@ -22,10 +22,10 @@ return [
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyrequest.gif'
     ],
     'interface' => [
-        'showRecordFieldList' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, survey_configuration, target_group, notified_tstamp',
+        'showRecordFieldList' => 'l10n_parent, l10n_diffsource, frontend_user, survey_configuration, target_group, notified_tstamp',
     ],
     'types' => [
-        '1' => ['showitem' => 'sys_language_uid, l10n_parent, l10n_diffsource, hidden, survey_configuration, target_group, notified_tstamp, --div--;LLL:EXT:frontend/Resources/Private/Language/locallang_ttc.xlf:tabs.access, starttime, endtime, access_restricted'],
+        '1' => ['showitem' => 'l10n_parent, l10n_diffsource, frontend_user, survey_configuration, target_group, notified_tstamp'],
     ],
     'columns' => [
 
@@ -66,15 +66,10 @@ return [
             ],
         ],
         'hidden' => [
-            'exclude' => false,
-            'label' => 'LLL:EXT:lang/locallang_general.xlf:LGL.hidden',
+            'exclude' => 0,
+            'label' => 'LLL:EXT:core/Resources/Private/Language/locallang_general.xlf:LGL.hidden',
             'config' => [
                 'type' => 'check',
-                'items' => [
-                    '1' => [
-                        '0' => 'LLL:EXT:lang/locallang_core.xlf:labels.enabled'
-                    ]
-                ],
             ],
         ],
         'starttime' => [

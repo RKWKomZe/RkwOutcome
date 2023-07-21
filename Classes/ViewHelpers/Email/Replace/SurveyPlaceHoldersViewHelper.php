@@ -62,7 +62,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
         $this->registerArgument('additionalParams', 'array', 'Additional params for links');
         $this->registerArgument('generatedTokens', 'array', 'Generated security tokens to access survey');
         $this->registerArgument('surveyRequest', SurveyRequest::class, 'SurveyRequest-object of email');
-
+        $this->registerArgument('surveyRequestTags', 'string', 'SurveyRequest-object of email');
     }
 
 
@@ -87,6 +87,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
         $surveyRequest = $arguments['surveyRequest'];
         $targetUid = $arguments['targetUid'];
         $generatedTokens = $arguments['generatedTokens'];
+        $surveyRequestTags = $arguments['surveyRequestTags'];
         $additionalParams = $arguments['additionalParams'] ? $arguments['additionalParams'] : [] ;
 
         try {
@@ -105,6 +106,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
                             $queueMail,
                             $queueRecipient,
                             $generatedTokens,
+                            $surveyRequestTags,
                             $additionalParams
                         );
                         $actionLinkPlain = $survey->getName() . '(' . $actionLink . ')';
@@ -129,6 +131,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
                             $queueMail,
                             $queueRecipient,
                             $generatedTokens,   //  @todo: evtl. in additional params unterbringen, ebenso wie targetUid
+                            $surveyRequestTags,
                             $additionalParams
                         );
                         $actionLinkHtml = '<a href="' . $actionLink . '" target="_blank">' . $survey->getName() . '</a>';
@@ -170,6 +173,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
      * @param QueueMail $queueMail
      * @param QueueRecipient|null $queueRecipient
      * @param array $generatedTokens
+     * @param string $surveyRequestTags
      * @param array $additionalParams
      * @return string
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\IllegalObjectTypeException
@@ -182,6 +186,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
         QueueMail $queueMail,
         QueueRecipient $queueRecipient = null,
         array $generatedTokens = [],
+        string $surveyRequestTags = '',
         array $additionalParams = []
     ): string {
 
@@ -192,10 +197,8 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
         /** @var \Madj2k\Postmaster\UriBuilder\EmailUriBuilder $uriBuilder */
         $uriBuilder = $objectManager->get(EmailUriBuilder::class);
 
-        $arguments = [
-            'survey' => $survey,
-            'tags'   => SurveyRequestUtility::buildSurveyRequestTags($surveyRequest)
-        ];
+        $arguments['survey'] = $survey;
+        $arguments['tags'] = $surveyRequestTags;
 
         if (isset($generatedTokens[$survey->getUid()])) {
             $arguments['token'] = $generatedTokens[$survey->getUid()];
