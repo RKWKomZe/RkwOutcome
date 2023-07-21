@@ -77,7 +77,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
          }
 
          $surveyRequestsGroupedByFrontendUser = $this->surveyRequestRepository
-             ->findPendingSurveyRequestsGroupedByFrontendUser($currentTime) ;
+             ->findPendingSurveyRequestsGroupedByFrontendUser($currentTime);
 
          $this->logInfo(
              sprintf(
@@ -92,7 +92,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
              if (
                  ! $this->isNotificationLimitReached($frontendUserUid, $checkPeriod, $maxSurveysPerPeriodAndFrontendUser, $currentTime)
-                 && $processableSubject = $this->getProcessable($surveyRequestsByUser)
+                 && $processableSubject = $this->getRandomProcessableSubject($surveyRequestsByUser)
              ) {
 
                  /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
@@ -101,7 +101,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
                      if (
                          ($this->containsProcessableSubject($surveyRequest, $processableSubject))
                          && ($surveyRequest->getFrontendUser()->getTxFeregisterConsentMarketing())
-                     ){
+                     ) {
 
                          $surveyConfigurations = $this->getSurveyConfigurations($surveyRequest, $processableSubject);
 
@@ -228,7 +228,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
      * @return \TYPO3\CMS\Extbase\DomainObject\AbstractEntity|null
      * @throws \TYPO3\CMS\Extbase\Persistence\Exception\InvalidQueryException
      */
-    protected function getProcessable(array $surveyRequestsByUser): ?AbstractEntity
+    protected function getRandomProcessableSubject(array $surveyRequestsByUser): ?AbstractEntity
     {
         $notifiableObjects = [];
         foreach ($surveyRequestsByUser as $surveyRequest) {

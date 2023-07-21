@@ -13,9 +13,9 @@ namespace RKW\RkwOutcome\Utility;
  * The TYPO3 project - inspiring people to share!
  */
 
+use Madj2k\Accelerator\Persistence\MarkerReducer;
 use RKW\RkwEvents\Domain\Model\Event;
-use RKW\RkwEvents\Domain\Model\EventReservation;
-use RKW\RkwShop\Domain\Model\Order;
+use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -31,6 +31,19 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
  */
 class TCA
 {
+
+    /**
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
+     * @TYPO3\CMS\Extbase\Annotation\Inject
+     */
+    protected SurveyRequestRepository $surveyRequestRepository;
+
+
+    /**
+     * @var \Madj2k\Accelerator\Persistence\MarkerReducer|null
+     */
+    protected ?MarkerReducer $markerReducer = null;
+
 
     /**
      * @param array $parameters
@@ -78,14 +91,25 @@ class TCA
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
         $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
+        /** @var \Madj2k\Accelerator\Persistence\MarkerReducer $markerReducer */
+        $this->markerReducer = $objectManager->get(MarkerReducer::class);
+
+        /** @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository */
+        $this->surveyRequestRepository = $objectManager->get(SurveyRequestRepository::class);
+
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
+        $surveyRequest = $this->surveyRequestRepository->findByUid($record['uid']);
+
+        $process = $this->markerReducer->explode($surveyRequest->getProcess())['process'];
+
         //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
         /** @todo: problem ist hier meist, dass die TypoScript-Definition nicht in der Rootpage eingebunden ist. Einige Extensions haben wir da gerne mal vergessen! */
-        if ($record['process_type'] ===  Order::class) {
-            $newTitle = '[Bestellung] ' . $record['order'];
+        if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
+            $newTitle = '[Bestellung] ' . $process->getUid() . ' - ' . $process->getFrontendUser()->getEmail();
         }
 
-        if ($record['process_type'] === EventReservation::class) {
-            $newTitle = '[Reservierung] ' . $record['event_reservation'];
+        if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
+            $newTitle = '[Reservierung] ' . $process->getUid();
         }
 
         $parameters['title'] = $newTitle;

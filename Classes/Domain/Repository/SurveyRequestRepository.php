@@ -96,6 +96,7 @@ class SurveyRequestRepository extends StoragePidAwareAbstractRepository
         foreach ($surveyRequests as $surveyRequest) {
 
             $process = $markerReducer->explode($surveyRequest->getProcess())['process'];
+
             /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
             $surveyConfiguration = $surveyRequest->getSurveyConfiguration();
             $surveyWaitingTime = $surveyConfiguration->getSurveyWaitingTime();
