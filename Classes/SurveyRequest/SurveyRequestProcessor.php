@@ -166,13 +166,6 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
     {
         if ($recipient = $surveyRequest->getFrontendUser()) {
 
-            $this->logInfo(
-                sprintf(
-                    'Sending notification for %s will be dispatched.',
-                    $surveyRequest->getUid()
-                )
-            );
-
             // Signal for e.g. E-Mails
             $this->signalSlotDispatcher->dispatch(
                 __CLASS__,
@@ -182,7 +175,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
             $this->logInfo(
                 sprintf(
-                    'Send request for survey request %s to frontend user with id %s (email %s).',
+                    'Sending request for survey request %s to frontend user with id %s (email %s).',
                     $surveyRequest->getUid(),
                     $recipient->getUid(),
                     $recipient->getEmail()

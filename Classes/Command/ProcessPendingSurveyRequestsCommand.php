@@ -14,15 +14,13 @@ namespace RKW\RkwOutcome\Command;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwOutcome\Log\LogTrait;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use TYPO3\CMS\Core\Log\Logger;
-use TYPO3\CMS\Core\Log\LogLevel;
-use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 
@@ -39,16 +37,13 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
 class ProcessPendingSurveyRequestsCommand extends Command
 {
 
+    use LogTrait;
+
+
     /**
      * @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor|null
      */
     protected ?SurveyRequestProcessor $surveyRequestProcessor = null;
-
-
-    /**
-     * @var \TYPO3\CMS\Core\Log\Logger|null
-     */
-    protected ?Logger $logger = null;
 
 
     /**
@@ -136,7 +131,7 @@ class ProcessPendingSurveyRequestsCommand extends Command
             );
 
             $io->error($message);
-            $this->getLogger()->log(LogLevel::ERROR, $message);
+            $this->logError($message);
             $result = 1;
         }
 
@@ -145,18 +140,4 @@ class ProcessPendingSurveyRequestsCommand extends Command
 
     }
 
-
-    /**
-     * Returns logger instance
-     *
-     * @return \TYPO3\CMS\Core\Log\Logger
-     */
-    protected function getLogger(): \TYPO3\CMS\Core\Log\Logger
-    {
-        if (!$this->logger instanceof \TYPO3\CMS\Core\Log\Logger) {
-            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        }
-
-        return $this->logger;
-    }
 }

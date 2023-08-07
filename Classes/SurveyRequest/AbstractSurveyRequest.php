@@ -111,27 +111,19 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
          * ich auch nicht sagen kann, wie die TargetGroup dann zu setzen wäre.
          */
 
-        $this->logInfo(
-            sprintf(
-                'Looking for configurations matching process with uid %s and targetGroup %s',
-                $process->getUid(),
-                json_encode($process->getTargetGroup())
-            )
-        );
-
         $notifiableObjects = [];
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
 
+            $this->logInfo(
+                sprintf(
+                    'Looking for configurations matching orderItems in order %s.',
+                    $process->getUid()
+                )
+            );
+
             /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
             foreach ($process->getOrderItem() as $orderItem) {
-
-                $this->logInfo(
-                    sprintf(
-                        'Looking for configurations matching orderItem with uid %s.',
-                        $orderItem->getUid()
-                    )
-                );
 
                 /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
                 $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup(

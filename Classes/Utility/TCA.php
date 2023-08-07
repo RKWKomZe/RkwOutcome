@@ -15,8 +15,11 @@ namespace RKW\RkwOutcome\Utility;
 
 use Madj2k\Accelerator\Persistence\MarkerReducer;
 use RKW\RkwEvents\Domain\Model\Event;
+use RKW\RkwEvents\Domain\Repository\EventRepository;
+use RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository;
 use RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository;
 use RKW\RkwShop\Domain\Model\Product;
+use RKW\RkwShop\Domain\Repository\ProductRepository;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
@@ -33,6 +36,19 @@ class TCA
 {
 
     /**
+     * @var \TYPO3\CMS\Extbase\Object\ObjectManager|null
+     */
+    private ?ObjectManager $objectManager = null;
+
+
+    /**
+     * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
+     * @TYPO3\CMS\Extbase\Annotation\Inject
+     */
+    protected SurveyConfigurationRepository $surveyConfigurationRepository;
+
+
+    /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
@@ -40,9 +56,43 @@ class TCA
 
 
     /**
+     * @var \RKW\RkwShop\Domain\Repository\ProductRepository
+     * @TYPO3\CMS\Extbase\Annotation\Inject
+     */
+    protected ProductRepository $productRepository;
+
+
+    /**
      * @var \Madj2k\Accelerator\Persistence\MarkerReducer|null
      */
     protected ?MarkerReducer $markerReducer = null;
+
+
+    /**
+     * @return void
+     */
+    public function __construct()
+    {
+
+        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
+        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
+
+        /** @var \Madj2k\Accelerator\Persistence\MarkerReducer $markerReducer */
+        $this->markerReducer = $this->objectManager->get(MarkerReducer::class);
+
+        /** @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository */
+        $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
+
+        /** @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository $surveyConfigurationRepository */
+        $this->surveyConfigurationRepository = $this->objectManager->get(SurveyConfigurationRepository::class);
+
+        /** @var \RKW\RkwShop\Domain\Repository\ProductRepository $productRepository */
+        $this->productRepository = $this->objectManager->get(ProductRepository::class);
+
+        /** @var \RKW\RkwEvents\Domain\Repository\EventRepository $eventRepository */
+        $this->eventRepository = $this->objectManager->get(EventRepository::class);
+
+    }
 
 
     /**
@@ -53,30 +103,35 @@ class TCA
     {
 
         $record = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid']);
-        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
-        //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
+        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+        $surveyConfiguration = $this->surveyConfigurationRepository->findByUid($record['uid']);
+
+        $targetGroups = [];
+        foreach($surveyConfiguration->getTargetGroup() as $targetGroup) {
+            $targetGroups[] = $targetGroup->getTitle();
+        }
+
         if ($record['process_type'] === Product::class) {
-//            $productRepository = $objectManager->get(ProductRepository::class);
-//            /** @var \RKW\RkwShop\Domain\Model\Product $product */
-//            $product = $productRepository->findByUid($record['product']);
-//            $newTitle = sprintf(
-//                '%s - ',
-//                $product->getTitle()
-//            );
-            $newTitle = '[Product] ' . $record['product'] . ' (' .  $record['target_group'] . ')';
+            /** @var \RKW\RkwShop\Domain\Model\Product $product */
+            $product = $this->productRepository->findByUid($record['product']);
+            $newTitle = sprintf(
+                '[Produkt - %s] %s (%s)',
+                $record['product'],
+                $product->getTitle(),
+                implode(', ', $targetGroups),
+            );
         }
 
         if ($record['process_type'] === Event::class) {
-//            $eventRepository = $objectManager->get(EventRepository::class);
-//            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
-//            $event = $eventRepository->findByUid($record['event']);
-//            $newTitle = sprintf(
-//                '%s - ',
-//                $event->getTitle()
-//            );
-            $newTitle = '[Event] ' . $record['event'] . ' (' .  $record['target_group'] . ')';
+            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
+            $event = $this->eventRepository->findByUid($record['event']);
+            $newTitle = sprintf(
+                '[Veranstaltung - %s] %s (%s)',
+                $record['event'],
+                $event->getTitle(),
+                implode(', ', $targetGroups),
+            );
         }
 
         $parameters['title'] = $newTitle;
@@ -88,32 +143,29 @@ class TCA
 
         $record = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid']);
 
-        /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
-        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-
-        /** @var \Madj2k\Accelerator\Persistence\MarkerReducer $markerReducer */
-        $this->markerReducer = $objectManager->get(MarkerReducer::class);
-
-        /** @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository */
-        $this->surveyRequestRepository = $objectManager->get(SurveyRequestRepository::class);
-
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->surveyRequestRepository->findByUid($record['uid']);
 
         $process = $this->markerReducer->explode($surveyRequest->getProcess())['process'];
 
-        //  @todo: Fix trouble with external table not found. Example: #1472074485: Table 'rkw_komze_dev.tx_rkwshop_domain_model_author' doesn't exist
-        /** @todo: problem ist hier meist, dass die TypoScript-Definition nicht in der Rootpage eingebunden ist. Einige Extensions haben wir da gerne mal vergessen! */
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
-            $newTitle = '[Bestellung] ' . $process->getUid() . ' - ' . $process->getFrontendUser()->getEmail();
+            $newTitle = sprintf(
+                '[Bestellung - %s] %s (%s)',
+                $record['uid'],
+                $process->getFrontendUser()->getEmail(),
+                date('d.m.Y H:i', $process->getShippedTstamp()),
+            );
         }
 
         if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
             $newTitle = '[Reservierung] ' . $process->getUid();
         }
 
+        if ($surveyRequest->getNotifiedTstamp() > 0) {
+            $newTitle = $newTitle . ' (' . date('d.m.Y H:i', $surveyRequest->getNotifiedTstamp()) . ')';
+        }
+
         $parameters['title'] = $newTitle;
     }
-
 
 }

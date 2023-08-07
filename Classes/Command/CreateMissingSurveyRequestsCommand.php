@@ -14,6 +14,7 @@ namespace RKW\RkwOutcome\Command;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwOutcome\Log\LogTrait;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestCreator;
 use RKW\RkwShop\Domain\Model\Order;
 use RKW\RkwShop\Domain\Repository\CategoryRepository;
@@ -23,9 +24,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use TYPO3\CMS\Core\Log\Logger;
-use TYPO3\CMS\Core\Log\LogLevel;
-use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
@@ -42,6 +40,9 @@ use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
  */
 class CreateMissingSurveyRequestsCommand extends Command
 {
+
+    use LogTrait;
+
 
     /**
      * @var \RKW\RkwShop\Domain\Repository\OrderRepository|null
@@ -66,12 +67,6 @@ class CreateMissingSurveyRequestsCommand extends Command
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
     protected PersistenceManager $persistenceManager;
-
-
-    /**
-     * @var \TYPO3\CMS\Core\Log\Logger|null
-     */
-    protected ?Logger $logger = null;
 
 
     /**
@@ -157,7 +152,7 @@ class CreateMissingSurveyRequestsCommand extends Command
             ) {
                 if (
                     $targetGroupUid
-                    && ! $order->getTargetGroup()
+                    && count($order->getTargetGroup()) === 0
                 ) {
                     $order = $this->addMissingTargetGroup($order, $targetGroupUid);
                 }
@@ -182,7 +177,7 @@ class CreateMissingSurveyRequestsCommand extends Command
             );
 
             $io->error($message);
-            $this->getLogger()->log(LogLevel::ERROR, $message);
+            $this->logError($message);
             $result = 1;
         }
 
@@ -191,20 +186,6 @@ class CreateMissingSurveyRequestsCommand extends Command
 
     }
 
-
-    /**
-     * Returns logger instance
-     *
-     * @return \TYPO3\CMS\Core\Log\Logger
-     */
-    protected function getLogger(): \TYPO3\CMS\Core\Log\Logger
-    {
-        if (!$this->logger instanceof \TYPO3\CMS\Core\Log\Logger) {
-            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        }
-
-        return $this->logger;
-    }
 
     /**
      * @param \RKW\RkwShop\Domain\Model\Order $order
