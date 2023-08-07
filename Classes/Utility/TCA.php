@@ -161,6 +161,10 @@ class TCA
             $newTitle = '[Reservierung] ' . $process->getUid();
         }
 
+        if ($surveyRequest->getNotifiedTstamp() > 0) {
+            $newTitle = $newTitle . ' (' . date('d.m.Y H:i', $surveyRequest->getNotifiedTstamp()) . ')';
+        }
+
         $parameters['title'] = $newTitle;
     }
 

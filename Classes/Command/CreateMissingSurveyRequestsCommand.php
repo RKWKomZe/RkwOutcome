@@ -157,7 +157,7 @@ class CreateMissingSurveyRequestsCommand extends Command
             ) {
                 if (
                     $targetGroupUid
-                    && ! $order->getTargetGroup()
+                    && count($order->getTargetGroup()) === 0
                 ) {
                     $order = $this->addMissingTargetGroup($order, $targetGroupUid);
                 }
