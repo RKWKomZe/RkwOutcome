@@ -150,10 +150,10 @@ class TCA
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
             $newTitle = sprintf(
-                '[Bestellung - %s] %s (%s)',
-                $record['uid'],
-                $process->getFrontendUser()->getEmail(),
+                '[Bestellung - %s (%s)] %s',
+                $process->getUid(),
                 date('d.m.Y H:i', $process->getShippedTstamp()),
+                $process->getFrontendUser()->getEmail(),
             );
         }
 
