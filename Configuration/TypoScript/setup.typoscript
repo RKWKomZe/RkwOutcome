@@ -58,4 +58,24 @@ module.tx_rkwoutcome {
     settings < plugin.tx_rkwoutcome.settings
     persistence < plugin.tx_rkwoutcome.persistence
     view < plugin.tx_rkwoutcome.view
+#    view {
+#        layoutRootPaths {
+#            0 = EXT:postmaster/Resources/Private/Layouts/
+#            1 = {$module.tx_postmaster.view.layoutRootPath}
+#        }
+#        templateRootPaths {
+#            0 = EXT:postmaster/Resources/Private/Templates/
+#            1 = {$module.tx_postmaster.view.templateRootPath}
+#        }
+#        partialRootPaths {
+#            0 = EXT:postmaster/Resources/Private/Partials/
+#            1 = {$module.tx_postmaster.view.partialRootPath}
+#        }
+#
+#        widget {
+#            TYPO3\CMS\Fluid\ViewHelpers\Be\Widget\PaginateViewHelper {
+#                templateRootPath = EXT:postmaster/Resources/Private/Templates/
+#            }
+#        }
+#    }
 }

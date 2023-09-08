@@ -26,3 +26,23 @@ plugin.tx_rkwoutcome {
         rootPageUid =
     }
 }
+
+#module.tx_postmaster {
+#    persistence {
+#        # cat=module.tx_postmaster//a; type=string; label=Default storage PID
+#        storagePid =
+#    }
+#
+#    view {
+#
+#        # cat=module.tx_postmaster/file; type=string; label=Path to template layouts (BE)
+#        layoutRootPath = EXT:postmaster/Resources/Private/Layouts/
+#
+#        # cat=module.tx_postmaster/file; type=string; label=Path to template root (BE)
+#        templateRootPath = EXT:postmaster/Resources/Private/Templates/
+#
+#        # cat=module.tx_postmaster/file; type=string; label=Path to template partials (BE)
+#        partialRootPath = EXT:postmaster/Resources/Private/Partials/
+#    }
+#}
+
