@@ -15,7 +15,7 @@
 			<!-- ##################### -->
             <trans-unit id="rkwMailService.subject.userSurveyRequestNotification">
                 <source>Notification: Survey request</source>
-                <target>Bitte um Ihr Feedback zu %s</target>
+                <target>Ihre Meinung ist uns wichtig</target>
             </trans-unit>
 
 
@@ -57,7 +57,7 @@
             <!-- Templates/Backend/Email/UserSurveyRequest.html -->
             <trans-unit id="templates_email_userSurveyRequest.headline">
                 <source>Hello</source>
-                <target>Hallo</target>
+                <target>Guten Tag</target>
             </trans-unit>
 			<trans-unit id="templates_email_userSurveyRequest.goToSurvey">
 				<source>Go to survey %s</source>
