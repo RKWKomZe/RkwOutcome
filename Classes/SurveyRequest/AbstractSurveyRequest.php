@@ -104,7 +104,6 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
      */
     protected function getNotifiableObjects(AbstractEntity $process): array
     {
-
         /** @todo SK Die code-inspection weist darauf hin, dass getTargetGroup nicht als Methode existiert, vermutlich weil
          * ich bei mir die Änderungen an der rkw_shop und rkw_events nicht habe.
          * Vielleicht braucht man dann doch eine Kapsel-Klasse, die die TargetGroup enthält und
@@ -112,27 +111,19 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
          * ich auch nicht sagen kann, wie die TargetGroup dann zu setzen wäre.
          */
 
-        $this->logInfo(
-            sprintf(
-                'Looking for configurations matching process with uid %s and targetGroup %s',
-                $process->getUid(),
-                json_encode($process->getTargetGroup())
-            )
-        );
-
         $notifiableObjects = [];
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
 
+            $this->logInfo(
+                sprintf(
+                    'Looking for configurations matching orderItems in order %s.',
+                    $process->getUid()
+                )
+            );
+
             /** @var \RKW\RkwShop\Domain\Model\OrderItem $orderItem */
             foreach ($process->getOrderItem() as $orderItem) {
-
-                $this->logInfo(
-                    sprintf(
-                        'Looking for configurations matching orderItem with uid %s.',
-                        $orderItem->getUid()
-                    )
-                );
 
                 /** @var \TYPO3\CMS\Extbase\Persistence\QueryResultInterface $surveyConfigurations */
                 $surveyConfigurations = $this->surveyConfigurationRepository->findByProductAndTargetGroup(

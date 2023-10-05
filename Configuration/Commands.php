@@ -1,8 +1,12 @@
 <?php
 
 return [
-    'rkw_outcome:request' => [
-        'class' => \RKW\RkwOutcome\Command\SurveyRequestCommand::class,
+    'rkw_outcome:processPendingRequests' => [
+        'class' => \RKW\RkwOutcome\Command\ProcessPendingSurveyRequestsCommand::class,
+        'schedulable' => true,
+    ],
+    'rkw_outcome:createMissingRequests' => [
+        'class' => \RKW\RkwOutcome\Command\CreateMissingSurveyRequestsCommand::class,
         'schedulable' => true,
     ],
 ];

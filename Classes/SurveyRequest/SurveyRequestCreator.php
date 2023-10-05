@@ -108,7 +108,7 @@ class SurveyRequestCreator extends AbstractSurveyRequest
                 $this->surveyRequestRepository->add($surveyRequest);
                 $this->persistenceManager->persistAll();
 
-                $this->logDebug(
+                $this->logInfo(
                     sprintf(
                         'Created surveyRequest for process with uid=%s of type=%s by frontenduser with uid=%s',
                         $process->getUid(),

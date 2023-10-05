@@ -69,13 +69,6 @@ class RkwMailService implements \TYPO3\CMS\Core\SingletonInterface
         $settings = $this->getSettings(ConfigurationManagerInterface::CONFIGURATION_TYPE_FRAMEWORK);
         $settingsDefault = $this->getSettings();
 
-        $this->logInfo(
-            sprintf(
-                'Mailer: Settings %s.',
-                json_encode($settings['view'])
-            )
-        );
-
         if ($settings['view']['templateRootPaths']) {
 
             $this->logInfo(
