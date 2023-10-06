@@ -14,20 +14,18 @@ namespace RKW\RkwOutcome\Command;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwOutcome\Log\LogTrait;
 use RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use TYPO3\CMS\Core\Log\Logger;
-use TYPO3\CMS\Core\Log\LogLevel;
-use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 
 /**
- * Class CleanupCommand
+ * Class ProcessPendingSurveyRequestsCommand
  *
  * Execute on CLI with: 'vendor/bin/typo3 rkw_outcome:request'
  *
@@ -36,19 +34,16 @@ use TYPO3\CMS\Extbase\Object\ObjectManager;
  * @package RKW_RkwOutcome
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class SurveyRequestCommand extends Command
+class ProcessPendingSurveyRequestsCommand extends Command
 {
+
+    use LogTrait;
+
 
     /**
      * @var \RKW\RkwOutcome\SurveyRequest\SurveyRequestProcessor|null
      */
     protected ?SurveyRequestProcessor $surveyRequestProcessor = null;
-
-
-    /**
-     * @var \TYPO3\CMS\Core\Log\Logger|null
-     */
-    protected ?Logger $logger = null;
 
 
     /**
@@ -110,8 +105,8 @@ class SurveyRequestCommand extends Command
         $io->title($this->getDescription());
         $io->newLine();
 
-        $checkPeriod = $input->getOption('checkPeriod');
-        $maxSurveysPerPeriodAndFrontendUser= $input->getOption('maxSurveysPerPeriodAndFrontendUser');
+        $checkPeriod = $input->getArgument('checkPeriod') * 24 * 60 * 60;
+        $maxSurveysPerPeriodAndFrontendUser= $input->getArgument('maxSurveysPerPeriodAndFrontendUser');
 
         $result = 0;
         try {
@@ -135,8 +130,9 @@ class SurveyRequestCommand extends Command
                 str_replace(array("\n", "\r"), '', $e->getMessage())
             );
 
+            // @extensionScannerIgnoreLine
             $io->error($message);
-            $this->getLogger()->log(LogLevel::ERROR, $message);
+            $this->logError($message);
             $result = 1;
         }
 
@@ -145,18 +141,4 @@ class SurveyRequestCommand extends Command
 
     }
 
-
-    /**
-     * Returns logger instance
-     *
-     * @return \TYPO3\CMS\Core\Log\Logger
-     */
-    protected function getLogger(): \TYPO3\CMS\Core\Log\Logger
-    {
-        if (!$this->logger instanceof \TYPO3\CMS\Core\Log\Logger) {
-            $this->logger = GeneralUtility::makeInstance(LogManager::class)->getLogger(__CLASS__);
-        }
-
-        return $this->logger;
-    }
 }

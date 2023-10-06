@@ -7,19 +7,25 @@
 
 <!-- PLAINTEXT -->
 <f:section name="Plaintext">
-    <postmaster:email.recipientSalutation queueRecipient="{queueRecipient}" prependText="<postmaster:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
-
-    <postmaster:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
-        <rkwOutcome:email.replace.surveyPlaceHolders
-            targetUid="{targetUid}"
-            surveyRequest="{surveyRequest}"
-            queueMail="{queueMail}"
-            isPlaintext="true"
-            generatedTokens="{generatedTokens}"
-        >
-            {mailText}
-        </rkwOutcome:email.replace.surveyPlaceHolders>
-    </postmaster:email.replace.redirectLinks>
+<postmaster:email.recipientSalutation queueRecipient="{queueRecipient}" prependText="<postmaster:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
+<postmaster:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="true">
+<f:format.stripTags>
+<postmaster:email.replace.rteLinks plaintextFormat="true">
+<f:format.raw>
+<rkwOutcome:email.replace.surveyPlaceHolders
+    targetUid="{targetUid}"
+    surveyRequest="{surveyRequest}"
+    queueMail="{queueMail}"
+    isPlaintext="true"
+    generatedTokens="{generatedTokens}"
+    surveyRequestTags="{surveyRequestTags}"
+>
+<postmaster:email.plaintextLineBreaks convertLineBreaks="true">{mailText}</postmaster:email.plaintextLineBreaks>
+</rkwOutcome:email.replace.surveyPlaceHolders>
+</f:format.raw>
+</postmaster:email.replace.rteLinks>
+</f:format.stripTags>
+</postmaster:email.replace.redirectLinks>
 </f:section>
 
 <!-- HTML -->
@@ -28,7 +34,7 @@
         <postmaster:email.recipientSalutation queueRecipient="{queueRecipient}" prependText="<postmaster:email.translate key='templates_email_userSurveyRequest.headline' languageKey='{queueRecipient.languageCode}' extensionName='rkwOutcome' /> " appendText=","/>
     </h1>
     <p>
-        <f:format.nl2br>
+        <f:format.raw>
             <postmaster:email.replace.redirectLinks queueMail="{queueMail}" isPlaintext="false">
                 <rkwOutcome:email.replace.surveyPlaceHolders
                     targetUid="{targetUid}"
@@ -36,11 +42,12 @@
                     queueMail="{queueMail}"
                     isPlaintext="false"
                     generatedTokens="{generatedTokens}"
+                    surveyRequestTags="{surveyRequestTags}"
                 >
                     {mailText}
                 </rkwOutcome:email.replace.surveyPlaceHolders>
             </postmaster:email.replace.redirectLinks>
-        </f:format.nl2br>
+        </f:format.raw>
     </p>
     <p><postmaster:email.translate key="templates_email_userSurveyRequest.orderInfo" languageKey="{queueRecipient.languageCode}" arguments="{0: '{f:format.date(date: process.date, format: \'d.m.Y H:i\')}', 1: '{process.targetGroup.name}', 2: '{process.subject.name}'}" extensionName="rkwOutcome"/></p>
 </f:section>
