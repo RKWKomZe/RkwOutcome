@@ -41,35 +41,35 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
      * @var \TYPO3\CMS\Extbase\SignalSlot\Dispatcher
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected Dispatcher $signalSlotDispatcher;
+    protected ?Dispatcher $signalSlotDispatcher;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected SurveyRequestRepository $surveyRequestRepository;
+    protected ?SurveyRequestRepository $surveyRequestRepository;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected SurveyConfigurationRepository $surveyConfigurationRepository;
+    protected ?SurveyConfigurationRepository $surveyConfigurationRepository;
 
 
     /**
      * @var \RKW\RkwSurvey\Domain\Repository\SurveyRepository
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected SurveyRepository $surveyRepository;
+    protected ?SurveyRepository $surveyRepository;
 
 
     /**
      * @var \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected PersistenceManager $persistenceManager;
+    protected ?PersistenceManager $persistenceManager;
 
 
     /**
@@ -85,7 +85,53 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
 
 
     /**
+     * @param \TYPO3\CMS\Extbase\SignalSlot\Dispatcher $signalSlotDispatcher
+     */
+    public function injectDispatcher(Dispatcher $signalSlotDispatcher)
+    {
+        $this->signalSlotDispatcher = $signalSlotDispatcher;
+    }
+
+
+    /**
+     * @param \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository
+     */
+    public function injectSurveyRequestRepository(SurveyRequestRepository $surveyRequestRepository)
+    {
+        $this->surveyRequestRepository = $surveyRequestRepository;
+    }
+
+
+    /**
+     * @param \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository $surveyConfigurationRepository
+     */
+    public function injectSurveyConfigurationRepository(SurveyConfigurationRepository $surveyConfigurationRepository)
+    {
+        $this->surveyConfigurationRepository = $surveyConfigurationRepository;
+    }
+
+
+    /**
+     * @param \RKW\RkwSurvey\Domain\Repository\SurveyRepository $surveyRepository
+     */
+    public function injectSurveyRepository(SurveyRepository $surveyRepository)
+    {
+        $this->surveyRepository = $surveyRepository;
+    }
+
+
+    /**
+     * @param \TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager $persistenceManager
+     */
+    public function injectPersistenceManager(PersistenceManager $persistenceManager)
+    {
+        $this->persistenceManager = $persistenceManager;
+    }
+
+
+    /**
      * @return void
+     * @throws \TYPO3\CMS\Extbase\Object\Exception
      */
     public function __construct()
     {

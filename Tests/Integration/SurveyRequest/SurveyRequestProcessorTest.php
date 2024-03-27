@@ -52,6 +52,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
      * @var string[]
      */
     protected $testExtensionsToLoad = [
+        'typo3conf/ext/ajax_api',
         'typo3conf/ext/accelerator',
         'typo3conf/ext/core_extended',
         'typo3conf/ext/fe_register',

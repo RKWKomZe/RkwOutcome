@@ -45,21 +45,21 @@ class TCA
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected SurveyConfigurationRepository $surveyConfigurationRepository;
+    protected ?SurveyConfigurationRepository $surveyConfigurationRepository;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected SurveyRequestRepository $surveyRequestRepository;
+    protected ?SurveyRequestRepository $surveyRequestRepository;
 
 
     /**
      * @var \RKW\RkwShop\Domain\Repository\ProductRepository
      * @TYPO3\CMS\Extbase\Annotation\Inject
      */
-    protected ProductRepository $productRepository;
+    protected ?ProductRepository $productRepository;
 
 
     /**
@@ -69,7 +69,35 @@ class TCA
 
 
     /**
+     * @param \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository
+     */
+    public function injectSurveyRequestRepository(SurveyRequestRepository $surveyRequestRepository)
+    {
+        $this->surveyRequestRepository = $surveyRequestRepository;
+    }
+
+
+    /**
+     * @param \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository $surveyConfigurationRepository
+     */
+    public function injectSurveyConfigurationRepository(SurveyConfigurationRepository $surveyConfigurationRepository)
+    {
+        $this->surveyConfigurationRepository = $surveyConfigurationRepository;
+    }
+
+
+    /**
+     * @param \RKW\RkwShop\Domain\Repository\ProductRepository $productRepository
+     */
+    public function injectProductRepository(ProductRepository $productRepository)
+    {
+        $this->productRepository = $productRepository;
+    }
+
+
+    /**
      * @return void
+     * @throws \TYPO3\CMS\Extbase\Object\Exception
      */
     public function __construct()
     {

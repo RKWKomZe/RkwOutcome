@@ -119,19 +119,6 @@ class SurveyRequest extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
 
 
     /**
-     * Sets the deleted value
-     *
-     * @param bool $deleted
-     * @return void
-     * @api
-     */
-    public function setDeleted(bool $deleted): void
-    {
-        $this->deleted = $deleted;
-    }
-
-
-    /**
      * Returns the process
      *
      * @return array $process
