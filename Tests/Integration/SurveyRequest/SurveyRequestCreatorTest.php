@@ -30,6 +30,7 @@ use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
  * SurveyRequestCreatorTest
@@ -51,6 +52,7 @@ class SurveyRequestCreatorTest extends FunctionalTestCase
      * @var string[]
      */
     protected $testExtensionsToLoad = [
+        'typo3conf/ext/ajax_api',
         'typo3conf/ext/accelerator',
         'typo3conf/ext/core_extended',
         'typo3conf/ext/fe_register',

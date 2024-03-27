@@ -31,7 +31,7 @@ trait LogTrait
 {
 
     /**
-     * @var \TYPO3\CMS\Core\Log\Logger
+     * @var \TYPO3\CMS\Core\Log\Logger|null
      */
     protected ?Logger $logger = null;
 

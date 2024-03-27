@@ -53,9 +53,11 @@ class SurveyRequestUtility
         return implode(',', $surveyRequestTags);
     }
 
+
     /**
      * @param \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest
      * @return array
+     * @throws \TYPO3\CMS\Extbase\Object\Exception
      */
     public static function getProcessInformation(SurveyRequest $surveyRequest): array
     {

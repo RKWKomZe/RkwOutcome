@@ -1,5 +1,4 @@
 <?php
-
 namespace RKW\RkwOutcome\ViewHelpers\Email\Replace;
 
 /*
@@ -40,6 +39,7 @@ class SurveyPlaceHoldersViewHelper extends \TYPO3Fluid\Fluid\Core\ViewHelper\Abs
 {
 
     use CompileWithContentArgumentAndRenderStatic;
+
 
     /**
      * @var bool

@@ -130,13 +130,14 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
                              }
 
                              $notifiableSurveyRequests[] = $surveyRequest;
+                             $this->surveyRequestRepository->update($surveyRequest);
+
                          }
 
                      } else {
-                         $surveyRequest->setDeleted(true);
+                         $this->surveyRequestRepository->remove($surveyRequest);
                      }
 
-                     $this->surveyRequestRepository->update($surveyRequest);
                      $this->persistenceManager->persistAll();
                  }
              }
