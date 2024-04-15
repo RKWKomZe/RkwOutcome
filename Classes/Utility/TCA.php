@@ -132,37 +132,42 @@ class TCA
 
         $record = BackendUtility::getRecord($parameters['table'], $parameters['row']['uid']);
 
-        /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
-        $surveyConfiguration = $this->surveyConfigurationRepository->findByUid($record['uid']);
+        if ($record) {
 
-        $targetGroups = [];
-        foreach($surveyConfiguration->getTargetGroup() as $targetGroup) {
-            $targetGroups[] = $targetGroup->getTitle();
+            /** @var \RKW\RkwOutcome\Domain\Model\SurveyConfiguration $surveyConfiguration */
+            $surveyConfiguration = $this->surveyConfigurationRepository->findByUid($record['uid']);
+
+            $targetGroups = [];
+            foreach($surveyConfiguration->getTargetGroup() as $targetGroup) {
+                $targetGroups[] = $targetGroup->getTitle();
+            }
+
+            if ($record['process_type'] === Product::class) {
+                /** @var \RKW\RkwShop\Domain\Model\Product $product */
+                $product = $this->productRepository->findByUid($record['product']);
+                $newTitle = sprintf(
+                    '[Produkt - %s] %s (%s)',
+                    $record['product'],
+                    $product->getTitle(),
+                    implode(', ', $targetGroups),
+                );
+            }
+
+            if ($record['process_type'] === Event::class) {
+                /** @var \RKW\RkwEvents\Domain\Model\Event $event */
+                $event = $this->eventRepository->findByUid($record['event']);
+                $newTitle = sprintf(
+                    '[Veranstaltung - %s] %s (%s)',
+                    $record['event'],
+                    $event->getTitle(),
+                    implode(', ', $targetGroups),
+                );
+            }
+
+            $parameters['title'] = $newTitle;
+
         }
 
-        if ($record['process_type'] === Product::class) {
-            /** @var \RKW\RkwShop\Domain\Model\Product $product */
-            $product = $this->productRepository->findByUid($record['product']);
-            $newTitle = sprintf(
-                '[Produkt - %s] %s (%s)',
-                $record['product'],
-                $product->getTitle(),
-                implode(', ', $targetGroups),
-            );
-        }
-
-        if ($record['process_type'] === Event::class) {
-            /** @var \RKW\RkwEvents\Domain\Model\Event $event */
-            $event = $this->eventRepository->findByUid($record['event']);
-            $newTitle = sprintf(
-                '[Veranstaltung - %s] %s (%s)',
-                $record['event'],
-                $event->getTitle(),
-                implode(', ', $targetGroups),
-            );
-        }
-
-        $parameters['title'] = $newTitle;
     }
 
 
