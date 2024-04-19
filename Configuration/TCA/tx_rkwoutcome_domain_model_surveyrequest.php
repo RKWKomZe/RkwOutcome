@@ -21,9 +21,6 @@ return [
         'searchFields' => 'survey_configuration, notified_tstamp',
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyrequest.gif'
     ],
-    'interface' => [
-        'showRecordFieldList' => 'l10n_parent, l10n_diffsource, frontend_user, survey_configuration, target_group, notified_tstamp',
-    ],
     'types' => [
         '1' => ['showitem' => 'l10n_parent, l10n_diffsource, frontend_user, survey_configuration, target_group, notified_tstamp'],
     ],
@@ -48,7 +45,6 @@ return [
         ],
         'l10n_parent' => [
             'displayCond' => 'FIELD:sys_language_uid:>:0',
-            'exclude' => true,
             'label' => 'LLL:EXT:lang/locallang_general.xlf:LGL.l18n_parent',
             'config' => [
                 'type' => 'select',
