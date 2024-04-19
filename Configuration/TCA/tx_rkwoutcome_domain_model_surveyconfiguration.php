@@ -22,9 +22,6 @@ return [
         'searchFields' => 'product, event, survey, target_group, mail_text',
         'iconfile' => 'EXT:rkw_outcome/Resources/Public/Icons/tx_rkwoutcome_domain_model_surveyconfiguration.gif'
     ],
-    'interface' => [
-        'showRecordFieldList' => 'l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, mail_text, survey_waiting_time',
-    ],
     'types' => [
         '1' => ['showitem' => 'process_type, l10n_parent, l10n_diffsource, hidden, product, event, survey, target_group, mail_text, survey_waiting_time'],
     ],
@@ -49,7 +46,6 @@ return [
         ],
         'l10n_parent' => [
             'displayCond' => 'FIELD:sys_language_uid:>:0',
-            'exclude' => true,
             'label' => 'LLL:EXT:lang/locallang_general.xlf:LGL.l18n_parent',
             'config' => [
                 'type' => 'select',
