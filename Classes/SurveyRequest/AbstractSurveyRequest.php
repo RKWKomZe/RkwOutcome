@@ -150,13 +150,6 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
      */
     protected function getNotifiableObjects(AbstractEntity $process): array
     {
-        /** @todo SK Die code-inspection weist darauf hin, dass getTargetGroup nicht als Methode existiert, vermutlich weil
-         * ich bei mir die Änderungen an der rkw_shop und rkw_events nicht habe.
-         * Vielleicht braucht man dann doch eine Kapsel-Klasse, die die TargetGroup enthält und
-         * den Klassennamen und die uid der Referenzklasse. Bin dafür aber nicht tief genug in der Logik drin, sodass
-         * ich auch nicht sagen kann, wie die TargetGroup dann zu setzen wäre.
-         */
-
         $notifiableObjects = [];
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {

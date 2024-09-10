@@ -96,6 +96,7 @@
         <survey>1</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
         <survey_waiting_time>86400</survey_waiting_time>
+        <mail_text></mail_text>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>2</uid>
@@ -104,6 +105,7 @@
         <survey>2</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
         <survey_waiting_time>86400</survey_waiting_time>
+        <mail_text></mail_text>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>3</uid>
@@ -112,22 +114,29 @@
         <survey>3</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
         <survey_waiting_time>86400</survey_waiting_time>
+        <mail_text></mail_text>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
         <name>Erste Umfrage</name>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <tx_rkwsurvey_domain_model_survey>
         <uid>2</uid>
         <pid>1</pid>
         <name>Zweite Umfrage</name>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <tx_rkwsurvey_domain_model_survey>
         <uid>3</uid>
         <pid>1</pid>
         <name>Dritte Umfrage</name>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>
