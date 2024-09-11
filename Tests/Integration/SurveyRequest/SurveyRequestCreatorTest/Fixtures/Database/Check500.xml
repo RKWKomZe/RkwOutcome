@@ -19,6 +19,7 @@
         <pid>1</pid>
         <title>Shoptalk</title>
         <reservation>1</reservation>
+        <register_add_information></register_add_information>
     </tx_rkwevents_domain_model_event>
     <!-- eventReservations -->
     <tx_rkwevents_domain_model_eventreservation>
@@ -27,6 +28,7 @@
         <fe_user>1</fe_user>
         <event>1</event>
         <email>test@dummy.de</email>
+        <remark></remark>
     </tx_rkwevents_domain_model_eventreservation>
     <!-- surveyConfigurations -->
     <tx_rkwoutcome_domain_model_surveyconfiguration>
@@ -35,12 +37,15 @@
         <event>1</event>
         <survey>1</survey>
         <process_type>RKW\RkwEvents\Domain\Model\Event</process_type>
+        <mail_text></mail_text>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
         <name>Meine Umfrage</name>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>

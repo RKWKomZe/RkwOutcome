@@ -64,6 +64,7 @@
         <survey>2</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
         <survey_waiting_time>86400</survey_waiting_time>
+        <mail_text></mail_text>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <tx_rkwoutcome_domain_model_surveyconfiguration>
         <uid>2</uid>
@@ -72,17 +73,22 @@
         <survey>2</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
         <survey_waiting_time>86400</survey_waiting_time>
+        <mail_text></mail_text>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
         <name>Nicht benutzte Umfrage</name>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <tx_rkwsurvey_domain_model_survey>
         <uid>2</uid>
         <pid>1</pid>
         <name>Benutzte Umfrage</name>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>
