@@ -6,12 +6,16 @@
         <pid>1</pid>
         <name>Zugriffsbeschränkte Umfrage</name>
         <access_restricted>1</access_restricted>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <tx_rkwsurvey_domain_model_survey>
         <uid>2</uid>
         <pid>1</pid>
         <name>Offene Umfrage</name>
         <access_restricted>0</access_restricted>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <!-- products -->
     <tx_rkwshop_domain_model_product>
@@ -30,6 +34,7 @@
         <product>1</product>
         <survey>1,2</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
+        <mail_text></mail_text>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- sys_category -->
     <sys_category>

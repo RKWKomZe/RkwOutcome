@@ -14,7 +14,6 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
  * The TYPO3 project - inspiring people to share!
  */
 
-use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use Madj2k\Accelerator\Persistence\MarkerReducer;
 use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
@@ -26,6 +25,7 @@ use RKW\RkwShop\Domain\Repository\OrderRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 /**
  * SurveyRequestUtilityTest
@@ -49,6 +49,7 @@ class SurveyRequestUtilityTest extends FunctionalTestCase
     protected $testExtensionsToLoad = [
         'typo3conf/ext/ajax_api',
         'typo3conf/ext/accelerator',
+        'typo3conf/ext/persisted_sanitized_routing',
         'typo3conf/ext/core_extended',
         'typo3conf/ext/fe_register',
         'typo3conf/ext/postmaster',

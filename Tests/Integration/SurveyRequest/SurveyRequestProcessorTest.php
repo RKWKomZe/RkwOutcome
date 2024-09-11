@@ -18,7 +18,6 @@ use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Madj2k\Accelerator\Persistence\MarkerReducer;
 use Madj2k\FeRegister\Domain\Repository\FrontendUserRepository;
-use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
 use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
 use RKW\RkwOutcome\Domain\Model\SurveyRequest;
@@ -31,6 +30,7 @@ use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
+use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 /**
  * SurveyRequestProcessorTest
@@ -54,6 +54,7 @@ class SurveyRequestProcessorTest extends FunctionalTestCase
     protected $testExtensionsToLoad = [
         'typo3conf/ext/ajax_api',
         'typo3conf/ext/accelerator',
+        'typo3conf/ext/persisted_sanitized_routing',
         'typo3conf/ext/core_extended',
         'typo3conf/ext/fe_register',
         'typo3conf/ext/postmaster',

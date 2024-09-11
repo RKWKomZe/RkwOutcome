@@ -11,8 +11,8 @@ CREATE TABLE tx_rkwoutcome_domain_model_surveyrequest (
 	frontend_user int(11) unsigned DEFAULT '0',
 	target_group int(11) unsigned DEFAULT '0',
 
-	process varchar(255) DEFAULT '' NOT NULL,
-	process_subject varchar(255) DEFAULT '' NOT NULL,
+	process longtext NOT NULL,
+	process_subject longtext NOT NULL,
 
 	survey_configuration int(11) unsigned DEFAULT '0',
 

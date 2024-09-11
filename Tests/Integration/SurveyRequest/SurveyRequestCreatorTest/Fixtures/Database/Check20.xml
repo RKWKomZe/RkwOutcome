@@ -57,12 +57,15 @@
         <product>2</product>
         <survey>1</survey>
         <process_type>RKW\RkwShop\Domain\Model\Product</process_type>
+        <mail_text></mail_text>
     </tx_rkwoutcome_domain_model_surveyconfiguration>
     <!-- surveys -->
     <tx_rkwsurvey_domain_model_survey>
         <uid>1</uid>
         <pid>1</pid>
         <name>Meine Umfrage</name>
+        <starttext></starttext>
+        <endtext></endtext>
     </tx_rkwsurvey_domain_model_survey>
     <!-- sys_category -->
     <sys_category>

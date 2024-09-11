@@ -16,7 +16,6 @@ namespace RKW\RkwOutcome\Tests\Integration\SurveyRequest;
 
 use Madj2k\Accelerator\Persistence\MarkerReducer;
 use Madj2k\FeRegister\Domain\Repository\FrontendUserRepository;
-use Nimut\TestingFramework\TestCase\FunctionalTestCase;
 use RKW\RkwEvents\Domain\Model\EventReservation;
 use RKW\RkwEvents\Domain\Repository\EventRepository;
 use RKW\RkwEvents\Domain\Repository\EventReservationRepository;
@@ -30,7 +29,7 @@ use RKW\RkwSurvey\Domain\Repository\TokenRepository;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
 use TYPO3\CMS\Extbase\Persistence\Generic\PersistenceManager;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 /**
  * SurveyRequestCreatorTest
