@@ -20,7 +20,7 @@ $EM_CONF[$_EXTKEY] = [
 	'internal' => '',
 	'uploadfolder' => '0',
 	'clearCacheOnLoad' => 0,
-	'version' => '10.4.1',
+	'version' => '10.4.2',
 	'constraints' => [
 		'depends' => [
             'typo3' => '10.4.0-10.4.99',
@@ -28,7 +28,7 @@ $EM_CONF[$_EXTKEY] = [
             'accelerator' => '10.4.0-12.4.99',
             'fe_register' => '10.4.0-12.4.99',
             'postmaster' => '10.4.0-12.4.99',
-            'rkw_events' => '9.5.0-10.4.99',
+            'rkw_events' => '10.4.0-12.4.99',
             'rkw_shop' => '10.4.0-12.4.99',
             'rkw_survey' => '10.4.0-12.4.99'
 		],
