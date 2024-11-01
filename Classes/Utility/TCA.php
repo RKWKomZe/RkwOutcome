@@ -36,63 +36,27 @@ class TCA
 {
 
     /**
-     * @var \TYPO3\CMS\Extbase\Object\ObjectManager|null
-     */
-    private ?ObjectManager $objectManager = null;
-
-
-    /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository
-     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
     protected ?SurveyConfigurationRepository $surveyConfigurationRepository;
 
 
     /**
      * @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository
-     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
     protected ?SurveyRequestRepository $surveyRequestRepository;
 
 
     /**
      * @var \RKW\RkwShop\Domain\Repository\ProductRepository
-     * @TYPO3\CMS\Extbase\Annotation\Inject
      */
     protected ?ProductRepository $productRepository;
 
 
     /**
-     * @var \Madj2k\Accelerator\Persistence\MarkerReducer|null
+     * @var \RKW\RkwEvents\Domain\Repository\EventRepository
      */
-    protected ?MarkerReducer $markerReducer = null;
-
-
-    /**
-     * @param \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository
-     */
-    public function injectSurveyRequestRepository(SurveyRequestRepository $surveyRequestRepository)
-    {
-        $this->surveyRequestRepository = $surveyRequestRepository;
-    }
-
-
-    /**
-     * @param \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository $surveyConfigurationRepository
-     */
-    public function injectSurveyConfigurationRepository(SurveyConfigurationRepository $surveyConfigurationRepository)
-    {
-        $this->surveyConfigurationRepository = $surveyConfigurationRepository;
-    }
-
-
-    /**
-     * @param \RKW\RkwShop\Domain\Repository\ProductRepository $productRepository
-     */
-    public function injectProductRepository(ProductRepository $productRepository)
-    {
-        $this->productRepository = $productRepository;
-    }
+    protected ?EventRepository $eventRepository;
 
 
     /**
@@ -103,22 +67,19 @@ class TCA
     {
 
         /** @var \TYPO3\CMS\Extbase\Object\ObjectManager $objectManager */
-        $this->objectManager = GeneralUtility::makeInstance(ObjectManager::class);
-
-        /** @var \Madj2k\Accelerator\Persistence\MarkerReducer $markerReducer */
-        $this->markerReducer = $this->objectManager->get(MarkerReducer::class);
+        $objectManager = GeneralUtility::makeInstance(ObjectManager::class);
 
         /** @var \RKW\RkwOutcome\Domain\Repository\SurveyRequestRepository $surveyRequestRepository */
-        $this->surveyRequestRepository = $this->objectManager->get(SurveyRequestRepository::class);
+        $this->surveyRequestRepository = $objectManager->get(SurveyRequestRepository::class);
 
         /** @var \RKW\RkwOutcome\Domain\Repository\SurveyConfigurationRepository $surveyConfigurationRepository */
-        $this->surveyConfigurationRepository = $this->objectManager->get(SurveyConfigurationRepository::class);
+        $this->surveyConfigurationRepository = $objectManager->get(SurveyConfigurationRepository::class);
 
         /** @var \RKW\RkwShop\Domain\Repository\ProductRepository $productRepository */
-        $this->productRepository = $this->objectManager->get(ProductRepository::class);
+        $this->productRepository = $objectManager->get(ProductRepository::class);
 
         /** @var \RKW\RkwEvents\Domain\Repository\EventRepository $eventRepository */
-        $this->eventRepository = $this->objectManager->get(EventRepository::class);
+        $this->eventRepository = $objectManager->get(EventRepository::class);
 
     }
 
@@ -143,7 +104,9 @@ class TCA
             }
         }
 
-        if ($record['process_type'] === Product::class) {
+        $newTitle = '';
+
+        if ($record['process_type'] === Product::class && $record['product']) {
             /** @var \RKW\RkwShop\Domain\Model\Product $product */
             $product = $this->productRepository->findByUid($record['product']);
             $newTitle = sprintf(
@@ -154,13 +117,13 @@ class TCA
             );
         }
 
-        if ($record['process_type'] === Event::class) {
+        if ($record['process_type'] === Event::class && $record['event']) {
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
             $event = $this->eventRepository->findByUid($record['event']);
             $newTitle = sprintf(
                 '[Veranstaltung - %s] %s (%s)',
                 $record['event'],
-                $event->getTitle(),
+                $event->getSeries()->getTitle(),
                 implode(', ', $targetGroups),
             );
         }
@@ -178,7 +141,7 @@ class TCA
         /** @var \RKW\RkwOutcome\Domain\Model\SurveyRequest $surveyRequest */
         $surveyRequest = $this->surveyRequestRepository->findByUid($record['uid']);
 
-        $process = $this->markerReducer->explode($surveyRequest->getProcess())['process'];
+        $process = MarkerReducer::explode($surveyRequest->getProcess())['process'];
 
         if ($process instanceof \RKW\RkwShop\Domain\Model\Order) {
             $newTitle = sprintf(
