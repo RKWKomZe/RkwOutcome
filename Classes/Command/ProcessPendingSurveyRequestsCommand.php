@@ -62,8 +62,8 @@ class ProcessPendingSurveyRequestsCommand extends Command
             ->addArgument(
                 'maxSurveysPerPeriodAndFrontendUser',
                 InputArgument::OPTIONAL,
-                'Maximum number of notifications to send out for a given period of time (Default: 0)',
-                '0'
+                'Maximum number of notifications to send out for a given period of time (Default: 1)',
+                1
             );
     }
 

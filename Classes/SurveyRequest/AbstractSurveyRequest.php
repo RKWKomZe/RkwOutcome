@@ -182,6 +182,13 @@ abstract class AbstractSurveyRequest implements \TYPO3\CMS\Core\SingletonInterfa
 
         if ($process instanceof \RKW\RkwEvents\Domain\Model\EventReservation) {
 
+            $this->logInfo(
+                sprintf(
+                    'Looking for configurations matching event in reservation %s.',
+                    $process->getUid()
+                )
+            );
+
             /** @var \RKW\RkwEvents\Domain\Model\Event $event */
             $event = $process->getEvent();
 
