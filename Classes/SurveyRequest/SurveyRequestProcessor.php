@@ -81,7 +81,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
          $this->logInfo(
              sprintf(
-                 'Get on with %s survey requests.',
+                 'Found %s possible survey requests.',
                  count($surveyRequestsGroupedByFrontendUser)
              )
          );
@@ -176,7 +176,7 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
 
             $this->logInfo(
                 sprintf(
-                    'Sending request for survey request %s to frontend user with id %s (email %s).',
+                    'Sending notification for survey request %s to frontend user with id %s (email %s).',
                     $surveyRequest->getUid(),
                     $recipient->getUid(),
                     $recipient->getEmail()
@@ -231,9 +231,13 @@ class SurveyRequestProcessor extends AbstractSurveyRequest
         }
 
         $mergedNotifiableObjects = array_merge(...$notifiableObjects);
-        $randomKey = array_rand($mergedNotifiableObjects);
 
-        return (empty($mergedNotifiableObjects)) ? null : $mergedNotifiableObjects[$randomKey];
+        if (empty($mergedNotifiableObjects)) {
+            return null;
+        }
+
+        $randomKey = array_rand($mergedNotifiableObjects);
+        return $mergedNotifiableObjects[$randomKey];
     }
 
 

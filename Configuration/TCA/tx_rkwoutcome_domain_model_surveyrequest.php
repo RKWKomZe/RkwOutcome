@@ -109,7 +109,7 @@ return [
                 'type' => 'select',
                 'renderType' => 'selectSingle',
                 'foreign_table' => 'fe_users',
-                'foreign_table_where' => 'AND fe_users.disable = 0 AND fe_users.deleted = 0 ORDER BY username ASC',
+                'foreign_table_where' => 'AND fe_users.disable = 0 AND fe_users.deleted = 0 ORDER BY fe_users.username ASC',
                 'minitems' => 1,
                 'maxitems' => 1,
                 'readOnly' => true

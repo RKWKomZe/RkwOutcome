@@ -14,6 +14,7 @@ namespace RKW\RkwOutcome\Domain\Model;
  * The TYPO3 project - inspiring people to share!
  */
 
+use RKW\RkwEvents\Domain\Model\Event;
 use RKW\RkwShop\Domain\Model\Product;
 use TYPO3\CMS\Extbase\Domain\Model\Category;
 use TYPO3\CMS\Extbase\Persistence\ObjectStorage;
@@ -38,6 +39,12 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @var \RKW\RkwShop\Domain\Model\Product|null
      */
     protected ?Product $product = null;
+
+
+    /**
+     * @var \RKW\RkwEvents\Domain\Model\Event|null
+     */
+    protected ?Event $event = null;
 
 
     /**
@@ -128,9 +135,32 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
      * @param \RKW\RkwShop\Domain\Model\Product $product
      * @return void
      */
-    public function setProducts(Product $product): void
+    public function setProduct(Product $product): void
     {
         $this->product = $product;
+    }
+
+
+    /**
+     * Returns the event
+     *
+     * @return \RKW\RkwEvents\Domain\Model\Event $event
+     */
+    public function getEvent():? Event
+    {
+        return $this->event;
+    }
+
+
+    /**
+     * Sets the event
+     *
+     * @param \RKW\RkwEvents\Domain\Model\Event $event
+     * @return void
+     */
+    public function setEvent(Event $event): void
+    {
+        $this->event = $event;
     }
 
 
@@ -225,6 +255,7 @@ class SurveyConfiguration extends \TYPO3\CMS\Extbase\DomainObject\AbstractEntity
     {
         $this->mailText = $mailText;
     }
+
 
     /**
      * Returns the surveyWaitingTime
