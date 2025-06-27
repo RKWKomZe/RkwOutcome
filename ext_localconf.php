@@ -15,7 +15,7 @@ call_user_func(
 
         $signalSlotDispatcher->connect(
             \RKW\RkwShop\Orders\OrderManager::class,
-            \RKW\RkwShop\Orders\OrderManager::SIGNAL_AFTER_ORDER_CREATED_USER,
+            \RKW\RkwShop\Orders\OrderManager::SIGNAL_AFTER_ORDER_CREATED_USER_OUTCOME,
             \RKW\RkwOutcome\SurveyRequest\SurveyRequestCreator::class,
             'createSurveyRequestSignalSlot'
         );
