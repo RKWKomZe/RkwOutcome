@@ -48,6 +48,28 @@ class SurveyConfigurationRepository extends StoragePidAwareAbstractRepository
 
 
     /**
+     * Finds survey configurations matching product
+     *
+     * @param \RKW\RkwShop\Domain\Model\Product $product
+     * @return \TYPO3\CMS\Extbase\Persistence\QueryResultInterface|null
+     * implicitly tested
+     */
+    public function findByProduct(Product $product): ?QueryResultInterface
+    {
+        $query = $this->createQuery();
+        $query->getQuerySettings()->setRespectStoragePage(false);
+
+        $query->matching(
+            $query->logicalAnd(
+                $query->equals('product', $product)
+            )
+        );
+
+        return $query->execute();
+    }
+
+
+    /**
      * Finds survey configurations matching product and target group
      *
      * @param \RKW\RkwShop\Domain\Model\Product $product
